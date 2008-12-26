@@ -4,3 +4,5 @@ MAINTAINERCLEANFILES = \
 	config.h config.h.in
 AUTOMAKE_OPTIONS = foreign dist-bzip2
 EXTRA_DIST = autogen.bash
+
+SUBDIRS = utils tests
