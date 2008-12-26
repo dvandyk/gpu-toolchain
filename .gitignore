@@ -1,0 +1,26 @@
+# Automake
+aclocal.m4
+autom4te.cache
+config.h
+config.h.in
+config.log
+config.status
+config
+configure
+libtool
+stamp-h1
+.deps
+Makefile.in
+Makefile
+
+# Compiles
+*.a
+*.la
+*.lo
+*.o
+*_TEST
+
+# Vim
+.*.swp
+.*.swo
+
