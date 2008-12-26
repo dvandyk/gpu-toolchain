@@ -23,4 +23,4 @@ Makefile
 # Vim
 .*.swp
 .*.swo
-
+*~
