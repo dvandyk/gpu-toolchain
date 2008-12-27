@@ -31,6 +31,8 @@ namespace gpu
     struct Directive;
 
     struct Instruction;
+
+    struct Label;
 }
 
 #endif

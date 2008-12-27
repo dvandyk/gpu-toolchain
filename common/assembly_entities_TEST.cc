@@ -67,6 +67,7 @@ struct AssemblyEntitiesTest :
                 "Directive 'file' 'stdin'\n"
                 "Comment 'tuuuraluuraluu'\n"
                 "Directive 'section' 'text'\n"
+                "Label 'main'\n"
                 "Instruction 'nop'\n"
                 "Instruction 'add'\n"
                 "  Operand '$1'\n"
@@ -79,6 +80,7 @@ struct AssemblyEntitiesTest :
         entities.append(make_shared_ptr(new Directive("file", "stdin")));
         entities.append(make_shared_ptr(new Comment("tuuuraluuraluu")));
         entities.append(make_shared_ptr(new Directive("section", "text")));
+        entities.append(make_shared_ptr(new Label("main")));
         entities.append(make_shared_ptr(new Instruction("nop")));
 
         Instruction * instruction(new Instruction("add"));

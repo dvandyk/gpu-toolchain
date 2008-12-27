@@ -29,7 +29,7 @@
 
 namespace gpu
 {
-    typedef ConstVisitorTag<Comment, Data, Directive, Instruction> AssemblyEntities;
+    typedef ConstVisitorTag<Comment, Data, Directive, Instruction, Label> AssemblyEntities;
 
     typedef ConstVisitor<AssemblyEntities> AssemblyEntityVisitor;
 
@@ -91,6 +91,18 @@ namespace gpu
         std::string mnemonic;
 
         Sequence<std::string> operands;
+    };
+
+    struct Label :
+        public AssemblyEntity
+    {
+        Label(const std::string & text);
+
+        ~Label();
+
+        void accept(AssemblyEntityVisitor &) const;
+
+        std::string text;
     };
 }
 

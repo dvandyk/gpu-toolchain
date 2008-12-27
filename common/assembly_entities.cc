@@ -108,4 +108,24 @@ namespace gpu
     ConstVisits<Instruction>::~ConstVisits()
     {
     }
+
+    Label::Label(const std::string & text) :
+        text(text)
+    {
+    }
+
+    Label::~Label()
+    {
+    }
+
+    void
+    Label::accept(AssemblyEntityVisitor & v) const
+    {
+        static_cast<ConstVisits<Label> *>(&v)->visit(*this);
+    }
+
+    template <>
+    ConstVisits<Label>::~ConstVisits()
+    {
+    }
 }
