@@ -1,6 +1,8 @@
 CLEANFILES = *~
 MAINTAINERCLEANFILES = Makefile.in
 
+AM_CXXFLAGS = -I$(top_srcdir)
+
 noinst_LIBRARIES = libgputests.a
 
 libgputests_a_SOURCES = \

@@ -1,5 +1,7 @@
 CLEANFILES = *~
 MAINTAINERCLEANFILES = Makefile.in
+
+AM_CXXFLAGS = -I$(top_srcdir)
 DEFS = \
 	-DGPU_BUILDDIR=\"$(top_builddir)\" \
 	-DGPU_SRCDIR=\"$(top_srcdir)\"

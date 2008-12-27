@@ -1,6 +1,8 @@
 CLEANFILES = *~
 MAINTAINERCLEANFILES = Makefile.in
 
+AM_CXXFLAGS = -I$(top_srcdir)
+
 noinst_LTLIBRARIES = libgpuutils.la
 
 libgpuutils_la_SOURCES = \
