@@ -19,8 +19,9 @@
 
 #include <common/expression.hh>
 #include <utils/destringify.hh>
-#include <utils/text_manipulation.hh>
 #include <utils/private_implementation_pattern-impl.hh>
+#include <utils/stringify.hh>
+#include <utils/text_manipulation.hh>
 
 #include <string>
 #include <vector>
@@ -251,19 +252,15 @@ namespace
         return true;
     }
 
-    bool is_value(const std::string & input)
+    long dehexify(const std::string & s)
     {
-        return is_dec_value(input) || is_hex_value(input);
-    }
+        long result;
+        std::stringstream ss(s);
+        ss.setf(std::ios::hex, std::ios::basefield);
 
-    bool is_operator(const std::string & input)
-    {
-        static std::string allowed_chars("+-");
+        ss >> result;
 
-        if (1 != input.size())
-            return false;
-
-        return (std::string::npos != allowed_chars.find(input[0]));
+        return result;
     }
 }
 
@@ -272,71 +269,68 @@ namespace gpu
     ExpressionPtr
     ExpressionParser::parse(const std::string & expression)
     {
+        const static std::string operators("+-");
+
         Expression * result(0);
-        std::string stripped(strip_whitespaces(expression));
+        std::string input(strip_whitespaces(expression));
 
-        if (stripped.empty())
-            return ExpressionPtr(result); // ToDo: Throw!
+        if (input.empty())
+            return ExpressionPtr(); // ToDo: Throw!
 
-        std::string operand(split_first_word(" \t", stripped));
-        stripped = strip_whitespaces(stripped);
+        std::string::size_type pos(input.find_first_of(operators));
+        std::string first(input.substr(0, pos));
+        input.erase(0, pos);
 
-        if (is_value(operand))
+        if (is_dec_value(first))
         {
-            result = new Value(destringify<unsigned>(operand));
+            result = new Value(destringify<long>(first));
         }
-        else if (! is_operator(operand))
+        else if (is_hex_value(first))
         {
-            result = new Variable(operand);
+            result = new Value(dehexify(first));
         }
         else
         {
-            return ExpressionPtr(result); // ToDo: Throw!
+            result = new Variable(strip_whitespaces(first));
         }
 
-        while (! stripped.empty())
+        while (! input.empty())
         {
-            std::string op(split_first_word(" \t", stripped));
-            stripped = strip_whitespaces(stripped);
+            char op(input[0]);
 
-            if (op.empty())
-                return ExpressionPtr(result); // ToDo: Throw!
+            if (std::string::npos == operators.find(op))
+                return ExpressionPtr(); // ToDo: Throw!
 
-            if (! is_operator(op))
-                return ExpressionPtr(result); // ToDo: Throw!
+            input.erase(0, 1);
+            pos = input.find_first_of(operators);
+            std::string operand(input.substr(0, pos));
+            input.erase(0, pos);
 
-            operand = split_first_word(" \t", stripped);
-            stripped = strip_whitespaces(stripped);
-
-            if (operand.empty())
-                return ExpressionPtr(result); // ToDo: Throw!
-
-            Expression * operand_expression(0);
-
-            if (is_value(operand))
+            Expression * rhs(0);
+            if (is_dec_value(operand))
             {
-                operand_expression = new Value(destringify<unsigned>(operand));
+                rhs = new Value(destringify<long>(operand));
             }
-            else if (! is_operator(operand))
+            else if (is_hex_value(operand))
             {
-                operand_expression = new Variable(operand);
+                rhs = new Value(dehexify(operand));
             }
             else
             {
-                return ExpressionPtr(result); // ToDo: Throw!
+                rhs = new Variable(strip_whitespaces(operand));
             }
 
-            if ('+' == op[0])
+            if ('+' == op)
             {
-                result = new Sum(ExpressionPtr(result), ExpressionPtr(operand_expression));
+                result = new Sum(ExpressionPtr(result), ExpressionPtr(rhs));
             }
-            else if ('-' == op[0])
+            else if ('-' == op)
             {
-                result = new Difference(ExpressionPtr(result), ExpressionPtr(operand_expression));
+                result = new Difference(ExpressionPtr(result), ExpressionPtr(rhs));
             }
             else
             {
-                return ExpressionPtr(result); // ToDo: Throw!
+                return ExpressionPtr(); // ToDo: Throw!
             }
         }
 

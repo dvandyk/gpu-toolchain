@@ -128,8 +128,8 @@ class ExpressionEvaluatorTest :
         ExpressionEvaluatorTest() :
             Test("expression_evaluator_test")
         {
-            data.push_back(DataPair(". - main", 722));
-            // Needs hex-aware destringify: data.push_back(DataPair("0x1234", 0x1234));
+            data.push_back(DataPair(".-main", 722));
+            data.push_back(DataPair("0x1234", 0x1234));
 
             symbols.insert(SymbolPair(".", 745));
             symbols.insert(SymbolPair("main", 23));
