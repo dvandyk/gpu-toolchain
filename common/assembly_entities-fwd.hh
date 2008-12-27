@@ -20,9 +20,13 @@
 #ifndef GPU_GUARD_COMMON_ASSEMBLY_ENTITIES_FWD_HH
 #define GPU_GUARD_COMMON_ASSEMBLY_ENTITIES_FWD_HH 1
 
+#include <utils/memory.hh>
+
 namespace gpu
 {
     struct AssemblyEntity;
+
+    typedef std::tr1::shared_ptr<AssemblyEntity> AssemblyEntityPtr;
 
     struct Comment;
 
