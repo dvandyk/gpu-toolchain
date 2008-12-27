@@ -4,6 +4,7 @@ MAINTAINERCLEANFILES = Makefile.in
 noinst_LTLIBRARIES = libgpuutils.la
 
 libgpuutils_la_SOURCES = \
+	destringify.hh destringify.cc \
 	exception.cc exception.hh \
 	memory.hh \
 	private_implementation_pattern.hh private_implementation_pattern-impl.hh \
