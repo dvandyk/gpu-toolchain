@@ -90,6 +90,7 @@ dnl output
 AM_CONFIG_HEADER(config.h)
 AC_OUTPUT(
 	Makefile
+	common/Makefile
 	tests/Makefile
 	utils/Makefile
 )
