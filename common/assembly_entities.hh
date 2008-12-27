@@ -104,6 +104,28 @@ namespace gpu
 
         std::string text;
     };
+
+    class AssemblyEntityPrinter :
+        public AssemblyEntityVisitor,
+        public PrivateImplementationPattern<AssemblyEntityPrinter>
+    {
+        public:
+            AssemblyEntityPrinter();
+
+            ~AssemblyEntityPrinter();
+
+            void visit(const Comment &);
+
+            void visit(const Data &);
+
+            void visit(const Directive &);
+
+            void visit(const Instruction &);
+
+            void visit(const Label &);
+
+            std::string output() const;
+    };
 }
 
 #endif

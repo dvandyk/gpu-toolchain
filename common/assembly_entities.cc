@@ -21,6 +21,8 @@
 #include <common/expression.hh>
 #include <utils/sequence-impl.hh>
 
+#include <sstream>
+
 namespace gpu
 {
     AssemblyEntity::~AssemblyEntity()
@@ -127,5 +129,63 @@ namespace gpu
     template <>
     ConstVisits<Label>::~ConstVisits()
     {
+    }
+
+    template <>
+    struct Implementation<AssemblyEntityPrinter>
+    {
+        std::stringstream stream;
+    };
+
+    AssemblyEntityPrinter::AssemblyEntityPrinter() :
+        PrivateImplementationPattern<AssemblyEntityPrinter>(new Implementation<AssemblyEntityPrinter>)
+    {
+    }
+
+    AssemblyEntityPrinter::~AssemblyEntityPrinter()
+    {
+    }
+
+    void
+    AssemblyEntityPrinter::visit(const Comment & c)
+    {
+        this->_imp->stream << "Comment '" << c.text << "'" << std::endl;
+    }
+
+    void
+    AssemblyEntityPrinter::visit(const Data & d)
+    {
+        ExpressionPrinter p;
+
+        this->_imp->stream << "Data (" << d.size << ") '" << p.print(d.expression) << "'" << std::endl;
+    }
+
+    void
+    AssemblyEntityPrinter::visit(const Directive & d)
+    {
+        this->_imp->stream << "Directive '" << d.name << "' '" << d.params << "'" << std::endl;
+    }
+
+    void
+    AssemblyEntityPrinter::visit(const Instruction & i)
+    {
+        this->_imp->stream << "Instruction '" << i.mnemonic << "'" << std::endl;
+
+        for (Sequence<std::string>::Iterator j(i.operands.begin()), j_end(i.operands.end()) ; j != j_end ; ++j)
+        {
+            this->_imp->stream << "  Operand '" << *j << "'" << std::endl;
+        }
+    }
+
+    void
+    AssemblyEntityPrinter::visit(const Label & l)
+    {
+        this->_imp->stream << "Label '" << l.text << "'" << std::endl;
+    }
+
+    std::string
+    AssemblyEntityPrinter::output() const
+    {
+        return this->_imp->stream.str();
     }
 }

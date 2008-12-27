@@ -27,32 +27,6 @@
 using namespace gpu;
 using namespace tests;
 
-struct TestVisitor :
-    public AssemblyEntityVisitor
-{
-    std::stringstream s;
-
-    void visit(const Comment & c)
-    {
-        s << "Comment '" << c.text << "'" << std::endl;
-    }
-
-    void visit(const Directive & d)
-    {
-        s << "Directive '" << d.name << "' '" << d.params << "'" << std::endl;
-    }
-
-    void visit(const Instruction & i)
-    {
-        s << "Instruction '" << i.mnemonic << "'" << std::endl;
-
-        for (Sequence<std::string>::Iterator j(i.operands.begin()), j_end(i.operands.end()) ; j != j_end ; ++j)
-        {
-            s << "  Operand '" << *j << "'" << std::endl;
-        }
-    }
-};
-
 struct AssemblyEntitiesTest :
     public Test
 {
@@ -74,7 +48,7 @@ struct AssemblyEntitiesTest :
                 "  Operand '$1'\n"
                 "  Operand '0x1234'\n");
 
-        TestVisitor v;
+        AssemblyEntityPrinter p;
         Sequence<std::tr1::shared_ptr<AssemblyEntity> > entities;
 
         entities.append(make_shared_ptr(new Directive("file", "stdin")));
@@ -93,10 +67,10 @@ struct AssemblyEntitiesTest :
         for (Sequence<std::tr1::shared_ptr<AssemblyEntity> >::Iterator i(entities.begin()), i_end(entities.end()) ;
                 i != i_end ; ++i)
         {
-            (*i)->accept(v);
+            (*i)->accept(p);
         }
 
-        TEST_CHECK_EQUAL(reference, v.s.str());
+        TEST_CHECK_EQUAL(reference, p.output());
 
     }
 } assembly_entities_test;
