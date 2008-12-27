@@ -12,6 +12,7 @@ stamp-h1
 .deps
 Makefile.in
 Makefile
+gpu-toolchain-*.tar.*
 
 # Compiles
 *.a
