@@ -414,5 +414,71 @@ namespace gpu
 
         return _imp->stack.front();
     }
+
+    template <>
+    struct Implementation<ExpressionPrinter>
+    {
+        std::string output;
+    };
+
+    ExpressionPrinter::ExpressionPrinter() :
+        PrivateImplementationPattern<ExpressionPrinter>(new Implementation<ExpressionPrinter>)
+    {
+    }
+
+    ExpressionPrinter::~ExpressionPrinter()
+    {
+    }
+
+    std::string
+    ExpressionPrinter::print(const ExpressionPtr & e)
+    {
+        _imp->output = "";
+
+        if (0 != e.get())
+            e->accept(*this);
+
+        return _imp->output;
+    }
+
+    void
+    ExpressionPrinter::visit(Difference & d)
+    {
+        _imp->output += "-(";
+
+        d.left_hand_side()->accept(*this);
+
+        _imp->output += ",";
+
+        d.right_hand_side()->accept(*this);
+
+        _imp->output += ")";
+    }
+
+    void
+    ExpressionPrinter::visit(Sum & s)
+    {
+        _imp->output += "+(";
+
+        s.left_hand_side()->accept(*this);
+
+        _imp->output += ",";
+
+        s.right_hand_side()->accept(*this);
+
+        _imp->output += ")";
+    }
+
+    void
+    ExpressionPrinter::visit(Value & v)
+    {
+        _imp->output += stringify(v.value());
+    }
+
+    void
+    ExpressionPrinter::visit(Variable & v)
+    {
+        _imp->output += v.variable();
+    }
 }
 

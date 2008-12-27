@@ -131,6 +131,26 @@ namespace gpu
 
             unsigned evaluate(const ExpressionPtr & expression);
     };
+
+    class ExpressionPrinter :
+        public ExpressionVisitor,
+        public PrivateImplementationPattern<ExpressionPrinter>
+    {
+        public:
+            ExpressionPrinter();
+
+            ~ExpressionPrinter();
+
+            std::string print(const ExpressionPtr & expression);
+
+            virtual void visit(Difference & d);
+
+            virtual void visit(Sum & s);
+
+            virtual void visit(Value & v);
+
+            virtual void visit(Variable & v);
+    };
 }
 
 #endif

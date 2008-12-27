@@ -29,58 +29,6 @@
 using namespace gpu;
 using namespace tests;
 
-class ExpressionPrinter :
-    public ExpressionVisitor
-{
-    public:
-        std::string output;
-
-        ExpressionPrinter(const ExpressionPtr & ptr)
-        {
-            ptr->accept(*this);
-        }
-
-        virtual ~ExpressionPrinter()
-        {
-        }
-
-        virtual void visit(Difference & d)
-        {
-            output += "-(";
-
-            d.left_hand_side()->accept(*this);
-
-            output += ",";
-
-            d.right_hand_side()->accept(*this);
-
-            output += ")";
-        }
-
-        virtual void visit(Sum & s)
-        {
-            output += "+(";
-
-            s.left_hand_side()->accept(*this);
-
-            output += ",";
-
-            s.right_hand_side()->accept(*this);
-
-            output += ")";
-        }
-
-        virtual void visit(Value & v)
-        {
-            output += stringify(v.value());
-        }
-
-        virtual void visit(Variable & v)
-        {
-            output += v.variable();
-        }
-};
-
 class ExpressionParserTest :
     public Test
 {
@@ -101,8 +49,8 @@ class ExpressionParserTest :
             ExpressionPtr expression(ExpressionParser::parse(x.first));
             TEST_CHECK(0 != expression.get());
 
-            ExpressionPrinter printer(expression);
-            TEST_CHECK_EQUAL(printer.output, x.second);
+            ExpressionPrinter printer;
+            TEST_CHECK_EQUAL(printer.print(expression), x.second);
         }
 
         virtual void run()
