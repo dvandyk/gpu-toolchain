@@ -27,8 +27,6 @@
 #include <algorithm>
 #include <fstream>
 
-#include <iostream>
-
 using namespace gpu;
 using namespace tests;
 
@@ -42,7 +40,7 @@ struct GeneratorSectionsTest :
 
     void run_one(const std::string & s)
     {
-        std::string input_name(std::string(GPU_BUILDDIR) + "/r6xx/generator_TEST_DATA/" + s + ".s");
+        std::string input_name(std::string(GPU_SRCDIR) + "/r6xx/generator_TEST_DATA/" + s + ".s");
         std::fstream input(input_name.c_str(), std::ios_base::in);
 
         AssemblyEntityPrinter p;

@@ -40,8 +40,8 @@ struct AssemblyParserTest :
 
     void run_one(const std::string & s)
     {
-        std::string input_name(std::string(GPU_BUILDDIR) + "/common/assembly_parser_TEST_DATA/" + s + ".s");
-        std::string reference_name(std::string(GPU_BUILDDIR) + "/common/assembly_parser_TEST_DATA/" + s + ".ref");
+        std::string input_name(std::string(GPU_SRCDIR) + "/common/assembly_parser_TEST_DATA/" + s + ".s");
+        std::string reference_name(std::string(GPU_SRCDIR) + "/common/assembly_parser_TEST_DATA/" + s + ".ref");
 
         std::fstream input(input_name.c_str(), std::ios_base::in);
         std::fstream reference(reference_name.c_str(), std::ios_base::in);
