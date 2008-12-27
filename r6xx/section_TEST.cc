@@ -64,5 +64,5 @@ struct SectionTest :
             run_one(d->first, d->second);
         }
     }
-} assembly_parser_test;
+} section_test;
 
