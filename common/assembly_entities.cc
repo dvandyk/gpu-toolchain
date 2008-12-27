@@ -18,6 +18,7 @@
  */
 
 #include <common/assembly_entities.hh>
+#include <common/expression.hh>
 #include <utils/sequence-impl.hh>
 
 namespace gpu
@@ -64,6 +65,27 @@ namespace gpu
 
     template <>
     ConstVisits<Directive>::~ConstVisits()
+    {
+    }
+
+    Data::Data(unsigned size, const ExpressionPtr & expression) :
+        size(size),
+        expression(expression)
+    {
+    }
+
+    Data::~Data()
+    {
+    }
+
+    void
+    Data::accept(AssemblyEntityVisitor & v) const
+    {
+        static_cast<ConstVisits<Data> *>(&v)->visit(*this);
+    }
+
+    template <>
+    ConstVisits<Data>::~ConstVisits()
     {
     }
 

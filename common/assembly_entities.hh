@@ -21,6 +21,7 @@
 #define GPU_GUARD_COMMON_ASSEMBLY_ENTITIES_HH 1
 
 #include <common/assembly_entities-fwd.hh>
+#include <common/expression-fwd.hh>
 #include <utils/sequence.hh>
 #include <utils/visitor.hh>
 
@@ -28,7 +29,7 @@
 
 namespace gpu
 {
-    typedef ConstVisitorTag<Comment, Directive, Instruction> AssemblyEntities;
+    typedef ConstVisitorTag<Comment, Data, Directive, Instruction> AssemblyEntities;
 
     typedef ConstVisitor<AssemblyEntities> AssemblyEntityVisitor;
 
@@ -48,6 +49,20 @@ namespace gpu
         void accept(AssemblyEntityVisitor &) const;
 
         std::string text;
+    };
+
+    struct Data :
+        public AssemblyEntity
+    {
+        Data(unsigned size, const ExpressionPtr & expression);
+
+        ~Data();
+
+        void accept(AssemblyEntityVisitor &) const;
+
+        unsigned size;
+
+        ExpressionPtr expression;
     };
 
     struct Directive :

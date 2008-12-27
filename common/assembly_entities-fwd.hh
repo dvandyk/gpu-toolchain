@@ -22,7 +22,11 @@
 
 namespace gpu
 {
+    struct AssemblyEntity;
+
     struct Comment;
+
+    struct Data;
 
     struct Directive;
 
