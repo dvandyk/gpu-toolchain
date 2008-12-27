@@ -38,8 +38,13 @@ struct SequenceTest :
         Sequence<char> seq;
 
         seq.append('a');
+        TEST_CHECK_EQUAL(seq.last(), 'a');
+
         seq.append('b');
+        TEST_CHECK_EQUAL(seq.last(), 'b');
+
         seq.append('c');
+        TEST_CHECK_EQUAL(seq.last(), 'c');
 
         TEST_CHECK_EQUAL(3, std::distance(seq.begin(), seq.end()));
 

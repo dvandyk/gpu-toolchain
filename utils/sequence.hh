@@ -54,6 +54,8 @@ namespace gpu
             /// \}
 
             void append(const T_ &);
+
+            T_ & last();
     };
 }
 

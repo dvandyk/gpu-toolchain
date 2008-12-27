@@ -65,6 +65,13 @@ namespace gpu
     {
         this->_imp->list.push_back(t);
     }
+
+    template <typename T_>
+    T_ &
+    Sequence<T_>::last()
+    {
+        return this->_imp->list.back();
+    }
 }
 
 #endif
