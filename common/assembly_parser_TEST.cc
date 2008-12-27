@@ -24,7 +24,6 @@
 #include <utils/sequence-impl.hh>
 
 #include <fstream>
-#include <iostream> // <-- remove!
 #include <sstream>
 
 using namespace gpu;
