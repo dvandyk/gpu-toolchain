@@ -1,5 +1,7 @@
 CLEANFILES = *~
 MAINTAINERCLEANFILES = Makefile.in
+DEFS = \
+       -DGPU_BUILDDIR=\"$(top_builddir)\"
 
 noinst_LTLIBRARIES = libgpucommon.la
 
