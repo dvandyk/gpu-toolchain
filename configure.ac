@@ -91,6 +91,7 @@ AM_CONFIG_HEADER(config.h)
 AC_OUTPUT(
 	Makefile
 	common/Makefile
+	r6xx/Makefile
 	tests/Makefile
 	utils/Makefile
 )

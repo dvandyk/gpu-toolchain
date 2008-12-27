@@ -1,0 +1,3 @@
+# Using shortcuts
+.alu
+.cf

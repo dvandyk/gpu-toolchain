@@ -5,4 +5,4 @@ MAINTAINERCLEANFILES = \
 AUTOMAKE_OPTIONS = foreign dist-bzip2
 EXTRA_DIST = autogen.bash
 
-SUBDIRS = utils common tests
+SUBDIRS = utils tests common r6xx
