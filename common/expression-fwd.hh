@@ -20,9 +20,13 @@
 #ifndef GPU_GUARD_COMMON_EXPRESSION_FWD_HH
 #define GPU_GUARD_COMMON_EXPRESSION_FWD_HH 1
 
+#include <utils/memory.hh>
+
 namespace gpu
 {
     struct Expression;
+
+    typedef std::tr1::shared_ptr<Expression> ExpressionPtr;
 
     struct Difference;
 
