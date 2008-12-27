@@ -5,6 +5,7 @@ AM_CXXFLAGS = -I$(top_srcdir)
 DEFS = \
 	-DGPU_BUILDDIR=\"$(top_builddir)\" \
 	-DGPU_SRCDIR=\"$(top_srcdir)\"
+EXTRA_DIST =
 
 noinst_LTLIBRARIES = libgpucommon.la
 
@@ -26,6 +27,9 @@ assembly_entities_TEST_LDADD = libgpucommon.la ../tests/libgputests.a ../utils/l
 
 assembly_parser_TEST_SOURCES = assembly_parser_TEST.cc
 assembly_parser_TEST_LDADD = libgpucommon.la ../tests/libgputests.a ../utils/libgpuutils.la
+EXTRA_DIST += \
+	assembly_parser_TEST_DATA/sum.s \
+	assembly_parser_TEST_DATA/sum.ref
 
 expression_TEST_SOURCES = expression_TEST.cc
 expression_TEST_LDADD = libgpucommon.la ../tests/libgputests.a ../utils/libgpuutils.la
