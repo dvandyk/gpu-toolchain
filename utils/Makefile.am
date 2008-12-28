@@ -7,6 +7,7 @@ noinst_LTLIBRARIES = libgpuutils.la
 
 libgpuutils_la_SOURCES = \
 	destringify.hh destringify.cc \
+	enumeration.cc enumeration.hh \
 	exception.cc exception.hh \
 	memory.hh \
 	private_implementation_pattern.hh private_implementation_pattern-impl.hh \
@@ -18,9 +19,13 @@ libgpuutils_la_SOURCES = \
 libgpuutils_la_CXXFLAGS = -I$(top_srcdir)
 
 TESTS = \
+	enumeration_TEST \
 	sequence_TEST
 
 check_PROGRAMS = $(TESTS)
+
+enumeration_TEST_SOURCES = enumeration_TEST.cc
+enumeration_TEST_LDADD = ../tests/libgputests.a libgpuutils.la
 
 sequence_TEST_SOURCES = sequence_TEST.cc
 sequence_TEST_LDADD = ../tests/libgputests.a libgpuutils.la
