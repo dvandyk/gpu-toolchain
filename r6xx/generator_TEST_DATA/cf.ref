@@ -1,0 +1,3 @@
+Label 'main'
+Instruction 'alu'
+  Operand '@start'

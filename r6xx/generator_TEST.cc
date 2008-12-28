@@ -43,7 +43,6 @@ struct GeneratorSectionsTest :
         std::string input_name(std::string(GPU_SRCDIR) + "/r6xx/generator_TEST_DATA/" + s + ".s");
         std::fstream input(input_name.c_str(), std::ios_base::in);
 
-        AssemblyEntityPrinter p;
         Sequence<std::tr1::shared_ptr<AssemblyEntity> > entities(AssemblyParser::parse(input));
 
         r6xx::Generator g(entities);
@@ -57,5 +56,51 @@ struct GeneratorSectionsTest :
         run_one("pushpop");
         run_one("shortcut");
     }
-} assembly_parser_test;
+} generator_sections_test;
 
+struct GeneratorFilterTest :
+    public Test
+{
+    GeneratorFilterTest() :
+        Test("generator_filter_test")
+    {
+    }
+
+    void run_one(const std::string & s)
+    {
+        std::string input_name(std::string(GPU_SRCDIR) + "/r6xx/generator_TEST_DATA/" + s + ".s");
+        std::fstream input(input_name.c_str(), std::ios_base::in);
+
+        Sequence<std::tr1::shared_ptr<AssemblyEntity> > entities(AssemblyParser::parse(input));
+        r6xx::Generator g(entities);
+
+        for (r6xx::Generator::SectionIterator i(g.begin_sections()), i_end(g.end_sections()) ;
+                i != i_end ; ++i)
+        {
+            std::string ref_name(std::string(GPU_SRCDIR) + "/r6xx/generator_TEST_DATA/" + i->name().substr(1) + ".ref");
+            std::fstream ref(ref_name.c_str(), std::ios_base::in);
+
+            AssemblyEntityPrinter p;
+            for (r6xx::Section::Iterator j(i->begin()), j_end(i->end()) ;
+                    j != j_end ; ++j)
+            {
+                (*j)->accept(p);
+            }
+
+            std::string ref_str, line;
+            while (std::getline(ref, line))
+            {
+                ref_str += line + "\n";
+            }
+
+            TEST_CHECK_EQUAL(p.output(), ref_str);
+        }
+    }
+
+    virtual void run()
+    {
+        run_one("section");
+        run_one("pushpop");
+        run_one("shortcut");
+    }
+} generator_filter_test;

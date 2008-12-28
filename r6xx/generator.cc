@@ -42,46 +42,65 @@ namespace gpu
         SectionFilter(std::list<r6xx::Section> & sections) :
             sections(sections)
         {
+            stack.push_back(sections.back());
         }
 
         bool balanced()
         {
-            return stack.empty();
+            return (stack.size() == 1);
         }
 
-        void visit(const Comment &) { }
-        void visit(const Data &) { }
-        void visit(const Instruction &) { }
-        void visit(const Label &) { }
+        void visit(const Comment & c)
+        {
+            stack.back().append(make_shared_ptr(new Comment(c)));
+        }
+
+        void visit(const Data & d)
+        {
+            stack.back().append(make_shared_ptr(new Data(d)));
+        }
+
+        void visit(const Instruction & i)
+        {
+            stack.back().append(make_shared_ptr(new Instruction(i)));
+        }
+
+        void visit(const Label & l)
+        {
+            stack.back().append(make_shared_ptr(new Label(l)));
+        }
+
+        r6xx::Section find_or_add(const std::string & name)
+        {
+            std::list<r6xx::Section>::const_iterator s(std::find_if(sections.begin(), sections.end(), r6xx::SectionNameComparator(name)));
+            if (sections.end() != s)
+                return *s;
+
+            sections.push_back(r6xx::Section(name));
+
+            return sections.back();
+        }
 
         void visit(const Directive & d)
         {
             if ("section" == d.name)
             {
-                std::list<r6xx::Section>::const_iterator s(std::find_if(sections.begin(), sections.end(), r6xx::SectionNameComparator(d.params)));
-                if (sections.end() == s)
-                    sections.push_back(r6xx::Section(d.params));
+                stack.back() = find_or_add(d.params);
             }
             else if ("pushsection" == d.name)
             {
-                std::list<r6xx::Section>::const_iterator s(std::find_if(sections.begin(), sections.end(), r6xx::SectionNameComparator(d.params)));
-                if (sections.end() == s)
-                    s = sections.insert(sections.end(), r6xx::Section(d.params));
-
-                stack.push_back(*s);
+                stack.push_back(find_or_add(d.params));
             }
             else if ("popsection" == d.name)
             {
-                if (stack.empty())
+                if (stack.size() == 1)
                     throw r6xx::UnbalancedSectionStackError();
 
                 stack.pop_back();
             }
             else if (r6xx::Section::valid("." + d.name))
             {
-                std::list<r6xx::Section>::const_iterator s(std::find_if(sections.begin(), sections.end(), r6xx::SectionNameComparator(d.name)));
-                if (sections.end() == s)
-                    sections.push_back(r6xx::Section("." + d.name));
+                stack.back() = find_or_add("." + d.name);
             }
         }
     };
@@ -97,6 +116,8 @@ namespace gpu
         Generator::Generator(const Sequence<std::tr1::shared_ptr<AssemblyEntity> > & entities) :
             PrivateImplementationPattern<r6xx::Generator>(new Implementation<r6xx::Generator>)
         {
+            _imp->sections.push_back(Section(".cf"));
+
             SectionFilter filter(_imp->sections);
             for (Sequence<std::tr1::shared_ptr<AssemblyEntity> >::Iterator e(entities.begin()), e_end(entities.end()) ;
                     e != e_end ; ++e)

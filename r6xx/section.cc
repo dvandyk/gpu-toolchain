@@ -18,18 +18,25 @@
  */
 
 #include <utils/private_implementation_pattern-impl.hh>
+#include <utils/wrapped_forward_iterator-impl.hh>
 #include <r6xx/error.hh>
 #include <r6xx/section.hh>
 
 #include <algorithm>
+#include <list>
 #include <string>
 
 namespace gpu
 {
+    template
+    struct WrappedForwardIterator<r6xx::Section::IteratorTag, AssemblyEntityPtr>;
+
     template <>
     struct Implementation<r6xx::Section>
     {
         std::string name;
+
+        std::list<AssemblyEntityPtr> entities;
 
         Implementation(const std::string & name) :
             name(name)
@@ -48,6 +55,24 @@ namespace gpu
 
         Section::~Section()
         {
+        }
+
+        Section::Iterator
+        Section::begin() const
+        {
+            return Iterator(_imp->entities.begin());
+        }
+
+        Section::Iterator
+        Section::end() const
+        {
+            return Iterator(_imp->entities.end());
+        }
+
+        void
+        Section::append(const AssemblyEntityPtr & e)
+        {
+            _imp->entities.push_back(e);
         }
 
         std::string

@@ -1,0 +1,5 @@
+Label 'start'
+Instruction 'add'
+  Operand '$1'
+  Operand '$1'
+  Operand '$2'

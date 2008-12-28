@@ -22,6 +22,7 @@
 
 #include <common/assembly_entities-fwd.hh>
 #include <utils/private_implementation_pattern.hh>
+#include <utils/wrapped_forward_iterator.hh>
 
 namespace gpu
 {
@@ -34,6 +35,15 @@ namespace gpu
                 Section(const std::string & name);
 
                 ~Section();
+
+                struct IteratorTag;
+                typedef WrappedForwardIterator<IteratorTag, AssemblyEntityPtr> Iterator;
+
+                Iterator begin() const;
+
+                Iterator end() const;
+
+                void append(const AssemblyEntityPtr &);
 
                 std::string name() const;
 
