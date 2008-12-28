@@ -17,8 +17,8 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef GPU_GUARD_R6XX_GENERATOR_HH
-#define GPU_GUARD_R6XX_GENERATOR_HH 1
+#ifndef GPU_GUARD_R6XX_ASSEMBLER_HH
+#define GPU_GUARD_R6XX_ASSEMBLER_HH 1
 
 #include <common/assembly_entities-fwd.hh>
 #include <r6xx/section.hh>
@@ -29,13 +29,13 @@ namespace gpu
 {
     namespace r6xx
     {
-        class Generator :
-            public PrivateImplementationPattern<Generator>
+        class Assembler :
+            public PrivateImplementationPattern<Assembler>
         {
             public:
-                Generator(const Sequence<std::tr1::shared_ptr<AssemblyEntity> > & entities);
+                Assembler(const Sequence<std::tr1::shared_ptr<AssemblyEntity> > & entities);
 
-                ~Generator();
+                ~Assembler();
 
                 struct SectionTag;
                 typedef WrappedForwardIterator<SectionTag, r6xx::Section> SectionIterator;

@@ -19,7 +19,7 @@
 
 #include <common/assembly_entities.hh>
 #include <r6xx/error.hh>
-#include <r6xx/generator.hh>
+#include <r6xx/assembler.hh>
 #include <r6xx/section.hh>
 #include <utils/private_implementation_pattern-impl.hh>
 #include <utils/sequence-impl.hh>
@@ -31,7 +31,7 @@
 namespace gpu
 {
     template
-    struct WrappedForwardIterator<r6xx::Generator::SectionTag, r6xx::Section>;
+    struct WrappedForwardIterator<r6xx::Assembler::SectionTag, r6xx::Section>;
 
     struct SectionFilter :
         public AssemblyEntityVisitor
@@ -106,15 +106,15 @@ namespace gpu
     };
 
     template <>
-    struct Implementation<r6xx::Generator>
+    struct Implementation<r6xx::Assembler>
     {
         std::list<r6xx::Section> sections;
     };
 
     namespace r6xx
     {
-        Generator::Generator(const Sequence<std::tr1::shared_ptr<AssemblyEntity> > & entities) :
-            PrivateImplementationPattern<r6xx::Generator>(new Implementation<r6xx::Generator>)
+        Assembler::Assembler(const Sequence<std::tr1::shared_ptr<AssemblyEntity> > & entities) :
+            PrivateImplementationPattern<r6xx::Assembler>(new Implementation<r6xx::Assembler>)
         {
             _imp->sections.push_back(Section(".cf"));
 
@@ -129,18 +129,18 @@ namespace gpu
                 throw UnbalancedSectionStackError();
         }
 
-        Generator::~Generator()
+        Assembler::~Assembler()
         {
         }
 
-        Generator::SectionIterator
-        Generator::begin_sections() const
+        Assembler::SectionIterator
+        Assembler::begin_sections() const
         {
             return SectionIterator(_imp->sections.begin());
         }
 
-        Generator::SectionIterator
-        Generator::end_sections() const
+        Assembler::SectionIterator
+        Assembler::end_sections() const
         {
             return SectionIterator(_imp->sections.end());
         }
