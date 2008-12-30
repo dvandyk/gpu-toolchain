@@ -32,5 +32,10 @@ namespace gpu
             SyntaxError(0, "the section stack was not balaneced (.pushsection/.popsection)")
         {
         }
+
+        SourceOperandSyntaxError::SourceOperandSyntaxError(const std::string & message) :
+            SyntaxError(0, message)
+        {
+        }
     }
 }

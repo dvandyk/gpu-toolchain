@@ -17,35 +17,29 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef GPU_GUARD_R6XX_ERROR_HH
-#define GPU_GUARD_R6XX_ERROR_HH 1
+#ifndef GPU_GUARD_R6XX_ALU_SOURCE_OPERAND_FWD_HH
+#define GPU_GUARD_R6XX_ALU_SOURCE_OPERAND_FWD_HH 1
 
-#include <utils/exception.hh>
+#include <utils/memory.hh>
 
 namespace gpu
 {
     namespace r6xx
     {
-        class InvalidSectionNameError :
-            public SyntaxError
+        namespace alu
         {
-            public:
-                InvalidSectionNameError(unsigned line, const std::string & name);
-        };
+            struct SourceOperand;
 
-        class UnbalancedSectionStackError :
-            public SyntaxError
-        {
-            public:
-                UnbalancedSectionStackError();
-        };
+            typedef std::tr1::shared_ptr<SourceOperand> SourceOperandPtr;
 
-        class SourceOperandSyntaxError :
-            public SyntaxError
-        {
-            public:
-                SourceOperandSyntaxError(const std::string & message);
-        };
+            struct SourceGPR;
+
+            struct SourceKCache;
+
+            struct SourceCFile;
+
+            struct SourceLiteral;
+        }
     }
 }
 
