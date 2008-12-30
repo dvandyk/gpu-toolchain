@@ -41,7 +41,7 @@ namespace gpu
             explicit Enumeration(unsigned value) :
                 _value(value)
             {
-                if (value >= (1 << width_))
+                if (value >= (1L << width_))
                     throw EnumerationValueOutOfBoundsError(_value, width_);
             }
 
