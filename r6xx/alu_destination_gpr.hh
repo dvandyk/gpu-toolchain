@@ -17,30 +17,34 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <r6xx/error.hh>
+#ifndef GPU_GUARD_R6XX_ALU_DESTINATION_GPR_HH
+#define GPU_GUARD_R6XX_ALU_DESTINATION_GPR_HH 1
+
+#include <utils/enumeration.hh>
 
 namespace gpu
 {
     namespace r6xx
     {
-        InvalidSectionNameError::InvalidSectionNameError(unsigned line, const std::string & name) :
-            SyntaxError(line, "'" + name + "' is not a valid section name in the r6xx ISA")
+        namespace alu
         {
-        }
+            struct DestinationGPR
+            {
+                Enumeration<2> channel;
 
-        UnbalancedSectionStackError::UnbalancedSectionStackError() :
-            SyntaxError(0, "the section stack was not balaneced (.pushsection/.popsection)")
-        {
-        }
+                Enumeration<7> index;
 
-        SourceOperandSyntaxError::SourceOperandSyntaxError(const std::string & message) :
-            SyntaxError(0, message)
-        {
-        }
+                bool relative;
 
-        DestinationGPRSyntaxError::DestinationGPRSyntaxError(const std::string & message) :
-            SyntaxError(0, message)
-        {
+                DestinationGPR(const Enumeration<2> & channel, const Enumeration<7> & index, bool relative);
+            };
+
+            struct DestinationGPRParser
+            {
+                static DestinationGPR parse(const std::string & input);
+            };
         }
     }
 }
+
+#endif
