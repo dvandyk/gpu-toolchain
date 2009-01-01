@@ -123,6 +123,8 @@ namespace gpu
             struct EntityConverter
             {
                 static Sequence<EntityPtr> convert(const Sequence<AssemblyEntityPtr> &);
+
+                static EntityPtr convert(const AssemblyEntityPtr &);
             };
 
             struct EntityPrinter

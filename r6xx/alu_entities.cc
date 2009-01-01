@@ -406,6 +406,17 @@ namespace gpu
 
                 return result;
             }
+
+            EntityPtr
+            EntityConverter::convert(const AssemblyEntityPtr & input)
+            {
+                internal::EntityConverter converter;
+
+                converter.result = EntityPtr();
+                input->accept(converter);
+
+                return converter.result;
+            }
         }
     }
 }
