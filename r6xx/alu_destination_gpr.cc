@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -117,6 +117,20 @@ namespace gpu
                     throw DestinationGPRSyntaxError("register index out of bounds");
 
                 return DestinationGPR(channel, Enumeration<7>(index), relative);
+            }
+
+            std::string
+            DestinationGPRPrinter::print(const DestinationGPR & input)
+            {
+                std::string result("DestinationGPR(");
+
+                result += "channel=" + stringify(input.channel);
+                result += ", index=" + stringify(input.index);
+                result += ", relative=" + stringify(input.relative);
+
+                result += ")";
+
+                return result;
             }
         }
     }
