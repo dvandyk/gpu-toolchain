@@ -17,33 +17,47 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef GPU_GUARD_R6XX_ASSEMBLER_HH
-#define GPU_GUARD_R6XX_ASSEMBLER_HH 1
-
-#include <common/assembly_entities-fwd.hh>
-#include <r6xx/section.hh>
-#include <utils/private_implementation_pattern.hh>
-#include <utils/sequence.hh>
+#include <common/assembly_entities.hh>
+#include <r6xx/alu_section.hh>
+#include <utils/wrapped_forward_iterator-impl.hh>
 
 namespace gpu
 {
     namespace r6xx
     {
-        class Assembler :
-            public PrivateImplementationPattern<Assembler>
+        namespace alu
         {
-            public:
-                Assembler(const Sequence<std::tr1::shared_ptr<AssemblyEntity> > & entities);
+            Section::Section()
+            {
+            }
 
-                ~Assembler();
+            Section::~Section()
+            {
+            }
 
-                struct SectionTag;
-                typedef WrappedForwardIterator<SectionTag, r6xx::SectionPtr> SectionIterator;
+            Section::Iterator
+            Section::begin() const
+            {
+                return Iterator(entities.begin());
+            }
 
-                SectionIterator begin_sections() const;
-                SectionIterator end_sections() const;
-        };
+            Section::Iterator
+            Section::end() const
+            {
+                return Iterator(entities.end());
+            }
+
+            void
+            Section::append(const AssemblyEntityPtr & e)
+            {
+                entities.append(e);
+            }
+
+            std::string
+            Section::name() const
+            {
+                return ".alu";
+            }
+        }
     }
 }
-
-#endif

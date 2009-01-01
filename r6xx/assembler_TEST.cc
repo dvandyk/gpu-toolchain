@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -77,11 +77,11 @@ struct AssemblerFilterTest :
         for (r6xx::Assembler::SectionIterator i(g.begin_sections()), i_end(g.end_sections()) ;
                 i != i_end ; ++i)
         {
-            std::string ref_name(std::string(GPU_SRCDIR) + "/r6xx/assembler_TEST_DATA/" + i->name().substr(1) + ".ref");
+            std::string ref_name(std::string(GPU_SRCDIR) + "/r6xx/assembler_TEST_DATA/" + (*i)->name().substr(1) + ".ref");
             std::fstream ref(ref_name.c_str(), std::ios_base::in);
 
             AssemblyEntityPrinter p;
-            for (r6xx::Section::Iterator j(i->begin()), j_end(i->end()) ;
+            for (r6xx::Section::Iterator j((*i)->begin()), j_end((*i)->end()) ;
                     j != j_end ; ++j)
             {
                 (*j)->accept(p);

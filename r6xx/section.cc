@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -19,6 +19,8 @@
 
 #include <utils/private_implementation_pattern-impl.hh>
 #include <utils/wrapped_forward_iterator-impl.hh>
+#include <r6xx/alu_section.hh>
+#include <r6xx/cf_section.hh>
 #include <r6xx/error.hh>
 #include <r6xx/section.hh>
 
@@ -31,68 +33,43 @@ namespace gpu
     template
     struct WrappedForwardIterator<r6xx::Section::IteratorTag, AssemblyEntityPtr>;
 
-    template <>
-    struct Implementation<r6xx::Section>
-    {
-        std::string name;
-
-        std::list<AssemblyEntityPtr> entities;
-
-        Implementation(const std::string & name) :
-            name(name)
-        {
-        }
-    };
-
     namespace r6xx
     {
-        Section::Section(const std::string & name) :
-            PrivateImplementationPattern<r6xx::Section>(new Implementation<r6xx::Section>(name))
-        {
-            if (! valid(name))
-                throw InvalidSectionNameError(0, name);
-        }
-
         Section::~Section()
         {
         }
 
-        Section::Iterator
-        Section::begin() const
+        SectionPtr
+        Section::make(const std::string & name)
         {
-            return Iterator(_imp->entities.begin());
-        }
+            SectionPtr result;
 
-        Section::Iterator
-        Section::end() const
-        {
-            return Iterator(_imp->entities.end());
-        }
+            if (".alu" == name)
+            {
+                result = SectionPtr(new alu::Section);
+            }
+            else if (".cf" == name)
+            {
+                result = SectionPtr(new cf::Section);
+            }
+            else
+            {
+                throw InvalidSectionNameError(0, name);
+            }
 
-        void
-        Section::append(const AssemblyEntityPtr & e)
-        {
-            _imp->entities.push_back(e);
-        }
-
-        std::string
-        Section::name() const
-        {
-            return _imp->name;
+            return result;
         }
 
         bool
         Section::valid(const std::string & name)
         {
-#define NAME(x) std::string(x)
             const static std::string section_names[] = 
             {
-                NAME(".alu"),
-                NAME(".cf")
+                ".alu",
+                ".cf"
             };
             const static std::string * const section_names_begin(&section_names[0]);
             const static std::string * const section_names_end(section_names_begin + sizeof(section_names) / sizeof(section_names[0]));
-#undef NAME
 
             return section_names_end != std::find(section_names_begin, section_names_end, name);
         }

@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -36,10 +36,10 @@ namespace gpu
     struct SectionFilter :
         public AssemblyEntityVisitor
     {
-        std::list<r6xx::Section> & sections;
-        std::list<r6xx::Section> stack;
+        std::list<r6xx::SectionPtr> & sections;
+        std::list<r6xx::SectionPtr> stack;
 
-        SectionFilter(std::list<r6xx::Section> & sections) :
+        SectionFilter(std::list<r6xx::SectionPtr> & sections) :
             sections(sections)
         {
             stack.push_back(sections.back());
@@ -52,31 +52,31 @@ namespace gpu
 
         void visit(const Comment & c)
         {
-            stack.back().append(make_shared_ptr(new Comment(c)));
+            stack.back()->append(make_shared_ptr(new Comment(c)));
         }
 
         void visit(const Data & d)
         {
-            stack.back().append(make_shared_ptr(new Data(d)));
+            stack.back()->append(make_shared_ptr(new Data(d)));
         }
 
         void visit(const Instruction & i)
         {
-            stack.back().append(make_shared_ptr(new Instruction(i)));
+            stack.back()->append(make_shared_ptr(new Instruction(i)));
         }
 
         void visit(const Label & l)
         {
-            stack.back().append(make_shared_ptr(new Label(l)));
+            stack.back()->append(make_shared_ptr(new Label(l)));
         }
 
-        r6xx::Section find_or_add(const std::string & name)
+        r6xx::SectionPtr find_or_add(const std::string & name)
         {
-            std::list<r6xx::Section>::const_iterator s(std::find_if(sections.begin(), sections.end(), r6xx::SectionNameComparator(name)));
+            std::list<r6xx::SectionPtr>::const_iterator s(std::find_if(sections.begin(), sections.end(), r6xx::SectionNameComparator(name)));
             if (sections.end() != s)
                 return *s;
 
-            sections.push_back(r6xx::Section(name));
+            sections.push_back(r6xx::Section::make(name));
 
             return sections.back();
         }
@@ -108,7 +108,7 @@ namespace gpu
     template <>
     struct Implementation<r6xx::Assembler>
     {
-        std::list<r6xx::Section> sections;
+        std::list<r6xx::SectionPtr> sections;
     };
 
     namespace r6xx
@@ -116,7 +116,7 @@ namespace gpu
         Assembler::Assembler(const Sequence<std::tr1::shared_ptr<AssemblyEntity> > & entities) :
             PrivateImplementationPattern<r6xx::Assembler>(new Implementation<r6xx::Assembler>)
         {
-            _imp->sections.push_back(Section(".cf"));
+            _imp->sections.push_back(Section::make(".cf"));
 
             SectionFilter filter(_imp->sections);
             for (Sequence<std::tr1::shared_ptr<AssemblyEntity> >::Iterator e(entities.begin()), e_end(entities.end()) ;

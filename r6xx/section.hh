@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -28,24 +28,27 @@ namespace gpu
 {
     namespace r6xx
     {
-        class Section :
-            public PrivateImplementationPattern<Section>
+        class Section;
+
+        typedef std::tr1::shared_ptr<Section> SectionPtr;
+
+        class Section
         {
             public:
-                Section(const std::string & name);
-
-                ~Section();
+                virtual ~Section() = 0;
 
                 struct IteratorTag;
                 typedef WrappedForwardIterator<IteratorTag, AssemblyEntityPtr> Iterator;
 
-                Iterator begin() const;
+                virtual Iterator begin() const = 0;
 
-                Iterator end() const;
+                virtual Iterator end() const = 0;
 
-                void append(const AssemblyEntityPtr &);
+                virtual void append(const AssemblyEntityPtr &) = 0;
 
-                std::string name() const;
+                virtual std::string name() const = 0;
+
+                static SectionPtr make(const std::string & name);
 
                 static bool valid(const std::string & name);
         };
@@ -61,9 +64,9 @@ namespace gpu
                 {
                 }
 
-                bool operator() (const Section & section)
+                bool operator() (const SectionPtr & section)
                 {
-                    return section.name() == _name;
+                    return section->name() == _name;
                 }
         };
     }
