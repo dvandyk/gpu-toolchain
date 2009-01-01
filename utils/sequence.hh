@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -55,7 +55,15 @@ namespace gpu
 
             void append(const T_ &);
 
+            const T_ & first() const;
+
+            T_ & first();
+
+            const T_ & last() const;
+
             T_ & last();
+
+            unsigned size() const;
     };
 }
 

@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -67,11 +67,40 @@ namespace gpu
     }
 
     template <typename T_>
+    unsigned
+    Sequence<T_>::size() const
+    {
+        return this->_imp->list.size();
+    }
+
+    template <typename T_>
+    const T_ &
+    Sequence<T_>::first() const
+    {
+        return this->_imp->list.front();
+    }
+
+    template <typename T_>
+    T_ &
+    Sequence<T_>::first()
+    {
+        return this->_imp->list.front();
+    }
+
+    template <typename T_>
+    const T_ &
+    Sequence<T_>::last() const
+    {
+        return this->_imp->list.back();
+    }
+
+    template <typename T_>
     T_ &
     Sequence<T_>::last()
     {
         return this->_imp->list.back();
     }
+
 }
 
 #endif

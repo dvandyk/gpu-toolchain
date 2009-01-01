@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -36,15 +36,19 @@ struct SequenceTest :
     virtual void run()
     {
         Sequence<char> seq;
+        TEST_CHECK_EQUAL(seq.size(), 0);
 
         seq.append('a');
         TEST_CHECK_EQUAL(seq.last(), 'a');
+        TEST_CHECK_EQUAL(seq.size(), 1);
 
         seq.append('b');
         TEST_CHECK_EQUAL(seq.last(), 'b');
+        TEST_CHECK_EQUAL(seq.size(), 2);
 
         seq.append('c');
         TEST_CHECK_EQUAL(seq.last(), 'c');
+        TEST_CHECK_EQUAL(seq.size(), 3);
 
         TEST_CHECK_EQUAL(3, std::distance(seq.begin(), seq.end()));
 
