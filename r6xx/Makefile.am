@@ -11,6 +11,7 @@ noinst_LTLIBRARIES = libgpur6xx.la
 
 libgpur6xx_la_SOURCES = \
 	alu_destination_gpr.cc alu_destination_gpr.hh \
+	alu_entities.cc alu_entities-fwd.hh alu_entities.hh \
 	alu_source_operand.cc alu_source_operand-fwd.hh alu_source_operand.hh \
 	error.cc error.hh \
 	assembler.cc assembler.hh \
@@ -18,12 +19,16 @@ libgpur6xx_la_SOURCES = \
 libgpuutils_la_CXXFLAGS = -I$(top_srcdir)
 
 TESTS = \
+	alu_entities_TEST \
 	alu_destination_gpr_TEST \
 	alu_source_operand_TEST \
 	assembler_TEST \
 	section_TEST
 
 check_PROGRAMS = $(TESTS)
+
+alu_entities_TEST_SOURCES = alu_entities_TEST.cc
+alu_entities_TEST_LDADD = libgpur6xx.la ../common/libgpucommon.la ../tests/libgputests.a ../utils/libgpuutils.la
 
 alu_destination_gpr_TEST_SOURCES = alu_destination_gpr_TEST.cc
 alu_destination_gpr_TEST_LDADD = libgpur6xx.la ../common/libgpucommon.la ../tests/libgputests.a ../utils/libgpuutils.la
