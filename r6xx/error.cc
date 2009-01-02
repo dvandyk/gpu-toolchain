@@ -43,6 +43,11 @@ namespace gpu
         {
         }
 
+        SourceGPRSyntaxError::SourceGPRSyntaxError(const std::string & message) :
+            SyntaxError(message)
+        {
+        }
+
         DestinationGPRSyntaxError::DestinationGPRSyntaxError(const std::string & message) :
             SyntaxError(message)
         {

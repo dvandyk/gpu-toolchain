@@ -23,6 +23,7 @@
 #include <r6xx/cf_section.hh>
 #include <r6xx/error.hh>
 #include <r6xx/section.hh>
+#include <r6xx/tex_section.hh>
 
 #include <algorithm>
 #include <list>
@@ -49,6 +50,10 @@ namespace gpu
             {
                 result = SectionPtr(new cf::Section);
             }
+            else if (".tex" == name)
+            {
+                result = SectionPtr(new tex::Section);
+            }
             else
             {
                 throw InvalidSectionNameError(name);
@@ -63,7 +68,8 @@ namespace gpu
             const static std::string section_names[] = 
             {
                 ".alu",
-                ".cf"
+                ".cf",
+                ".tex"
             };
             const static std::string * const section_names_begin(&section_names[0]);
             const static std::string * const section_names_end(section_names_begin + sizeof(section_names) / sizeof(section_names[0]));
@@ -95,6 +101,15 @@ namespace gpu
                         result += "\n";
 
                     result += cf::EntityPrinter::print(c.entities);
+                }
+
+                void visit(const tex::Section & t)
+                {
+                    result = "Section(name='.tex')";
+                    if (! t.entities.empty())
+                        result += "\n";
+
+                    result += tex::EntityPrinter::print(t.entities);
                 }
             };
         }

@@ -54,6 +54,13 @@ namespace gpu
                 SourceOperandSyntaxError(const std::string & message);
         };
 
+        class SourceGPRSyntaxError :
+            public r6xx::SyntaxError
+        {
+            public:
+                SourceGPRSyntaxError(const std::string & message);
+        };
+
         class DestinationGPRSyntaxError :
             public r6xx::SyntaxError
         {

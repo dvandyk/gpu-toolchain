@@ -31,7 +31,7 @@ namespace gpu
 {
     namespace r6xx
     {
-        typedef ConstVisitorTag<r6xx::alu::Section, r6xx::cf::Section> Sections;
+        typedef ConstVisitorTag<r6xx::alu::Section, r6xx::cf::Section, r6xx::tex::Section> Sections;
 
         typedef ConstVisitor<Sections> SectionVisitor;
 

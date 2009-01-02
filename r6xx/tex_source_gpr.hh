@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -17,32 +17,35 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef GPU_GUARD_R6XX_SECTION_FWD_HH
-#define GPU_GUARD_R6XX_SECTION_FWD_HH 1
+#ifndef GPU_GUARD_R6XX_TEX_SOURCE_GPR_HH
+#define GPU_GUARD_R6XX_TEX_SOURCE_GPR_HH 1
 
-#include <utils/memory.hh>
+#include <utils/enumeration.hh>
 
 namespace gpu
 {
     namespace r6xx
     {
-        class Section;
-
-        typedef std::tr1::shared_ptr<Section> SectionPtr;
-
-        namespace alu
-        {
-            struct Section;
-        }
-
-        namespace cf
-        {
-            struct Section;
-        }
-
         namespace tex
         {
-            struct Section;
+            struct SourceGPR
+            {
+                Enumeration<7> index;
+
+                bool relative;
+
+                SourceGPR(const Enumeration<7> & index, bool relative);
+            };
+
+            struct SourceGPRParser
+            {
+                static SourceGPR parse(const std::string & input);
+            };
+
+            struct SourceGPRPrinter
+            {
+                static std::string print(const SourceGPR & input);
+            };
         }
     }
 }
