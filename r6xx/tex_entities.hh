@@ -20,7 +20,8 @@
 #ifndef GPU_GUARD_R6XX_TEX_ENTITIES_HH
 #define GPU_GUARD_R6XX_TEX_ENTITIES_HH 1
 
-#include <common/assembly_entities.hh>
+#include <common/assembly_entities-fwd.hh>
+#include <common/expression-fwd.hh>
 #include <r6xx/tex_entities-fwd.hh>
 #include <r6xx/tex_destination_gpr.hh>
 #include <r6xx/tex_source_gpr.hh>
@@ -36,7 +37,7 @@ namespace gpu
     {
         namespace tex
         {
-            typedef ConstVisitorTag<r6xx::tex::Label, r6xx::tex::LoadInstruction> Entities;
+            typedef ConstVisitorTag<r6xx::tex::Label, r6xx::tex::LoadInstruction, r6xx::tex::Size> Entities;
 
             typedef ConstVisitor<Entities> EntityVisitor;
 
@@ -70,6 +71,20 @@ namespace gpu
                 LoadInstruction(const Enumeration<5> &, const DestinationGPR & d, const SourceGPR &);
 
                 ~LoadInstruction();
+
+                void accept(EntityVisitor &) const;
+            };
+
+            struct Size :
+                public Entity
+            {
+                std::string symbol;
+
+                ExpressionPtr expression;
+
+                Size(const std::string &, const ExpressionPtr &);
+
+                ~Size();
 
                 void accept(EntityVisitor &) const;
             };

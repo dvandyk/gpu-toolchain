@@ -20,7 +20,8 @@
 #ifndef GPU_GUARD_R6XX_ALU_ENTITIES_HH
 #define GPU_GUARD_R6XX_ALU_ENTITIES_HH 1
 
-#include <common/assembly_entities.hh>
+#include <common/assembly_entities-fwd.hh>
+#include <common/expression-fwd.hh>
 #include <r6xx/alu_entities-fwd.hh>
 #include <r6xx/alu_destination_gpr.hh>
 #include <r6xx/alu_source_operand.hh>
@@ -36,7 +37,8 @@ namespace gpu
     {
         namespace alu
         {
-            typedef ConstVisitorTag<r6xx::alu::Form2Instruction, r6xx::alu::Form3Instruction, r6xx::alu::IndexMode, r6xx::alu::GroupEnd, r6xx::alu::Label> Entities;
+            typedef ConstVisitorTag<r6xx::alu::Form2Instruction, r6xx::alu::Form3Instruction,
+                    r6xx::alu::IndexMode, r6xx::alu::GroupEnd, r6xx::alu::Label, r6xx::alu::Size> Entities;
 
             typedef ConstVisitor<Entities> EntityVisitor;
 
@@ -116,6 +118,20 @@ namespace gpu
                 Label(const std::string &);
 
                 ~Label();
+
+                void accept(EntityVisitor &) const;
+            };
+
+            struct Size :
+                public Entity
+            {
+                std::string symbol;
+
+                ExpressionPtr expression;
+
+                Size(const std::string &, const ExpressionPtr &);
+
+                ~Size();
 
                 void accept(EntityVisitor &) const;
             };

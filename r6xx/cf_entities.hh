@@ -20,7 +20,8 @@
 #ifndef GPU_GUARD_R6XX_CF_ENTITIES_HH
 #define GPU_GUARD_R6XX_CF_ENTITIES_HH 1
 
-#include <common/assembly_entities.hh>
+#include <common/assembly_entities-fwd.hh>
+#include <common/expression-fwd.hh>
 #include <r6xx/cf_entities-fwd.hh>
 #include <utils/enumeration.hh>
 #include <utils/sequence.hh>
@@ -34,7 +35,8 @@ namespace gpu
     {
         namespace cf
         {
-            typedef ConstVisitorTag<r6xx::cf::ALUClause, r6xx::cf::Label, r6xx::cf::LoopInstruction, r6xx::cf::TextureFetchClause> Entities;
+            typedef ConstVisitorTag<r6xx::cf::ALUClause, r6xx::cf::Label, r6xx::cf::LoopInstruction,
+                    r6xx::cf::TextureFetchClause, r6xx::cf::Size> Entities;
 
             typedef ConstVisitor<Entities> EntityVisitor;
 
@@ -82,6 +84,20 @@ namespace gpu
                 LoopInstruction(const Enumeration<7> & opcode, const std::string & target, const std::string & counter);
 
                 ~LoopInstruction();
+
+                void accept(EntityVisitor &) const;
+            };
+
+            struct Size :
+                public Entity
+            {
+                std::string symbol;
+
+                ExpressionPtr expression;
+
+                Size(const std::string &, const ExpressionPtr &);
+
+                ~Size();
 
                 void accept(EntityVisitor &) const;
             };

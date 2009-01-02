@@ -35,6 +35,8 @@ namespace gpu
             struct Label;
 
             struct LoadInstruction;
+
+            struct Size;
         }
     }
 }

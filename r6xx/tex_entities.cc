@@ -17,6 +17,9 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <common/assembly_entities.hh>
+#include <common/directives.hh>
+#include <common/expression.hh>
 #include <r6xx/tex_entities.hh>
 #include <r6xx/error.hh>
 #include <utils/sequence-impl.hh>
@@ -41,6 +44,11 @@ namespace gpu
 
     template <>
     ConstVisits<r6xx::tex::LoadInstruction>::~ConstVisits()
+    {
+    }
+
+    template <>
+    ConstVisits<r6xx::tex::Size>::~ConstVisits()
     {
     }
 
@@ -84,6 +92,22 @@ namespace gpu
                 static_cast<ConstVisits<LoadInstruction> *>(&v)->visit(*this);
             }
 
+            Size::Size(const std::string & s, const ExpressionPtr & e) :
+                symbol(s),
+                expression(e)
+            {
+            }
+
+            Size::~Size()
+            {
+            }
+
+            void
+            Size::accept(EntityVisitor & v) const
+            {
+                static_cast<ConstVisits<Size> *>(&v)->visit(*this);
+            }
+
             namespace internal
             {
                 struct EntityPrinter :
@@ -101,6 +125,16 @@ namespace gpu
                         output = "LoadInstruction(\n";
                         output += "\topcode=" + stringify(l.opcode) + ",\n";
                         output += "\tdestination=" + DestinationGPRPrinter::print(l.destination) + ",\n";
+                        output += ")";
+                    }
+
+                    void visit(const Size & s)
+                    {
+                        ExpressionPrinter p;
+
+                        output = "Size(\n";
+                        output += "\tsymbol=" + s.symbol + ",\n";
+                        output += "\texpression=" + p.print(s.expression) + ",\n";
                         output += ")";
                     }
                 };
@@ -174,7 +208,20 @@ namespace gpu
 
                     void visit(const Comment &) { }
                     void visit(const Data &) { }
-                    void visit(const Directive &) { }
+
+                    void visit(const Directive & d)
+                    {
+                        if ("size" == d.name)
+                        {
+                            Tuple<std::string, ExpressionPtr> parameters(SizeParser::parse(d.params));
+
+                            result = EntityPtr(new Size(parameters.first, parameters.second));
+                        }
+                        else
+                        {
+                            throw SyntaxError("unknown directive '." + d.name + "' in texture fetch section");
+                        }
+                    }
 
                     void visit(const Instruction & i)
                     {

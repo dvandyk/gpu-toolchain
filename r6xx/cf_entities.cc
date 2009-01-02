@@ -17,6 +17,9 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <common/assembly_entities.hh>
+#include <common/directives.hh>
+#include <common/expression.hh>
 #include <r6xx/cf_entities.hh>
 #include <r6xx/error.hh>
 #include <utils/sequence-impl.hh>
@@ -46,6 +49,11 @@ namespace gpu
 
     template <>
     ConstVisits<r6xx::cf::LoopInstruction>::~ConstVisits()
+    {
+    }
+
+    template <>
+    ConstVisits<r6xx::cf::Size>::~ConstVisits()
     {
     }
 
@@ -110,6 +118,22 @@ namespace gpu
                 static_cast<ConstVisits<LoopInstruction> *>(&v)->visit(*this);
             }
 
+            Size::Size(const std::string & s, const ExpressionPtr & e) :
+                symbol(s),
+                expression(e)
+            {
+            }
+
+            Size::~Size()
+            {
+            }
+
+            void
+            Size::accept(EntityVisitor & v) const
+            {
+                static_cast<ConstVisits<Size> *>(&v)->visit(*this);
+            }
+
             TextureFetchClause::TextureFetchClause(const std::string & clause) :
                 clause(clause)
             {
@@ -149,6 +173,16 @@ namespace gpu
                         if (! l.counter.empty())
                             output += ", counter='" + l.counter + "'";
 
+                        output += ")";
+                    }
+
+                    void visit(const Size & s)
+                    {
+                        ExpressionPrinter p;
+
+                        output = "Size(\n";
+                        output += "\tsymbol=" + s.symbol + ",\n";
+                        output += "\texpression=" + p.print(s.expression) + ",\n";
                         output += ")";
                     }
 
@@ -263,7 +297,20 @@ namespace gpu
 
                     void visit(const Comment &) { }
                     void visit(const Data &) { }
-                    void visit(const Directive &) { }
+
+                    void visit(const Directive & d)
+                    {
+                        if ("size" == d.name)
+                        {
+                            Tuple<std::string, ExpressionPtr> parameters(SizeParser::parse(d.params));
+
+                            result = EntityPtr(new Size(parameters.first, parameters.second));
+                        }
+                        else
+                        {
+                            throw SyntaxError("unknown directive '." + d.name + "' in control flow section");
+                        }
+                    }
 
                     void visit(const Instruction & i)
                     {

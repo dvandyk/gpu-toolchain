@@ -41,6 +41,8 @@ namespace gpu
             struct IndexMode;
 
             struct Label;
+
+            struct Size;
         }
     }
 }

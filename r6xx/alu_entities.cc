@@ -17,6 +17,9 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <common/assembly_entities.hh>
+#include <common/directives.hh>
+#include <common/expression.hh>
 #include <r6xx/alu_entities.hh>
 #include <r6xx/error.hh>
 #include <utils/sequence-impl.hh>
@@ -56,6 +59,11 @@ namespace gpu
 
     template <>
     ConstVisits<r6xx::alu::Label>::~ConstVisits()
+    {
+    }
+
+    template <>
+    ConstVisits<r6xx::alu::Size>::~ConstVisits()
     {
     }
 
@@ -148,6 +156,22 @@ namespace gpu
                 static_cast<ConstVisits<Label> *>(&v)->visit(*this);
             }
 
+            Size::Size(const std::string & s, const ExpressionPtr & e) :
+                symbol(s),
+                expression(e)
+            {
+            }
+
+            Size::~Size()
+            {
+            }
+
+            void
+            Size::accept(EntityVisitor & v) const
+            {
+                static_cast<ConstVisits<Size> *>(&v)->visit(*this);
+            }
+
             namespace internal
             {
                 struct EntityPrinter :
@@ -206,6 +230,16 @@ namespace gpu
                     void visit(const Label & l)
                     {
                         output = "Label(text='" + l.text + "')";
+                    }
+
+                    void visit(const Size & s)
+                    {
+                        ExpressionPrinter p;
+
+                        output = "Size(\n";
+                        output += "\tsymbol=" + s.symbol + ",\n";
+                        output += "\texpression=" + p.print(s.expression) + ",\n";
+                        output += ")";
                     }
                 };
             }
@@ -358,6 +392,12 @@ namespace gpu
                             }
 
                             result = EntityPtr(new IndexMode(mode));
+                        }
+                        else if ("size" == d.name)
+                        {
+                            Tuple<std::string, ExpressionPtr> parameters(SizeParser::parse(d.params));
+
+                            result = EntityPtr(new Size(parameters.first, parameters.second));
                         }
                         else
                         {

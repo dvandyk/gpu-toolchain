@@ -38,6 +38,8 @@ namespace gpu
 
             struct LoopInstruction;
 
+            struct Size;
+
             struct TextureFetchClause;
         }
     }
