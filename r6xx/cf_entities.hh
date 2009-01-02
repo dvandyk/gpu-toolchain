@@ -34,7 +34,7 @@ namespace gpu
     {
         namespace cf
         {
-            typedef ConstVisitorTag<r6xx::cf::ALUClause, r6xx::cf::Label> Entities;
+            typedef ConstVisitorTag<r6xx::cf::ALUClause, r6xx::cf::Label, r6xx::cf::TextureFetchClause> Entities;
 
             typedef ConstVisitor<Entities> EntityVisitor;
 
@@ -66,6 +66,18 @@ namespace gpu
                 Label(const std::string &);
 
                 ~Label();
+
+                void accept(EntityVisitor &) const;
+            };
+
+            struct TextureFetchClause :
+                public Entity
+            {
+                std::string clause;
+
+                TextureFetchClause(const std::string &);
+
+                ~TextureFetchClause();
 
                 void accept(EntityVisitor &) const;
             };

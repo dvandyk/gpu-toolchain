@@ -44,6 +44,11 @@ namespace gpu
     {
     }
 
+    template <>
+    ConstVisits<r6xx::cf::TextureFetchClause>::~ConstVisits()
+    {
+    }
+
     namespace r6xx
     {
         namespace cf
@@ -83,6 +88,21 @@ namespace gpu
                 static_cast<ConstVisits<Label> *>(&v)->visit(*this);
             }
 
+            TextureFetchClause::TextureFetchClause(const std::string & clause) :
+                clause(clause)
+            {
+            }
+
+            TextureFetchClause::~TextureFetchClause()
+            {
+            }
+
+            void
+            TextureFetchClause::accept(EntityVisitor & v) const
+            {
+                static_cast<ConstVisits<TextureFetchClause> *>(&v)->visit(*this);
+            }
+
             namespace internal
             {
                 struct EntityPrinter :
@@ -98,6 +118,11 @@ namespace gpu
                     void visit(const Label & l)
                     {
                         output = "Label(text='" + l.text + "')";
+                    }
+
+                    void visit(const TextureFetchClause & t)
+                    {
+                        output = "TextureFetchClause(clause='" + t.clause + "')";
                     }
                 };
             }
@@ -189,6 +214,13 @@ namespace gpu
                                 throw SyntaxError("expected 1 source operand, got " + stringify(i.operands.size()));
 
                             result = EntityPtr(new ALUClause(Enumeration<4>(aclause->second), i.operands.first()));
+                        }
+                        else if ("tex" == i.mnemonic)
+                        {
+                            if (1 != i.operands.size())
+                                throw SyntaxError("expected 1 source operand, got " + stringify(i.operands.size()));
+
+                            result = EntityPtr(new TextureFetchClause(i.operands.first()));
                         }
                         else
                         {
