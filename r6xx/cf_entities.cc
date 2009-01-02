@@ -143,7 +143,13 @@ namespace gpu
 
                 const static AClause aclause_instructions[] =
                 {
-                    AClause("alu", 8)
+                    AClause("alu", 8),
+                    AClause("alu_push_before", 9),
+                    AClause("alu_pop_after", 10),
+                    AClause("alu_pop_twice_after", 11),
+                    AClause("alu_continue", 13),
+                    AClause("alu_break", 14),
+                    AClause("alu_else_after", 15)
                 };
                 const AClause * aclause_instructions_begin(aclause_instructions);
                 const AClause * aclause_instructions_end(aclause_instructions + sizeof(aclause_instructions) / sizeof(AClause));
