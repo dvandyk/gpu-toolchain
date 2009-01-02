@@ -67,6 +67,13 @@ namespace gpu
     }
 
     template <typename T_>
+    bool
+    Sequence<T_>::empty() const
+    {
+        return this->_imp->list.empty();
+    }
+
+    template <typename T_>
     unsigned
     Sequence<T_>::size() const
     {

@@ -55,6 +55,8 @@ namespace gpu
 
             void append(const T_ &);
 
+            bool empty() const;
+
             const T_ & first() const;
 
             T_ & first();
