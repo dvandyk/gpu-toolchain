@@ -14,10 +14,11 @@ libgpur6xx_la_SOURCES = \
 	alu_entities.cc alu_entities-fwd.hh alu_entities.hh \
 	alu_section.cc alu_section.hh \
 	alu_source_operand.cc alu_source_operand-fwd.hh alu_source_operand.hh \
+	cf_entities.cc cf_entities-fwd.hh cf_entities.hh \
 	cf_section.cc cf_section.hh \
 	error.cc error.hh \
 	assembler.cc assembler.hh \
-	section.cc section.hh
+	section.cc section-fwd.hh section.hh
 libgpuutils_la_CXXFLAGS = -I$(top_srcdir)
 
 TESTS = \

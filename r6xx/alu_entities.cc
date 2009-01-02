@@ -210,6 +210,28 @@ namespace gpu
             }
 
             std::string
+            EntityPrinter::print(const Sequence<EntityPtr> & entities)
+            {
+                std::string result;
+
+                for (Sequence<EntityPtr>::Iterator i(entities.begin()), i_end(entities.end()) ;
+                        i != i_end ; ++i)
+                {
+                    if (! result.empty())
+                        result += "\n";
+
+                    internal::EntityPrinter p;
+
+                    (*i)->accept(p);
+
+                    result += p.output;
+
+                }
+
+                return result;
+            }
+
+            std::string
             EntityPrinter::print(const EntityPtr & ptr)
             {
                 internal::EntityPrinter p;

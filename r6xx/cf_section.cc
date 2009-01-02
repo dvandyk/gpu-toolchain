@@ -22,6 +22,11 @@
 
 namespace gpu
 {
+    template <>
+    ConstVisits<r6xx::cf::Section>::~ConstVisits()
+    {
+    }
+
     namespace r6xx
     {
         namespace cf
@@ -34,22 +39,15 @@ namespace gpu
             {
             }
 
-            Section::Iterator
-            Section::begin() const
-            {
-                return Iterator(entities.begin());
-            }
-
-            Section::Iterator
-            Section::end() const
-            {
-                return Iterator(entities.end());
-            }
-
             void
-            Section::append(const AssemblyEntityPtr & e)
+            Section::append(const AssemblyEntityPtr & ptr)
             {
-                entities.append(e);
+                EntityPtr converted(EntityConverter::convert(ptr));
+
+                if (0 != converted.get())
+                {
+                    entities.append(converted);
+                }
             }
 
             std::string
@@ -57,6 +55,13 @@ namespace gpu
             {
                 return ".cf";
             }
+
+            void
+            Section::accept(SectionVisitor & v) const
+            {
+                static_cast<ConstVisits<r6xx::cf::Section> *>(&v)->visit(*this);
+            }
+
         }
     }
 }

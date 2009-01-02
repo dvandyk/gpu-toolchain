@@ -17,13 +17,11 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef GPU_GUARD_R6XX_ALU_ENTITIES_HH
-#define GPU_GUARD_R6XX_ALU_ENTITIES_HH 1
+#ifndef GPU_GUARD_R6XX_CF_ENTITIES_HH
+#define GPU_GUARD_R6XX_CF_ENTITIES_HH 1
 
 #include <common/assembly_entities.hh>
-#include <r6xx/alu_entities-fwd.hh>
-#include <r6xx/alu_destination_gpr.hh>
-#include <r6xx/alu_source_operand.hh>
+#include <r6xx/cf_entities-fwd.hh>
 #include <utils/enumeration.hh>
 #include <utils/sequence.hh>
 #include <utils/visitor.hh>
@@ -34,9 +32,9 @@ namespace gpu
 {
     namespace r6xx
     {
-        namespace alu
+        namespace cf
         {
-            typedef ConstVisitorTag<r6xx::alu::Form2Instruction, r6xx::alu::Form3Instruction, r6xx::alu::IndexMode, r6xx::alu::GroupEnd, r6xx::alu::Label> Entities;
+            typedef ConstVisitorTag<r6xx::cf::ALUClause, r6xx::cf::Label> Entities;
 
             typedef ConstVisitor<Entities> EntityVisitor;
 
@@ -46,64 +44,16 @@ namespace gpu
                 virtual ~Entity() = 0;
             };
 
-            struct Form2Instruction :
+            struct ALUClause :
                 public Entity
             {
-                /*
-                 * R6xx ISA v0.35, p.8-19:
-                 * Opcode is enum(10), but first 3 bits must be 0.
-                 */
-                Enumeration<7> opcode;
+                std::string clause;
 
-                DestinationGPR destination;
+                Enumeration<4> opcode;
 
-                unsigned slots;
+                ALUClause(const Enumeration<4> & opcode, const std::string &);
 
-                Sequence<SourceOperandPtr> sources;
-
-                Form2Instruction(const Enumeration<7> &, const DestinationGPR &, const Sequence<SourceOperandPtr> &, unsigned);
-
-                ~Form2Instruction();
-
-                void accept(EntityVisitor &) const;
-            };
-
-            struct Form3Instruction :
-                public Entity
-            {
-                Enumeration<5> opcode;
-
-                DestinationGPR destination;
-
-                unsigned slots;
-
-                Sequence<SourceOperandPtr> sources;
-
-                Form3Instruction(const Enumeration<5> &, const DestinationGPR &, const Sequence<SourceOperandPtr> &, unsigned);
-
-                ~Form3Instruction();
-
-                void accept(EntityVisitor &) const;
-            };
-
-            struct GroupEnd :
-                public Entity
-            {
-                GroupEnd();
-
-                ~GroupEnd();
-
-                void accept(EntityVisitor &) const;
-            };
-
-            struct IndexMode :
-                public Entity
-            {
-                Enumeration<3> mode;
-
-                IndexMode(unsigned mode);
-
-                ~IndexMode();
+                ~ALUClause();
 
                 void accept(EntityVisitor &) const;
             };

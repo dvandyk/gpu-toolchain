@@ -21,28 +21,25 @@
 #define GPU_GUARD_R6XX_SECTION_HH 1
 
 #include <common/assembly_entities-fwd.hh>
+#include <r6xx/section-fwd.hh>
 #include <utils/private_implementation_pattern.hh>
-#include <utils/wrapped_forward_iterator.hh>
+#include <utils/visitor.hh>
+
+#include <string>
 
 namespace gpu
 {
     namespace r6xx
     {
-        class Section;
+        typedef ConstVisitorTag<r6xx::alu::Section, r6xx::cf::Section> Sections;
 
-        typedef std::tr1::shared_ptr<Section> SectionPtr;
+        typedef ConstVisitor<Sections> SectionVisitor;
 
-        class Section
+        class Section :
+            public ConstVisitable<Sections>
         {
             public:
                 virtual ~Section() = 0;
-
-                struct IteratorTag;
-                typedef WrappedForwardIterator<IteratorTag, AssemblyEntityPtr> Iterator;
-
-                virtual Iterator begin() const = 0;
-
-                virtual Iterator end() const = 0;
 
                 virtual void append(const AssemblyEntityPtr &) = 0;
 
@@ -68,6 +65,11 @@ namespace gpu
                 {
                     return section->name() == _name;
                 }
+        };
+
+        struct SectionPrinter
+        {
+            static std::string print(const SectionPtr &);
         };
     }
 }

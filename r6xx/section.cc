@@ -30,9 +30,6 @@
 
 namespace gpu
 {
-    template
-    struct WrappedForwardIterator<r6xx::Section::IteratorTag, AssemblyEntityPtr>;
-
     namespace r6xx
     {
         Section::~Section()
@@ -72,6 +69,44 @@ namespace gpu
             const static std::string * const section_names_end(section_names_begin + sizeof(section_names) / sizeof(section_names[0]));
 
             return section_names_end != std::find(section_names_begin, section_names_end, name);
+        }
+
+        namespace internal
+        {
+            struct SectionPrinter :
+                public SectionVisitor
+            {
+                std::string result;
+
+                void visit(const alu::Section & a)
+                {
+                    result = "Section(name='.alu')";
+
+                    if (! a.entities.empty())
+                        result += "\n";
+
+                    result += alu::EntityPrinter::print(a.entities);
+                }
+
+                void visit(const cf::Section & c)
+                {
+                    result = "Section(name='.cf')";
+                    if (! c.entities.empty())
+                        result += "\n";
+
+                    result += cf::EntityPrinter::print(c.entities);
+                }
+            };
+        }
+
+        std::string
+        SectionPrinter::print(const SectionPtr & input)
+        {
+            internal::SectionPrinter p;
+
+            input->accept(p);
+
+            return p.result;
         }
     }
 }

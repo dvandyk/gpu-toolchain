@@ -1,5 +1,9 @@
-Label 'start'
-Instruction 'add'
-  Operand '$1'
-  Operand '$1'
-  Operand '$2'
+Section(name='.alu')
+Label(text='start')
+Form2Instruction(
+	opcode=0,
+	destination=DestinationGPR(channel=0, index=1, relative=false),
+	slots=1,
+	source[0]=SourceGPR(1, 1, false, false),
+	source[1]=SourceGPR(2, 2, false, false),
+)

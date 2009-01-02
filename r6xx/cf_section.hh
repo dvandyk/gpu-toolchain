@@ -20,6 +20,7 @@
 #ifndef GPU_GUARD_R6XX_CF_SECTION_HH
 #define GPU_GUARD_R6XX_CF_SECTION_HH 1
 
+#include <r6xx/cf_entities.hh>
 #include <r6xx/section.hh>
 #include <utils/sequence.hh>
 
@@ -32,21 +33,17 @@ namespace gpu
             struct Section :
                 public r6xx::Section
             {
-                typedef r6xx::Section::Iterator Iterator;
-
-                Sequence<AssemblyEntityPtr> entities;
+                Sequence<EntityPtr> entities;
 
                 Section();
 
                 virtual ~Section();
 
-                virtual Iterator begin() const;
-
-                virtual Iterator end() const;
-
                 virtual void append(const AssemblyEntityPtr &);
 
                 virtual std::string name() const;
+
+                virtual void accept(SectionVisitor &) const;
             };
         }
     }

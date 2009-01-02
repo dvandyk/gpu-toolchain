@@ -17,34 +17,24 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef GPU_GUARD_R6XX_ALU_SECTION_HH
-#define GPU_GUARD_R6XX_ALU_SECTION_HH 1
+#ifndef GPU_GUARD_R6XX_CF_ENTITIES_FWD_HH
+#define GPU_GUARD_R6XX_CF_ENTITIES_FWD_HH 1
 
-#include <r6xx/alu_entities.hh>
-#include <r6xx/section.hh>
-#include <utils/sequence.hh>
+#include <utils/memory.hh>
 
 namespace gpu
 {
     namespace r6xx
     {
-        namespace alu
+        namespace cf
         {
-            struct Section :
-                public r6xx::Section
-            {
-                Sequence<EntityPtr> entities;
+            struct Entity;
 
-                Section();
+            typedef std::tr1::shared_ptr<Entity> EntityPtr;
 
-                virtual ~Section();
+            struct ALUClause;
 
-                virtual void append(const AssemblyEntityPtr &);
-
-                virtual std::string name() const;
-
-                virtual void accept(SectionVisitor &) const;
-            };
+            struct Label;
         }
     }
 }

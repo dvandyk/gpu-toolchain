@@ -21,6 +21,7 @@
 #include <common/assembly_entities.hh>
 #include <common/assembly_parser.hh>
 #include <r6xx/assembler.hh>
+#include <r6xx/section.hh>
 #include <utils/memory.hh>
 #include <utils/sequence-impl.hh>
 
@@ -80,20 +81,16 @@ struct AssemblerFilterTest :
             std::string ref_name(std::string(GPU_SRCDIR) + "/r6xx/assembler_TEST_DATA/" + (*i)->name().substr(1) + ".ref");
             std::fstream ref(ref_name.c_str(), std::ios_base::in);
 
-            AssemblyEntityPrinter p;
-            for (r6xx::Section::Iterator j((*i)->begin()), j_end((*i)->end()) ;
-                    j != j_end ; ++j)
-            {
-                (*j)->accept(p);
-            }
-
             std::string ref_str, line;
             while (std::getline(ref, line))
             {
-                ref_str += line + "\n";
+                if (! ref_str.empty())
+                    ref_str += "\n";
+
+                ref_str += line;
             }
 
-            TEST_CHECK_EQUAL(p.output(), ref_str);
+            TEST_CHECK_EQUAL(r6xx::SectionPrinter::print(*i), ref_str);
         }
     }
 
