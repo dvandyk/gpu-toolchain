@@ -107,6 +107,10 @@ namespace gpu
             {
                 stack.back() = find_or_add("." + d.name);
             }
+            else
+            {
+                stack.back()->append(make_shared_ptr(new Directive(d)));
+            }
         }
     };
 
