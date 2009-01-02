@@ -45,6 +45,11 @@ namespace gpu
     }
 
     template <>
+    ConstVisits<r6xx::cf::LoopInstruction>::~ConstVisits()
+    {
+    }
+
+    template <>
     ConstVisits<r6xx::cf::TextureFetchClause>::~ConstVisits()
     {
     }
@@ -88,6 +93,23 @@ namespace gpu
                 static_cast<ConstVisits<Label> *>(&v)->visit(*this);
             }
 
+            LoopInstruction::LoopInstruction(const Enumeration<7> & opcode, const std::string & target, const std::string & counter) :
+                opcode(opcode),
+                counter(counter),
+                target(target)
+            {
+            }
+
+            LoopInstruction::~LoopInstruction()
+            {
+            }
+
+            void
+            LoopInstruction::accept(EntityVisitor & v) const
+            {
+                static_cast<ConstVisits<LoopInstruction> *>(&v)->visit(*this);
+            }
+
             TextureFetchClause::TextureFetchClause(const std::string & clause) :
                 clause(clause)
             {
@@ -118,6 +140,16 @@ namespace gpu
                     void visit(const Label & l)
                     {
                         output = "Label(text='" + l.text + "')";
+                    }
+
+                    void visit(const LoopInstruction & l)
+                    {
+                        output = "LoopInstruction(opcode=" + stringify(l.opcode) + ", target='" + l.target + "'";
+
+                        if (! l.counter.empty())
+                            output += ", counter='" + l.counter + "'";
+
+                        output += ")";
                     }
 
                     void visit(const TextureFetchClause & t)
@@ -177,8 +209,8 @@ namespace gpu
                     AClause("alu_break", 14),
                     AClause("alu_else_after", 15)
                 };
-                const AClause * aclause_instructions_begin(aclause_instructions);
-                const AClause * aclause_instructions_end(aclause_instructions + sizeof(aclause_instructions) / sizeof(AClause));
+                const static AClause * aclause_instructions_begin(aclause_instructions);
+                const static AClause * aclause_instructions_end(aclause_instructions + sizeof(aclause_instructions) / sizeof(AClause));
 
                 struct AClauseComparator
                 {
@@ -190,6 +222,35 @@ namespace gpu
                     }
 
                     bool operator() (const AClause & f)
+                    {
+                        return mnemonic == f.first;
+                    }
+                };
+
+                /*
+                 * mnemonic
+                 * opcode
+                 * needs counter?
+                 */
+                typedef Tuple<std::string, unsigned, bool> Loop;
+                const static Loop loop_instructions[] =
+                {
+                    Loop("loop_start", 4, true),
+                    Loop("loop_end", 5, false)
+                };
+                const static Loop * loop_instructions_begin(loop_instructions);
+                const static Loop * loop_instructions_end(loop_instructions + sizeof(loop_instructions) / sizeof(Loop));
+
+                struct LoopComparator
+                {
+                    std::string mnemonic;
+
+                    LoopComparator(const std::string mnemonic) :
+                        mnemonic(mnemonic)
+                    {
+                    }
+
+                    bool operator() (const Loop & f)
                     {
                         return mnemonic == f.first;
                     }
@@ -207,6 +268,7 @@ namespace gpu
                     void visit(const Instruction & i)
                     {
                         const AClause * aclause(std::find_if(aclause_instructions_begin, aclause_instructions_end, AClauseComparator(i.mnemonic)));
+                        const Loop * loop(std::find_if(loop_instructions_begin, loop_instructions_end, LoopComparator(i.mnemonic)));
 
                         if (aclause != aclause_instructions_end)
                         {
@@ -214,6 +276,18 @@ namespace gpu
                                 throw SyntaxError("expected 1 source operand, got " + stringify(i.operands.size()));
 
                             result = EntityPtr(new ALUClause(Enumeration<4>(aclause->second), i.operands.first()));
+                        }
+                        else if (loop != loop_instructions_end)
+                        {
+                            unsigned operand_count(loop->third ? 2 : 1);
+                            if (i.operands.size() != operand_count)
+                                throw SyntaxError("expected " + stringify(operand_count) + " operands, got " + stringify(i.operands.size()));
+
+                            std::string counter("");
+                            if (loop->third)
+                                counter = i.operands.last();
+
+                            result = EntityPtr(new LoopInstruction(Enumeration<7>(loop->second), i.operands.first(), counter));
                         }
                         else if ("tex" == i.mnemonic)
                         {

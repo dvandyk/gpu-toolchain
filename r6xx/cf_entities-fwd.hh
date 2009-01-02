@@ -36,6 +36,8 @@ namespace gpu
 
             struct Label;
 
+            struct LoopInstruction;
+
             struct TextureFetchClause;
         }
     }
