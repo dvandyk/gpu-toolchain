@@ -24,8 +24,6 @@
 
 #include <string>
 
-#include <iostream>
-
 using namespace gpu;
 using namespace tests;
 
@@ -43,18 +41,32 @@ struct AluEntitiesConverterTest :
             "foo:\n"
             ".indexmode loop\n"
             "\tfadd $127.x, $33.w, $17.z\n"
-            "\tfmuladd $0.w, $0.x, $0.y, $0.z\n");
+            "\tfmuladd $0.w, $0.x, $0.y, $0.z\n"
+            ".groupend\n");
+        const static std::string reference(
+            "Label(text='foo')\n"
+            "IndexMode(mode=4)\n"
+            "Form2Instruction(\n"
+            "\topcode=0,\n"
+            "\tdestination=DestinationGPR(channel=0, index=127, relative=false),\n"
+            "\tslots=1,\n"
+            "\tsource[0]=SourceGPR(3, 33, false, false),\n"
+            "\tsource[1]=SourceGPR(2, 17, false, false),\n"
+            ")\n"
+            "Form3Instruction(\n"
+            "\topcode=16,\n"
+            "\tdestination=DestinationGPR(channel=3, index=0, relative=false),\n"
+            "\tslots=1,\n"
+            "\tsource[0]=SourceGPR(0, 0, false, false),\n"
+            "\tsource[1]=SourceGPR(1, 0, false, false),\n"
+            "\tsource[2]=SourceGPR(2, 0, false, false),\n"
+            ")\n"
+            "GroupEnd()");
         std::stringstream input(text);
 
         Sequence<AssemblyEntityPtr> entities(AssemblyParser::parse(input));
         Sequence<r6xx::alu::EntityPtr> alu_entities(r6xx::alu::EntityConverter::convert(entities));
 
-        std::cout << text << std::endl;
-        std::cout << "--" << std::endl;
-        for (Sequence<r6xx::alu::EntityPtr>::Iterator i(alu_entities.begin()), i_end(alu_entities.end()) ;
-                i != i_end ; ++i)
-        {
-            std::cout << r6xx::alu::EntityPrinter::print(*i) << std::endl;
-        }
+        TEST_CHECK_EQUAL(r6xx::alu::EntityPrinter::print(alu_entities), reference);
     }
 } alu_destination_gpr_parser_test;
