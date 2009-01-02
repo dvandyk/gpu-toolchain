@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -131,6 +131,26 @@ namespace gpu
     {
     }
 
+    Line::Line(unsigned number) :
+        number(number)
+    {
+    }
+
+    Line::~Line()
+    {
+    }
+
+    void
+    Line::accept(AssemblyEntityVisitor & v) const
+    {
+        static_cast<ConstVisits<Line> *>(&v)->visit(*this);
+    }
+
+    template <>
+    ConstVisits<Line>::~ConstVisits()
+    {
+    }
+
     template <>
     struct Implementation<AssemblyEntityPrinter>
     {
@@ -181,6 +201,12 @@ namespace gpu
     AssemblyEntityPrinter::visit(const Label & l)
     {
         this->_imp->stream << "Label '" << l.text << "'" << std::endl;
+    }
+
+    void
+    AssemblyEntityPrinter::visit(const Line & l)
+    {
+        this->_imp->stream << "Line '" << l.number << "'" << std::endl;
     }
 
     std::string

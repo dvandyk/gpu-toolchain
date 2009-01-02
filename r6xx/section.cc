@@ -51,7 +51,7 @@ namespace gpu
             }
             else
             {
-                throw InvalidSectionNameError(0, name);
+                throw InvalidSectionNameError(name);
             }
 
             return result;

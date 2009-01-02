@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -23,23 +23,28 @@ namespace gpu
 {
     namespace r6xx
     {
-        InvalidSectionNameError::InvalidSectionNameError(unsigned line, const std::string & name) :
-            SyntaxError(line, "'" + name + "' is not a valid section name in the r6xx ISA")
+        SyntaxError::SyntaxError(const std::string & message) :
+            gpu::SyntaxError("r6xx", message)
+        {
+        }
+
+        InvalidSectionNameError::InvalidSectionNameError(const std::string & name) :
+            SyntaxError("'" + name + "' is not a valid section name in the r6xx ISA")
         {
         }
 
         UnbalancedSectionStackError::UnbalancedSectionStackError() :
-            SyntaxError(0, "the section stack was not balaneced (.pushsection/.popsection)")
+            SyntaxError("the section stack was not balanced (.pushsection/.popsection)")
         {
         }
 
         SourceOperandSyntaxError::SourceOperandSyntaxError(const std::string & message) :
-            SyntaxError(0, message)
+            SyntaxError(message)
         {
         }
 
         DestinationGPRSyntaxError::DestinationGPRSyntaxError(const std::string & message) :
-            SyntaxError(0, message)
+            SyntaxError(message)
         {
         }
     }

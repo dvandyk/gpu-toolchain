@@ -18,6 +18,7 @@
  */
 
 #include <r6xx/cf_entities.hh>
+#include <r6xx/error.hh>
 #include <utils/sequence-impl.hh>
 #include <utils/stringify.hh>
 #include <utils/tuple.hh>
@@ -185,19 +186,24 @@ namespace gpu
                         if (aclause != aclause_instructions_end)
                         {
                             if (1 != i.operands.size())
-                                throw SyntaxError(0, "expected 1 source operand, got " + stringify(i.operands.size()));
+                                throw SyntaxError("expected 1 source operand, got " + stringify(i.operands.size()));
 
                             result = EntityPtr(new ALUClause(Enumeration<4>(aclause->second), i.operands.first()));
                         }
                         else
                         {
-                            throw SyntaxError(0, "unknown CF mnemonic '" + i.mnemonic + "'");
+                            throw SyntaxError("unknown CF mnemonic '" + i.mnemonic + "'");
                         }
                     }
 
                     void visit(const gpu::Label & l)
                     {
                         result = EntityPtr(new r6xx::cf::Label(l.text));
+                    }
+
+                    void visit(const gpu::Line & l)
+                    {
+                        SyntaxContext::Line(l.number);
                     }
                 };
             }

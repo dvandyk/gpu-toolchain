@@ -70,6 +70,11 @@ namespace gpu
             stack.back()->append(make_shared_ptr(new Label(l)));
         }
 
+        void visit(const Line & l)
+        {
+            SyntaxContext::Line(l.number);
+        }
+
         r6xx::SectionPtr find_or_add(const std::string & name)
         {
             std::list<r6xx::SectionPtr>::const_iterator s(std::find_if(sections.begin(), sections.end(), r6xx::SectionNameComparator(name)));

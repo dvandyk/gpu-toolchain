@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -17,28 +17,36 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef GPU_GUARD_COMMON_ASSEMBLY_ENTITIES_FWD_HH
-#define GPU_GUARD_COMMON_ASSEMBLY_ENTITIES_FWD_HH 1
+#ifndef GPU_GUARD_COMMON_CONTEXT_HH
+#define GPU_GUARD_COMMON_CONTEXT_HH 1
 
-#include <utils/memory.hh>
+#include <utils/exception.hh>
 
 namespace gpu
 {
-    struct AssemblyEntity;
+    struct SyntaxContext
+    {
+        struct File
+        {
+            File(const std::string & file);
 
-    typedef std::tr1::shared_ptr<AssemblyEntity> AssemblyEntityPtr;
+            ~File();
+        };
 
-    struct Comment;
+        struct Line
+        {
+            Line(unsigned line);
 
-    struct Data;
+            ~Line();
+        };
+    };
 
-    struct Directive;
-
-    struct Instruction;
-
-    struct Label;
-
-    struct Line;
+    class SyntaxError :
+        public Exception
+    {
+        protected:
+            SyntaxError(const std::string & backend, const std::string & message);
+    };
 }
 
 #endif

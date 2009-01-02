@@ -18,6 +18,7 @@
  */
 
 #include <r6xx/alu_entities.hh>
+#include <r6xx/error.hh>
 #include <utils/sequence-impl.hh>
 #include <utils/stringify.hh>
 #include <utils/tuple.hh>
@@ -352,7 +353,7 @@ namespace gpu
                                         break;
 
                                     default:
-                                        throw SyntaxError(0, "invalid channel for address register index mode");
+                                        throw SyntaxError("invalid channel for address register index mode");
                                 }
                             }
 
@@ -360,7 +361,7 @@ namespace gpu
                         }
                         else
                         {
-                            throw SyntaxError(0, "invalid directive '." + d.name + "' in ALU section");
+                            throw SyntaxError("invalid directive '." + d.name + "' in ALU section");
                         }
                     }
 
@@ -372,7 +373,7 @@ namespace gpu
                         Sequence<std::string>::Iterator j(i.operands.begin()), j_end(i.operands.end());
 
                         if (j == j_end)
-                            throw SyntaxError(0, "no destination operand");
+                            throw SyntaxError("no destination operand");
 
                         DestinationGPR destination(DestinationGPRParser::parse(*j));
 
@@ -387,26 +388,31 @@ namespace gpu
                         if (form2 != form2_instructions_end)
                         {
                             if (sources.size() != form2->third)
-                                throw SyntaxError(0, "expected " + stringify(form2->third) + " source operands, got " + stringify(sources.size()));
+                                throw SyntaxError("expected " + stringify(form2->third) + " source operands, got " + stringify(sources.size()));
 
                             result = EntityPtr(new Form2Instruction(Enumeration<7>(form2->second), destination, sources, form2->fourth));
                         }
                         else if (form3 != form3_instructions_end)
                         {
                             if (3 != sources.size())
-                                throw SyntaxError(0, "expected 3 source operands, got " + stringify(sources.size()));
+                                throw SyntaxError("expected 3 source operands, got " + stringify(sources.size()));
 
                             result = EntityPtr(new Form3Instruction(Enumeration<5>(form3->second), destination, sources, form3->third));
                         }
                         else
                         {
-                            throw SyntaxError(0, "unknown ALU mnemonic '" + i.mnemonic + "'");
+                            throw SyntaxError("unknown ALU mnemonic '" + i.mnemonic + "'");
                         }
                     }
 
                     void visit(const gpu::Label & l)
                     {
                         result = EntityPtr(new r6xx::alu::Label(l.text));
+                    }
+
+                    void visit(const gpu::Line & l)
+                    {
+                        SyntaxContext::Line(l.number);
                     }
                 };
             }

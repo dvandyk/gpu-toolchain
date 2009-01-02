@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -20,35 +20,42 @@
 #ifndef GPU_GUARD_R6XX_ERROR_HH
 #define GPU_GUARD_R6XX_ERROR_HH 1
 
-#include <utils/exception.hh>
+#include <common/syntax.hh>
 
 namespace gpu
 {
     namespace r6xx
     {
-        class InvalidSectionNameError :
-            public SyntaxError
+        class SyntaxError :
+            public gpu::SyntaxError
         {
             public:
-                InvalidSectionNameError(unsigned line, const std::string & name);
+                SyntaxError(const std::string & message);
+        };
+
+        class InvalidSectionNameError :
+            public r6xx::SyntaxError
+        {
+            public:
+                InvalidSectionNameError(const std::string & name);
         };
 
         class UnbalancedSectionStackError :
-            public SyntaxError
+            public r6xx::SyntaxError
         {
             public:
                 UnbalancedSectionStackError();
         };
 
         class SourceOperandSyntaxError :
-            public SyntaxError
+            public r6xx::SyntaxError
         {
             public:
                 SourceOperandSyntaxError(const std::string & message);
         };
 
         class DestinationGPRSyntaxError :
-            public SyntaxError
+            public r6xx::SyntaxError
         {
             public:
                 DestinationGPRSyntaxError(const std::string & message);

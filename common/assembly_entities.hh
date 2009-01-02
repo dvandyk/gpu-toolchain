@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -29,7 +29,7 @@
 
 namespace gpu
 {
-    typedef ConstVisitorTag<Comment, Data, Directive, Instruction, Label> AssemblyEntities;
+    typedef ConstVisitorTag<Comment, Data, Directive, Instruction, Label, Line> AssemblyEntities;
 
     typedef ConstVisitor<AssemblyEntities> AssemblyEntityVisitor;
 
@@ -105,6 +105,18 @@ namespace gpu
         std::string text;
     };
 
+    struct Line :
+        public AssemblyEntity
+    {
+        Line(unsigned number);
+
+        ~Line();
+
+        void accept(AssemblyEntityVisitor &) const;
+
+        unsigned number;
+    };
+
     class AssemblyEntityPrinter :
         public AssemblyEntityVisitor,
         public PrivateImplementationPattern<AssemblyEntityPrinter>
@@ -123,6 +135,8 @@ namespace gpu
             void visit(const Instruction &);
 
             void visit(const Label &);
+
+            void visit(const Line &);
 
             std::string output() const;
     };

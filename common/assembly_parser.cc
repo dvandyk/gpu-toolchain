@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -95,9 +95,13 @@ namespace gpu
     {
         Sequence<std::tr1::shared_ptr<AssemblyEntity> > result;
         std::string line;
+        unsigned number(0);
 
         while (std::getline(input, line))
         {
+            ++number;
+            result.append(make_shared_ptr(new Line(number)));
+
             line = strip_whitespaces(line);
 
             std::string comment(strip_whitespaces(split_comment(line)));
