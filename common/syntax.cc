@@ -74,4 +74,9 @@ namespace gpu
         Exception(make_prefix() + ": (" + backend + ") " + message)
     {
     }
+
+    CommonSyntaxError::CommonSyntaxError(const std::string & message) :
+        SyntaxError("common", message)
+    {
+    }
 }

@@ -47,6 +47,13 @@ namespace gpu
         protected:
             SyntaxError(const std::string & backend, const std::string & message);
     };
+
+    class CommonSyntaxError :
+        public SyntaxError
+    {
+        public:
+            CommonSyntaxError(const std::string & message);
+    };
 }
 
 #endif
