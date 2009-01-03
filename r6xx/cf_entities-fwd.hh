@@ -38,6 +38,8 @@ namespace gpu
 
             struct LoopInstruction;
 
+            struct NopInstruction;
+
             struct ProgramEnd;
 
             struct Size;

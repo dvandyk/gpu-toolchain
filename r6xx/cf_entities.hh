@@ -36,7 +36,7 @@ namespace gpu
         namespace cf
         {
             typedef ConstVisitorTag<r6xx::cf::ALUClause, r6xx::cf::Label, r6xx::cf::LoopInstruction,
-                    r6xx::cf::ProgramEnd, r6xx::cf::Size, r6xx::cf::TextureFetchClause> Entities;
+                    r6xx::cf::NopInstruction, r6xx::cf::ProgramEnd, r6xx::cf::Size, r6xx::cf::TextureFetchClause> Entities;
 
             typedef ConstVisitor<Entities> EntityVisitor;
 
@@ -84,6 +84,16 @@ namespace gpu
                 LoopInstruction(const Enumeration<7> & opcode, const std::string & target, const std::string & counter);
 
                 ~LoopInstruction();
+
+                void accept(EntityVisitor &) const;
+            };
+
+            struct NopInstruction :
+                public Entity
+            {
+                NopInstruction();
+
+                ~NopInstruction();
 
                 void accept(EntityVisitor &) const;
             };

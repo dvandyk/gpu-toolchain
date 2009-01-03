@@ -53,6 +53,11 @@ namespace gpu
     }
 
     template <>
+    ConstVisits<r6xx::cf::NopInstruction>::~ConstVisits()
+    {
+    }
+
+    template <>
     ConstVisits<r6xx::cf::ProgramEnd>::~ConstVisits()
     {
     }
@@ -121,6 +126,20 @@ namespace gpu
             LoopInstruction::accept(EntityVisitor & v) const
             {
                 static_cast<ConstVisits<LoopInstruction> *>(&v)->visit(*this);
+            }
+
+            NopInstruction::NopInstruction()
+            {
+            }
+
+            NopInstruction::~NopInstruction()
+            {
+            }
+
+            void
+            NopInstruction::accept(EntityVisitor & v) const
+            {
+                static_cast<ConstVisits<NopInstruction> *>(&v)->visit(*this);
             }
 
             ProgramEnd::ProgramEnd()
@@ -195,7 +214,12 @@ namespace gpu
                         output += ")";
                     }
 
-                    void visit(const ProgramEnd & p)
+                    void visit(const NopInstruction &)
+                    {
+                        output = "NopInstruction()";
+                    }
+
+                    void visit(const ProgramEnd &)
                     {
                         output = "ProgramEnd()";
                     }
@@ -366,6 +390,13 @@ namespace gpu
                                 counter = i.operands.last();
 
                             result = EntityPtr(new LoopInstruction(Enumeration<7>(loop->second), i.operands.first(), counter));
+                        }
+                        else if ("nop" == i.mnemonic)
+                        {
+                            if (0 != i.operands.size())
+                                throw SyntaxError("'nop' takes no operands");
+
+                            result = EntityPtr(new NopInstruction);
                         }
                         else if ("tex" == i.mnemonic)
                         {
