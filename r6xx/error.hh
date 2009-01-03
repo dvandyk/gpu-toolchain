@@ -67,6 +67,20 @@ namespace gpu
             public:
                 DestinationGPRSyntaxError(const std::string & message);
         };
+
+        class DuplicateSymbolError :
+            public Exception
+        {
+            public:
+                DuplicateSymbolError(const std::string & symbol);
+        };
+
+        class UnresolvedSymbolError :
+            public Exception
+        {
+            public:
+                UnresolvedSymbolError(const std::string & symbol);
+        };
     }
 }
 

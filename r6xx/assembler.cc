@@ -33,87 +33,6 @@ namespace gpu
     template
     struct WrappedForwardIterator<r6xx::Assembler::SectionTag, r6xx::Section>;
 
-    struct SectionFilter :
-        public AssemblyEntityVisitor
-    {
-        std::list<r6xx::SectionPtr> & sections;
-        std::list<r6xx::SectionPtr> stack;
-
-        SectionFilter(std::list<r6xx::SectionPtr> & sections) :
-            sections(sections)
-        {
-            stack.push_back(sections.back());
-        }
-
-        bool balanced()
-        {
-            return (stack.size() == 1);
-        }
-
-        void visit(const Comment & c)
-        {
-            stack.back()->append(make_shared_ptr(new Comment(c)));
-        }
-
-        void visit(const Data & d)
-        {
-            stack.back()->append(make_shared_ptr(new Data(d)));
-        }
-
-        void visit(const Instruction & i)
-        {
-            stack.back()->append(make_shared_ptr(new Instruction(i)));
-        }
-
-        void visit(const Label & l)
-        {
-            stack.back()->append(make_shared_ptr(new Label(l)));
-        }
-
-        void visit(const Line & l)
-        {
-            SyntaxContext::Line(l.number);
-        }
-
-        r6xx::SectionPtr find_or_add(const std::string & name)
-        {
-            std::list<r6xx::SectionPtr>::const_iterator s(std::find_if(sections.begin(), sections.end(), r6xx::SectionNameComparator(name)));
-            if (sections.end() != s)
-                return *s;
-
-            sections.push_back(r6xx::Section::make(name));
-
-            return sections.back();
-        }
-
-        void visit(const Directive & d)
-        {
-            if ("section" == d.name)
-            {
-                stack.back() = find_or_add(d.params);
-            }
-            else if ("pushsection" == d.name)
-            {
-                stack.push_back(find_or_add(d.params));
-            }
-            else if ("popsection" == d.name)
-            {
-                if (stack.size() == 1)
-                    throw r6xx::UnbalancedSectionStackError();
-
-                stack.pop_back();
-            }
-            else if (r6xx::Section::valid("." + d.name))
-            {
-                stack.back() = find_or_add("." + d.name);
-            }
-            else
-            {
-                stack.back()->append(make_shared_ptr(new Directive(d)));
-            }
-        }
-    };
-
     template <>
     struct Implementation<r6xx::Assembler>
     {
@@ -122,20 +41,101 @@ namespace gpu
 
     namespace r6xx
     {
+        struct ConversionStage :
+            public AssemblyEntityVisitor
+        {
+            std::list<SectionPtr> sections;
+            std::list<SectionPtr> stack;
+
+            ConversionStage()
+            {
+                sections.push_back(Section::make(".cf"));
+                stack.push_back(sections.back());
+            }
+
+            bool balanced()
+            {
+                return (stack.size() == 1);
+            }
+
+            void visit(const Comment & c)
+            {
+                stack.back()->append(make_shared_ptr(new Comment(c)));
+            }
+
+            void visit(const Data & d)
+            {
+                stack.back()->append(make_shared_ptr(new Data(d)));
+            }
+
+            void visit(const Instruction & i)
+            {
+                stack.back()->append(make_shared_ptr(new Instruction(i)));
+            }
+
+            void visit(const Label & l)
+            {
+                stack.back()->append(make_shared_ptr(new Label(l)));
+            }
+
+            void visit(const Line & l)
+            {
+                SyntaxContext::Line(l.number);
+            }
+
+            r6xx::SectionPtr find_or_add(const std::string & name)
+            {
+                std::list<SectionPtr>::const_iterator s(std::find_if(sections.begin(), sections.end(), r6xx::SectionNameComparator(name)));
+                if (sections.end() != s)
+                    return *s;
+
+                sections.push_back(Section::make(name));
+
+                return sections.back();
+            }
+
+            void visit(const Directive & d)
+            {
+                if ("section" == d.name)
+                {
+                    stack.back() = find_or_add(d.params);
+                }
+                else if ("pushsection" == d.name)
+                {
+                    stack.push_back(find_or_add(d.params));
+                }
+                else if ("popsection" == d.name)
+                {
+                    if (stack.size() == 1)
+                        throw r6xx::UnbalancedSectionStackError();
+
+                    stack.pop_back();
+                }
+                else if (r6xx::Section::valid("." + d.name))
+                {
+                    stack.back() = find_or_add("." + d.name);
+                }
+                else
+                {
+                    stack.back()->append(make_shared_ptr(new Directive(d)));
+                }
+            }
+        };
+
         Assembler::Assembler(const Sequence<std::tr1::shared_ptr<AssemblyEntity> > & entities) :
             PrivateImplementationPattern<r6xx::Assembler>(new Implementation<r6xx::Assembler>)
         {
-            _imp->sections.push_back(Section::make(".cf"));
-
-            SectionFilter filter(_imp->sections);
+            ConversionStage cs;
             for (Sequence<std::tr1::shared_ptr<AssemblyEntity> >::Iterator e(entities.begin()), e_end(entities.end()) ;
                     e != e_end ; ++e)
             {
-                (*e)->accept(filter);
+                (*e)->accept(cs);
             }
 
-            if (! filter.balanced())
+            if (! cs.balanced())
                 throw UnbalancedSectionStackError();
+
+            _imp->sections = cs.sections;
         }
 
         Assembler::~Assembler()

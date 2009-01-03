@@ -52,5 +52,15 @@ namespace gpu
             SyntaxError(message)
         {
         }
+
+        DuplicateSymbolError::DuplicateSymbolError(const std::string & symbol) :
+            Exception("Duplicate Symbol encountered: '" + symbol + "'")
+        {
+        }
+
+        UnresolvedSymbolError::UnresolvedSymbolError(const std::string & symbol) :
+            Exception("No such symbol: '" + symbol + "'")
+        {
+        }
     }
 }
