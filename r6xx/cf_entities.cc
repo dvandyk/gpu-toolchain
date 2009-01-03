@@ -53,6 +53,11 @@ namespace gpu
     }
 
     template <>
+    ConstVisits<r6xx::cf::ProgramEnd>::~ConstVisits()
+    {
+    }
+
+    template <>
     ConstVisits<r6xx::cf::Size>::~ConstVisits()
     {
     }
@@ -118,6 +123,20 @@ namespace gpu
                 static_cast<ConstVisits<LoopInstruction> *>(&v)->visit(*this);
             }
 
+            ProgramEnd::ProgramEnd()
+            {
+            }
+
+            ProgramEnd::~ProgramEnd()
+            {
+            }
+
+            void
+            ProgramEnd::accept(EntityVisitor & v) const
+            {
+                static_cast<ConstVisits<ProgramEnd> *>(&v)->visit(*this);
+            }
+
             Size::Size(const std::string & s, const ExpressionPtr & e) :
                 symbol(s),
                 expression(e)
@@ -174,6 +193,11 @@ namespace gpu
                             output += ", counter='" + l.counter + "'";
 
                         output += ")";
+                    }
+
+                    void visit(const ProgramEnd & p)
+                    {
+                        output = "ProgramEnd()";
                     }
 
                     void visit(const Size & s)
@@ -300,7 +324,14 @@ namespace gpu
 
                     void visit(const Directive & d)
                     {
-                        if ("size" == d.name)
+                        if ("programend" == d.name)
+                        {
+                            if (! d.params.empty())
+                                throw SyntaxError("the '.programend' directive does not take parameters");
+
+                            result = EntityPtr(new ProgramEnd);
+                        }
+                        else if ("size" == d.name)
                         {
                             Tuple<std::string, ExpressionPtr> parameters(SizeParser::parse(d.params));
 

@@ -38,6 +38,8 @@ namespace gpu
 
             struct LoopInstruction;
 
+            struct ProgramEnd;
+
             struct Size;
 
             struct TextureFetchClause;
