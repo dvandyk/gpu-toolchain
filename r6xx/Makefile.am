@@ -50,7 +50,9 @@ EXTRA_DIST += \
 	assembler_TEST_DATA/pushpop.s \
 	assembler_TEST_DATA/shortcut.s \
 	assembler_TEST_DATA/alu.ref \
-	assembler_TEST_DATA/cf.ref
+	assembler_TEST_DATA/cf.ref \
+	assembler_TEST_DATA/minimal.s \
+	assembler_TEST_DATA/minimal.ref
 
 section_TEST_SOURCES = section_TEST.cc
 section_TEST_LDADD = libgpur6xx.la ../common/libgpucommon.la ../tests/libgputests.a ../utils/libgpuutils.la

@@ -1,0 +1,60 @@
+Section(name='.cf')
+Label(text='main')
+LoopInstruction(opcode=4, target='.L1', counter='count')
+Label(text='.L0')
+TextureFetchClause(clause='fetch')
+ALUClause(clause='square')
+LoopInstruction(opcode=5, target='.L0')
+Label(text='.L1')
+NopInstruction()
+ProgramEnd()
+Size(
+	symbol=main,
+	expression=-(.,main),
+)
+Section(name='.alu')
+Label(text='square')
+IndexMode(mode=4)
+Form2Instruction(
+	opcode=1,
+	destination=DestinationGPR(channel=0, index=0, relative=true),
+	slots=1,
+	source[0]=SourceGPR(0, 0, false, true),
+	source[1]=SourceGPR(0, 0, false, true),
+)
+Form2Instruction(
+	opcode=1,
+	destination=DestinationGPR(channel=1, index=0, relative=true),
+	slots=1,
+	source[0]=SourceGPR(1, 0, false, true),
+	source[1]=SourceGPR(1, 0, false, true),
+)
+Form2Instruction(
+	opcode=1,
+	destination=DestinationGPR(channel=2, index=0, relative=true),
+	slots=1,
+	source[0]=SourceGPR(2, 0, false, true),
+	source[1]=SourceGPR(2, 0, false, true),
+)
+Form2Instruction(
+	opcode=1,
+	destination=DestinationGPR(channel=3, index=0, relative=true),
+	slots=1,
+	source[0]=SourceGPR(3, 0, false, true),
+	source[1]=SourceGPR(3, 0, false, true),
+)
+GroupEnd()
+Size(
+	symbol=square,
+	expression=-(.,square),
+)
+Section(name='.tex')
+Label(text='fetch')
+LoadInstruction(
+	opcode=3,
+	destination=DestinationGPR(index=0, relative=true, selector=<0, 1, 2, 3>),
+)
+Size(
+	symbol=fetch,
+	expression=-(.,fetch),
+)

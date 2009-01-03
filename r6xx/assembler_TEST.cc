@@ -20,6 +20,7 @@
 #include <tests/tests.hh>
 #include <common/assembly_entities.hh>
 #include <common/assembly_parser.hh>
+#include <common/syntax.hh>
 #include <r6xx/assembler.hh>
 #include <r6xx/section.hh>
 #include <utils/memory.hh>
@@ -101,3 +102,50 @@ struct AssemblerFilterTest :
         run_one("shortcut");
     }
 } assembler_filter_test;
+
+struct AssemblerTest :
+    public Test
+{
+    AssemblerTest() :
+        Test("assembler_test")
+    {
+    }
+
+    void run_one(const std::string & s)
+    {
+        std::string input_name(std::string(GPU_SRCDIR) + "/r6xx/assembler_TEST_DATA/" + s + ".s");
+        SyntaxContext::File f(input_name);
+        std::fstream input(input_name.c_str(), std::ios_base::in);
+
+        std::string reference_name(std::string(GPU_SRCDIR) + "/r6xx/assembler_TEST_DATA/" + s + ".ref");
+        std::fstream reference(reference_name.c_str(), std::ios_base::in);
+        std::string reference_string, line;
+        while (std::getline(reference, line))
+        {
+            if (! reference_string.empty())
+                reference_string += "\n";
+
+            reference_string += line;
+        }
+
+        Sequence<std::tr1::shared_ptr<AssemblyEntity> > entities(AssemblyParser::parse(input));
+        r6xx::Assembler a(entities);
+
+        std::string output;
+        for (r6xx::Assembler::SectionIterator i(a.begin_sections()), i_end(a.end_sections()) ;
+                i != i_end ; ++i)
+        {
+            if (! output.empty())
+                output += "\n";
+
+            output += r6xx::SectionPrinter::print(*i);
+        }
+
+        TEST_CHECK_EQUAL(output, reference_string);
+    }
+
+    virtual void run()
+    {
+        run_one("minimal");
+    }
+} assembler_test;
