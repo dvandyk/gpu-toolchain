@@ -128,20 +128,46 @@ struct AssemblerTest :
             reference_string += line;
         }
 
+        std::string symbols_name(std::string(GPU_SRCDIR) + "/r6xx/assembler_TEST_DATA/" + s + ".sym");
+        std::fstream symbols(symbols_name.c_str(), std::ios_base::in);
+        std::string symbols_string;
+        while (std::getline(symbols, line))
+        {
+            if (! symbols_string.empty())
+                symbols_string += "\n";
+
+            symbols_string += line;
+        }
+
         Sequence<std::tr1::shared_ptr<AssemblyEntity> > entities(AssemblyParser::parse(input));
         r6xx::Assembler a(entities);
 
-        std::string output;
+        std::string section_output;
         for (r6xx::Assembler::SectionIterator i(a.begin_sections()), i_end(a.end_sections()) ;
                 i != i_end ; ++i)
         {
-            if (! output.empty())
-                output += "\n";
+            if (! section_output.empty())
+                section_output += "\n";
 
-            output += r6xx::SectionPrinter::print(*i);
+            section_output += r6xx::SectionPrinter::print(*i);
         }
+        TEST_CHECK_EQUAL(section_output, reference_string);
 
-        TEST_CHECK_EQUAL(output, reference_string);
+        std::string symbols_output;
+        for (r6xx::Assembler::SymbolIterator i(a.begin_symbols()), i_end(a.end_symbols()) ;
+                i != i_end ; ++i)
+        {
+            if (! symbols_output.empty())
+                symbols_output += "\n";
+
+            symbols_output += "Symbol(\n";
+            symbols_output += "\tname='" + i->name + "'\n";
+            symbols_output += "\toffset=" + stringify(i->offset) + "\n";
+            symbols_output += "\tsize=" + stringify(i->size) + "\n";
+            symbols_output += "\tsection=" + stringify(i->section) +"\n";
+            symbols_output += ")";
+        }
+        TEST_CHECK_EQUAL(symbols_output, symbols_string);
     }
 
     virtual void run()

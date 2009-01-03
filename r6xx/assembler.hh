@@ -22,6 +22,7 @@
 
 #include <common/assembly_entities-fwd.hh>
 #include <r6xx/section.hh>
+#include <r6xx/symbol.hh>
 #include <utils/private_implementation_pattern.hh>
 #include <utils/sequence.hh>
 
@@ -42,6 +43,12 @@ namespace gpu
 
                 SectionIterator begin_sections() const;
                 SectionIterator end_sections() const;
+
+                struct SymbolTag;
+                typedef WrappedForwardIterator<SymbolTag, r6xx::Symbol> SymbolIterator;
+
+                SymbolIterator begin_symbols() const;
+                SymbolIterator end_symbols() const;
         };
     }
 }

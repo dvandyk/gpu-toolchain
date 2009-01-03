@@ -1,0 +1,30 @@
+Symbol(
+	name='main'
+	offset=0
+	size=40
+	section=0
+)
+Symbol(
+	name='.L0'
+	offset=8
+	size=0
+	section=0
+)
+Symbol(
+	name='.L1'
+	offset=32
+	size=0
+	section=0
+)
+Symbol(
+	name='square'
+	offset=0
+	size=32
+	section=1
+)
+Symbol(
+	name='fetch'
+	offset=0
+	size=16
+	section=2
+)

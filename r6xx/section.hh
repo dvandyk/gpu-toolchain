@@ -23,6 +23,7 @@
 #include <common/assembly_entities-fwd.hh>
 #include <r6xx/section-fwd.hh>
 #include <utils/private_implementation_pattern.hh>
+#include <utils/sequence.hh>
 #include <utils/visitor.hh>
 
 #include <string>
@@ -34,6 +35,13 @@ namespace gpu
         typedef ConstVisitorTag<r6xx::alu::Section, r6xx::cf::Section, r6xx::tex::Section> Sections;
 
         typedef ConstVisitor<Sections> SectionVisitor;
+
+        enum SectionId
+        {
+            sid_cf = 0,
+            sid_alu = 1,
+            sid_tex = 2
+        };
 
         class Section :
             public ConstVisitable<Sections>
@@ -70,6 +78,11 @@ namespace gpu
         struct SectionPrinter
         {
             static std::string print(const SectionPtr &);
+        };
+
+        struct SectionConverter
+        {
+            static Sequence<SectionPtr> convert(const Sequence<AssemblyEntityPtr> &);
         };
     }
 }

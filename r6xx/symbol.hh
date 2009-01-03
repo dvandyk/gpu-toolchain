@@ -29,13 +29,6 @@ namespace gpu
 {
     namespace r6xx
     {
-        enum SectionId
-        {
-            sid_cf = 0,
-            sid_alu = 1,
-            sid_tex = 2
-        };
-
         struct Symbol
         {
             const std::string name;

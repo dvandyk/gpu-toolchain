@@ -17,13 +17,15 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <utils/private_implementation_pattern-impl.hh>
-#include <utils/wrapped_forward_iterator-impl.hh>
+#include <common/assembly_entities.hh>
 #include <r6xx/alu_section.hh>
 #include <r6xx/cf_section.hh>
 #include <r6xx/error.hh>
 #include <r6xx/section.hh>
 #include <r6xx/tex_section.hh>
+#include <utils/private_implementation_pattern-impl.hh>
+#include <utils/sequence-impl.hh>
+#include <utils/wrapped_forward_iterator-impl.hh>
 
 #include <algorithm>
 #include <list>
@@ -122,6 +124,107 @@ namespace gpu
             input->accept(p);
 
             return p.result;
+        }
+
+        namespace internal
+        {
+            struct ConversionStage :
+                public AssemblyEntityVisitor
+            {
+                Sequence<r6xx::SectionPtr> sections;
+                std::list<SectionPtr> stack;
+
+                ConversionStage()
+                {
+                    sections.append(Section::make(".cf"));
+                    stack.push_back(sections.last());
+                }
+
+                bool balanced()
+                {
+                    return (stack.size() == 1);
+                }
+
+                void visit(const Comment & c)
+                {
+                    stack.back()->append(make_shared_ptr(new Comment(c)));
+                }
+
+                void visit(const Data & d)
+                {
+                    stack.back()->append(make_shared_ptr(new Data(d)));
+                }
+
+                void visit(const Instruction & i)
+                {
+                    stack.back()->append(make_shared_ptr(new Instruction(i)));
+                }
+
+                void visit(const Label & l)
+                {
+                    stack.back()->append(make_shared_ptr(new Label(l)));
+                }
+
+                void visit(const Line & l)
+                {
+                    SyntaxContext::Line(l.number);
+                }
+
+                r6xx::SectionPtr find_or_add(const std::string & name)
+                {
+                    Sequence<SectionPtr>::Iterator s(std::find_if(sections.begin(), sections.end(), r6xx::SectionNameComparator(name)));
+                    if (sections.end() != s)
+                        return *s;
+
+                    sections.append(Section::make(name));
+
+                    return sections.last();
+                }
+
+                void visit(const Directive & d)
+                {
+                    if ("section" == d.name)
+                    {
+                        stack.back() = find_or_add(d.params);
+                    }
+                    else if ("pushsection" == d.name)
+                    {
+                        stack.push_back(find_or_add(d.params));
+                    }
+                    else if ("popsection" == d.name)
+                    {
+                        if (stack.size() == 1)
+                            throw r6xx::UnbalancedSectionStackError();
+
+                        stack.pop_back();
+                    }
+                    else if (r6xx::Section::valid("." + d.name))
+                    {
+                        stack.back() = find_or_add("." + d.name);
+                    }
+                    else
+                    {
+                        stack.back()->append(make_shared_ptr(new Directive(d)));
+                    }
+                }
+            };
+        }
+
+        Sequence<SectionPtr>
+        SectionConverter::convert(const Sequence<AssemblyEntityPtr> & input)
+        {
+            internal::ConversionStage cs;
+
+            for (Sequence<std::tr1::shared_ptr<AssemblyEntity> >::Iterator e(input.begin()), e_end(input.end()) ;
+                    e != e_end ; ++e)
+            {
+                (*e)->accept(cs);
+            }
+
+            if (! cs.balanced())
+                throw UnbalancedSectionStackError();
+
+            return cs.sections;
         }
     }
 }

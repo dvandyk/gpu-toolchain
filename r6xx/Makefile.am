@@ -53,7 +53,8 @@ EXTRA_DIST += \
 	assembler_TEST_DATA/alu.ref \
 	assembler_TEST_DATA/cf.ref \
 	assembler_TEST_DATA/minimal.s \
-	assembler_TEST_DATA/minimal.ref
+	assembler_TEST_DATA/minimal.ref \
+	assembler_TEST_DATA/minimal.sym
 
 section_TEST_SOURCES = section_TEST.cc
 section_TEST_LDADD = libgpur6xx.la ../common/libgpucommon.la ../tests/libgputests.a ../utils/libgpuutils.la

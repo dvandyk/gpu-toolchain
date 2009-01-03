@@ -17,10 +17,10 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <common/assembly_entities.hh>
-#include <r6xx/error.hh>
 #include <r6xx/assembler.hh>
+#include <r6xx/error.hh>
 #include <r6xx/section.hh>
+#include <r6xx/symbol.hh>
 #include <utils/private_implementation_pattern-impl.hh>
 #include <utils/sequence-impl.hh>
 #include <utils/wrapped_forward_iterator-impl.hh>
@@ -30,112 +30,22 @@
 
 namespace gpu
 {
-    template
-    struct WrappedForwardIterator<r6xx::Assembler::SectionTag, r6xx::Section>;
-
     template <>
     struct Implementation<r6xx::Assembler>
     {
-        std::list<r6xx::SectionPtr> sections;
+        Sequence<r6xx::SectionPtr> sections;
+
+        Sequence<r6xx::Symbol> symbols;
     };
 
     namespace r6xx
     {
-        struct ConversionStage :
-            public AssemblyEntityVisitor
-        {
-            std::list<SectionPtr> sections;
-            std::list<SectionPtr> stack;
-
-            ConversionStage()
-            {
-                sections.push_back(Section::make(".cf"));
-                stack.push_back(sections.back());
-            }
-
-            bool balanced()
-            {
-                return (stack.size() == 1);
-            }
-
-            void visit(const Comment & c)
-            {
-                stack.back()->append(make_shared_ptr(new Comment(c)));
-            }
-
-            void visit(const Data & d)
-            {
-                stack.back()->append(make_shared_ptr(new Data(d)));
-            }
-
-            void visit(const Instruction & i)
-            {
-                stack.back()->append(make_shared_ptr(new Instruction(i)));
-            }
-
-            void visit(const Label & l)
-            {
-                stack.back()->append(make_shared_ptr(new Label(l)));
-            }
-
-            void visit(const Line & l)
-            {
-                SyntaxContext::Line(l.number);
-            }
-
-            r6xx::SectionPtr find_or_add(const std::string & name)
-            {
-                std::list<SectionPtr>::const_iterator s(std::find_if(sections.begin(), sections.end(), r6xx::SectionNameComparator(name)));
-                if (sections.end() != s)
-                    return *s;
-
-                sections.push_back(Section::make(name));
-
-                return sections.back();
-            }
-
-            void visit(const Directive & d)
-            {
-                if ("section" == d.name)
-                {
-                    stack.back() = find_or_add(d.params);
-                }
-                else if ("pushsection" == d.name)
-                {
-                    stack.push_back(find_or_add(d.params));
-                }
-                else if ("popsection" == d.name)
-                {
-                    if (stack.size() == 1)
-                        throw r6xx::UnbalancedSectionStackError();
-
-                    stack.pop_back();
-                }
-                else if (r6xx::Section::valid("." + d.name))
-                {
-                    stack.back() = find_or_add("." + d.name);
-                }
-                else
-                {
-                    stack.back()->append(make_shared_ptr(new Directive(d)));
-                }
-            }
-        };
-
         Assembler::Assembler(const Sequence<std::tr1::shared_ptr<AssemblyEntity> > & entities) :
             PrivateImplementationPattern<r6xx::Assembler>(new Implementation<r6xx::Assembler>)
         {
-            ConversionStage cs;
-            for (Sequence<std::tr1::shared_ptr<AssemblyEntity> >::Iterator e(entities.begin()), e_end(entities.end()) ;
-                    e != e_end ; ++e)
-            {
-                (*e)->accept(cs);
-            }
+            _imp->sections = SectionConverter::convert(entities);
 
-            if (! cs.balanced())
-                throw UnbalancedSectionStackError();
-
-            _imp->sections = cs.sections;
+            _imp->symbols = SymbolScanner::scan(_imp->sections);
         }
 
         Assembler::~Assembler()
@@ -152,6 +62,18 @@ namespace gpu
         Assembler::end_sections() const
         {
             return SectionIterator(_imp->sections.end());
+        }
+
+        Assembler::SymbolIterator
+        Assembler::begin_symbols() const
+        {
+            return SymbolIterator(_imp->symbols.begin());
+        }
+
+        Assembler::SymbolIterator
+        Assembler::end_symbols() const
+        {
+            return SymbolIterator(_imp->symbols.end());
         }
     }
 }
