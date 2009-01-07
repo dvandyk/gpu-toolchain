@@ -14,7 +14,8 @@ libgpuelf_la_SOURCES = \
 	file.cc file.hh \
 	error.cc error.hh \
 	section.cc section.hh \
-	string_table.cc string_table.hh
+	string_table.cc string_table.hh \
+	symbol_table.cc symbol_table.hh
 libgpuutils_la_CXXFLAGS = -I$(top_srcdir)
 
 TESTS = \
