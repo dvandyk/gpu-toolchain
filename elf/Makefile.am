@@ -13,6 +13,7 @@ libgpuelf_la_SOURCES = \
 	data.cc data.hh \
 	file.cc file.hh \
 	error.cc error.hh \
+	relocation_table.cc relocation_table.hh \
 	section.cc section.hh \
 	string_table.cc string_table.hh \
 	symbol_table.cc symbol_table.hh
