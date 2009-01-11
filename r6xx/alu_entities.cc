@@ -419,16 +419,31 @@ namespace gpu
                 typedef Tuple<std::string, unsigned, unsigned> Form3;
                 const static Form3 form3_instructions[] =
                 {
-                    Form3("fmuladd64", 8, 2),
-                    Form3("fmullit", 12, 4),
-                    Form3("fmuladd", 16, 1),
-                    Form3("fmuladdieee", 20, 1),
-                    Form3("fcnde", 24, 1),
-                    Form3("fcndgt", 25, 1),
-                    Form3("fcndge", 26, 1),
-                    Form3("icnde", 28, 1),
-                    Form3("icndgt", 29, 1),
-                    Form3("icndge", 30, 1)
+                    /* float double */
+                    Form3("dmuladd",            0x08, 2),
+                    Form3("dmuladd*2",          0x09, 2),
+                    Form3("dmuladd*4",          0x0a, 2),
+                    Form3("dmuladd/2",          0x0b, 2),
+                    /* float single */
+                    Form3("fcmove",             0x18, 1),
+                    Form3("fcmovge",            0x1a, 1),
+                    Form3("fcmovgt",            0x19, 1),
+                    Form3("fmuladd",            0x10, 1),
+                    Form3("fmuladd*2",          0x11, 1),
+                    Form3("fmuladd*4",          0x12, 1),
+                    Form3("fmuladd/2",          0x13, 1),
+                    Form3("fmuladdieee",        0x14, 1),
+                    Form3("fmuladdieee*2",      0x15, 1),
+                    Form3("fmuladdieee*4",      0x16, 1),
+                    Form3("fmuladdieee/2",      0x17, 1),
+                    Form3("fmullit",            0x0c, 1),
+                    Form3("fmullit*2",          0x0d, 1),
+                    Form3("fmullit*4",          0x0e, 1),
+                    Form3("fmullit/2",          0x0f, 1),
+                    /* signed int */
+                    Form3("icmove",             0x1c, 1),
+                    Form3("icmovge",            0x1e, 1),
+                    Form3("icmovgt",            0x1d, 1)
                 };
                 const Form3 * form3_instructions_begin(form3_instructions);
                 const Form3 * form3_instructions_end(form3_instructions + sizeof(form3_instructions) / sizeof(Form3));
