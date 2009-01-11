@@ -10,7 +10,8 @@ EXTRA_DIST =
 noinst_LTLIBRARIES = libgpuelf.la
 
 libgpuelf_la_SOURCES = \
-	data.cc data.hh
+	data.cc data.hh \
+	section.cc section.hh
 libgpuutils_la_CXXFLAGS = -I$(top_srcdir)
 
 TESTS = \
