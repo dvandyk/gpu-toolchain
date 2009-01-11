@@ -18,6 +18,7 @@ libgpur6xx_la_SOURCES = \
 	cf_entities.cc cf_entities-fwd.hh cf_entities.hh \
 	cf_section.cc cf_section.hh \
 	error.cc error.hh \
+	relocation.hh relocation.cc \
 	section.cc section-fwd.hh section.hh \
 	symbol.cc symbol.hh \
 	tex_destination_gpr.cc tex_destination_gpr.hh \
@@ -54,7 +55,8 @@ EXTRA_DIST += \
 	assembler_TEST_DATA/cf.ref \
 	assembler_TEST_DATA/minimal.s \
 	assembler_TEST_DATA/minimal.ref \
-	assembler_TEST_DATA/minimal.sym
+	assembler_TEST_DATA/minimal.sym \
+	assembler_TEST_DATA/minimal.reloc
 
 section_TEST_SOURCES = section_TEST.cc
 section_TEST_LDADD = libgpur6xx.la ../common/libgpucommon.la ../tests/libgputests.a ../utils/libgpuutils.la

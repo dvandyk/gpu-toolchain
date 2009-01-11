@@ -1,0 +1,20 @@
+Relocation(
+	section=0
+	symbol=.L1
+	type=2
+)
+Relocation(
+	section=0
+	symbol=fetch
+	type=3
+)
+Relocation(
+	section=0
+	symbol=square
+	type=1
+)
+Relocation(
+	section=0
+	symbol=.L0
+	type=2
+)

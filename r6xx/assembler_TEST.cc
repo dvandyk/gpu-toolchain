@@ -168,6 +168,7 @@ struct AssemblerTest :
             symbols_output += ")";
         }
         TEST_CHECK_EQUAL(symbols_output, symbols_string);
+
     }
 
     virtual void run()
