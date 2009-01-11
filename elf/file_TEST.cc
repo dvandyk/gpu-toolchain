@@ -36,7 +36,7 @@ struct ElfFileTest :
 
     void run()
     {
-        std::string filename(stringify(GPU_BUILDDIR) + "/elf/file_TEST_output");
+        std::string filename(stringify(GPU_BUILDDIR) + "/elf/file_TEST.output");
         elf::File file(elf::File::Parameters()
                 .data(ELFDATA2LSB)
                 .machine(EM_PPC)

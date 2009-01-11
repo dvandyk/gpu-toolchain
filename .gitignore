@@ -25,3 +25,6 @@ gpu-toolchain-*.tar.*
 .*.swp
 .*.swo
 *~
+
+# Test suite outputs
+*.output
