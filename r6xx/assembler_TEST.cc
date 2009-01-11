@@ -169,7 +169,7 @@ struct AssemblerTest :
         }
         TEST_CHECK_EQUAL(symbols_output, symbols_string);
 
-        a.write(std::string(GPU_SRCDIR) + "/r6xx/assembler_TEST_DATA/" + s + ".output");
+        a.write(std::string(GPU_BUILDDIR) + "/r6xx/assembler_TEST_" + s + ".output");
     }
 
     virtual void run()

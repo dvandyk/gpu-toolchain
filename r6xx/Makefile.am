@@ -1,4 +1,4 @@
-CLEANFILES = *~
+CLEANFILES = *~ *.output
 MAINTAINERCLEANFILES = Makefile.in
 
 AM_CXXFLAGS = -I$(top_srcdir)
