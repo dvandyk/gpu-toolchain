@@ -140,6 +140,8 @@ namespace gpu
 
             std::string output() const;
     };
+
+    extern template class Sequence<AssemblyEntityPtr>;
 }
 
 #endif

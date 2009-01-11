@@ -214,4 +214,6 @@ namespace gpu
     {
         return this->_imp->stream.str();
     }
+
+    template class Sequence<AssemblyEntityPtr>;
 }
