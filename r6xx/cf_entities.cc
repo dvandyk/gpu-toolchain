@@ -81,8 +81,8 @@ namespace gpu
             }
 
             ALUClause::ALUClause(const Enumeration<4> & opcode, const std::string & clause) :
-                opcode(opcode),
-                clause(clause)
+                clause(clause),
+                opcode(opcode)
             {
             }
 
@@ -112,8 +112,8 @@ namespace gpu
             }
 
             LoopInstruction::LoopInstruction(const Enumeration<7> & opcode, const std::string & target, const std::string & counter) :
-                opcode(opcode),
                 counter(counter),
+                opcode(opcode),
                 target(target)
             {
             }

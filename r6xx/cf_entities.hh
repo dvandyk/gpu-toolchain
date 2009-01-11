@@ -77,9 +77,9 @@ namespace gpu
             {
                 std::string counter;
 
-                std::string target;
-
                 Enumeration<7> opcode;
+
+                std::string target;
 
                 LoopInstruction(const Enumeration<7> & opcode, const std::string & target, const std::string & counter);
 

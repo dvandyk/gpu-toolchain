@@ -49,12 +49,12 @@ namespace gpu
     namespace elf
     {
         Symbol::Symbol(const std::string & name, const std::string & section) :
+            bind(0),
             name(name),
             section(section),
-            bind(0),
+            size(0),
             type(0),
-            value(0),
-            size(0)
+            value(0)
         {
         }
 
@@ -121,7 +121,6 @@ namespace gpu
             memset(&dummy, 0, sizeof(dummy));
             symbols.push_back(dummy);
 
-            unsigned index(1);
             for (std::vector<Symbol>::const_iterator s(_imp->entries.begin()), s_end(_imp->entries.end()) ;
                     s != s_end ; ++s)
             {

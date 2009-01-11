@@ -175,7 +175,7 @@ namespace gpu
                 }
 
                 // tex::EntityVisitor
-                void visit(const tex::LoadInstruction & i)
+                void visit(const tex::LoadInstruction &)
                 {
                     current_offsets[sid_tex] += 16; // size of a tex instruction
                 }

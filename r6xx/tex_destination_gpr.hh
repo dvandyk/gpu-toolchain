@@ -35,9 +35,9 @@ namespace gpu
 
                 Enumeration<7> index;
 
-                Selector selector;
-
                 bool relative;
+
+                Selector selector;
 
                 DestinationGPR(const Enumeration<7> & index, bool relative, const Selector & selector);
             };

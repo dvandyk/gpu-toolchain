@@ -45,7 +45,7 @@ namespace gpu
                 unsigned current_offsets[4];
 
                 // SectionVisitor
-                void visit(const alu::Section & a)
+                void visit(const alu::Section &)
                 {
                 }
 
@@ -72,9 +72,9 @@ namespace gpu
                 }
 
                 // cf::EntityVisitor
-                void visit(const cf::Label & l) { }
+                void visit(const cf::Label &) { }
                 void visit(const cf::ProgramEnd &) { }
-                void visit(const cf::Size & s) { }
+                void visit(const cf::Size &) { }
 
                 void visit(const cf::ALUClause & a)
                 {
@@ -103,10 +103,10 @@ namespace gpu
                 }
 
                 // tex::EntityVisitor
-                void visit(const tex::Label & l) { }
-                void visit(const tex::Size & s) { }
+                void visit(const tex::Label &) { }
+                void visit(const tex::Size &) { }
 
-                void visit(const tex::LoadInstruction & i)
+                void visit(const tex::LoadInstruction &)
                 {
                     current_offsets[sid_tex] += 16; // size of a tex instruction
                     // TODO Relocation for resource id

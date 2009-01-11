@@ -217,7 +217,7 @@ namespace gpu
                         output += ")";
                     }
 
-                    void visit(const GroupEnd & e)
+                    void visit(const GroupEnd &)
                     {
                         output += "GroupEnd()";
                     }

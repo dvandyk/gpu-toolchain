@@ -139,8 +139,8 @@ namespace gpu
                     }
 
                     // r6xx::SectionVisitor
-                    void visit(const cf::Section & c) { }
-                    void visit(const tex::Section & t) { }
+                    void visit(const cf::Section &) { }
+                    void visit(const tex::Section &) { }
 
                     void visit(const alu::Section & a)
                     {
@@ -156,8 +156,8 @@ namespace gpu
                     }
 
                     // alu::EntityVisitor
-                    void visit(const alu::Label & l) { }
-                    void visit(const alu::Size & s) { }
+                    void visit(const alu::Label &) { }
+                    void visit(const alu::Size &) { }
 
                     void visit(const alu::Form2Instruction & i)
                     {
@@ -202,7 +202,7 @@ namespace gpu
             }
 
             elf::Section
-            Generator::generate(const Sequence<r6xx::SectionPtr> & sections, const Sequence<r6xx::Symbol> & symbols)
+            Generator::generate(const Sequence<r6xx::SectionPtr> & sections, const Sequence<r6xx::Symbol> &)
             {
                 internal::Generator g;
 

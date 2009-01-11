@@ -65,8 +65,6 @@ namespace gpu
         void
         RelocationTable::append(const Relocation & r)
         {
-            unsigned index(_imp->entries.size());
-
             Elf32_Rel relocation;
             relocation.r_offset = r.offset;
             relocation.r_info = ELF32_R_INFO(_imp->symtab[r.symbol], r.type);

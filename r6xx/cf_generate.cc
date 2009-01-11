@@ -115,9 +115,9 @@ namespace gpu
                                 .flags(SHF_ALLOC | SHF_EXECINSTR)
                                 .name(".cf")
                                 .type(SHT_PROGBITS)),
+                        last_type(it_none),
                         reltab(symtab),
-                        symbols(symbols),
-                        last_type(it_none)
+                        symbols(symbols)
                     {
                     }
 
@@ -131,8 +131,8 @@ namespace gpu
                     }
 
                     // r6xx::SectionVisitor
-                    void visit(const alu::Section & c) { }
-                    void visit(const tex::Section & t) { }
+                    void visit(const alu::Section &) { }
+                    void visit(const tex::Section &) { }
 
                     void visit(const cf::Section & a)
                     {
@@ -150,8 +150,8 @@ namespace gpu
                     }
 
                     // cf::EntityVisitor
-                    void visit(const cf::Label & l) { }
-                    void visit(const cf::Size & s) { }
+                    void visit(const cf::Label &) { }
+                    void visit(const cf::Size &) { }
 
                     void visit(const cf::ALUClause & a)
                     {
