@@ -12,10 +12,12 @@ noinst_LTLIBRARIES = libgpur6xx.la
 libgpur6xx_la_SOURCES = \
 	alu_destination_gpr.cc alu_destination_gpr.hh \
 	alu_entities.cc alu_entities-fwd.hh alu_entities.hh \
+	alu_generate.cc alu_generate.hh \
 	alu_section.cc alu_section.hh \
 	alu_source_operand.cc alu_source_operand-fwd.hh alu_source_operand.hh \
 	assembler.cc assembler.hh \
 	cf_entities.cc cf_entities-fwd.hh cf_entities.hh \
+	cf_generate.cc cf_generate.hh \
 	cf_section.cc cf_section.hh \
 	error.cc error.hh \
 	relocation.hh relocation.cc \
@@ -46,7 +48,7 @@ alu_source_operand_TEST_SOURCES = alu_source_operand_TEST.cc
 alu_source_operand_TEST_LDADD = libgpur6xx.la ../common/libgpucommon.la ../tests/libgputests.a ../utils/libgpuutils.la
 
 assembler_TEST_SOURCES = assembler_TEST.cc
-assembler_TEST_LDADD = libgpur6xx.la ../common/libgpucommon.la ../tests/libgputests.a ../utils/libgpuutils.la
+assembler_TEST_LDADD = libgpur6xx.la ../common/libgpucommon.la ../elf/libgpuelf.la ../tests/libgputests.a ../utils/libgpuutils.la
 EXTRA_DIST += \
 	assembler_TEST_DATA/section.s \
 	assembler_TEST_DATA/pushpop.s \

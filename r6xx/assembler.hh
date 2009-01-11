@@ -49,6 +49,8 @@ namespace gpu
 
                 SymbolIterator begin_symbols() const;
                 SymbolIterator end_symbols() const;
+
+                void write(const std::string & filename) const;
         };
     }
 }
