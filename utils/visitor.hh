@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -48,7 +48,10 @@ namespace gpu
              typename T4_ = internal::NoType<4>,
              typename T5_ = internal::NoType<5>,
              typename T6_ = internal::NoType<6>,
-             typename T7_ = internal::NoType<7> >
+             typename T7_ = internal::NoType<7>,
+             typename T8_ = internal::NoType<8>,
+             typename T9_ = internal::NoType<9>,
+             typename T10_ = internal::NoType<10> >
     struct ConstVisitorTag
     {
         typedef T1_ ConstVisitableType1;
@@ -64,6 +67,12 @@ namespace gpu
         typedef T6_ ConstVisitableType6;
 
         typedef T7_ ConstVisitableType7;
+
+        typedef T8_ ConstVisitableType8;
+
+        typedef T9_ ConstVisitableType9;
+
+        typedef T10_ ConstVisitableType10;
     };
 
     template <typename Tag_> class ConstVisitor :
@@ -73,7 +82,9 @@ namespace gpu
         public ConstVisits<typename Tag_::ConstVisitableType4>,
         public ConstVisits<typename Tag_::ConstVisitableType5>,
         public ConstVisits<typename Tag_::ConstVisitableType6>,
-        public ConstVisits<typename Tag_::ConstVisitableType7>
+        public ConstVisits<typename Tag_::ConstVisitableType7>,
+        public ConstVisits<typename Tag_::ConstVisitableType8>,
+        public ConstVisits<typename Tag_::ConstVisitableType9>
     {
     };
 
