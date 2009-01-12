@@ -34,6 +34,8 @@ namespace gpu
 
             struct ALUClause;
 
+            struct BranchInstruction;
+
             struct Label;
 
             struct LoopInstruction;

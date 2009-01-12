@@ -148,6 +148,11 @@ namespace gpu
                     current_offsets[sid_cf] += 8; // size of a cf instruction
                 }
 
+                void visit(const cf::BranchInstruction &)
+                {
+                    current_offsets[sid_cf] += 8; // size of a cf instruction
+                }
+
                 void visit(const cf::Label & l)
                 {
                     add_symbol(l.text, current_offsets[sid_cf], sid_cf);

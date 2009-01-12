@@ -22,6 +22,7 @@
 #include <common/expression.hh>
 #include <r6xx/cf_entities.hh>
 #include <r6xx/error.hh>
+#include <utils/destringify.hh>
 #include <utils/sequence-impl.hh>
 #include <utils/stringify.hh>
 #include <utils/tuple.hh>
@@ -39,6 +40,11 @@ namespace gpu
 
     template <>
     ConstVisits<r6xx::cf::ALUClause>::~ConstVisits()
+    {
+    }
+
+    template <>
+    ConstVisits<r6xx::cf::BranchInstruction>::~ConstVisits()
     {
     }
 
@@ -94,6 +100,23 @@ namespace gpu
             ALUClause::accept(EntityVisitor & v) const
             {
                 static_cast<ConstVisits<ALUClause> *>(&v)->visit(*this);
+            }
+
+            BranchInstruction::BranchInstruction(const Enumeration<7> & opcode, const std::string & target, unsigned count) :
+                count(count),
+                opcode(opcode),
+                target(target)
+            {
+            }
+
+            BranchInstruction::~BranchInstruction()
+            {
+            }
+
+            void
+            BranchInstruction::accept(EntityVisitor & v) const
+            {
+                static_cast<ConstVisits<BranchInstruction> *>(&v)->visit(*this);
             }
 
             Label::Label(const std::string & t) :
@@ -197,6 +220,11 @@ namespace gpu
                     void visit(const ALUClause & a)
                     {
                         output += "ALUClause(clause='" + a.clause + "')";
+                    }
+
+                    void visit(const BranchInstruction & b)
+                    {
+                        output += "BranchInstruction(opcode=" + stringify(b.opcode) + ", target='" + b.target + "', count=" + stringify(b.count) + ")";
                     }
 
                     void visit(const Label & l)
@@ -312,6 +340,34 @@ namespace gpu
                 /*
                  * mnemonic
                  * opcode
+                 */
+                typedef Tuple<std::string, unsigned> Branch;
+
+                const static Branch branch_instructions[] =
+                {
+                    Branch("call", 0x0d)
+                };
+                const static Branch * branch_instructions_begin(branch_instructions);
+                const static Branch * branch_instructions_end(branch_instructions + sizeof(branch_instructions) / sizeof(Branch));
+
+                struct BranchComparator
+                {
+                    std::string mnemonic;
+
+                    BranchComparator(const std::string mnemonic) :
+                        mnemonic(mnemonic)
+                    {
+                    }
+
+                    bool operator() (const Branch & b)
+                    {
+                        return mnemonic == b.first;
+                    }
+                };
+
+                /*
+                 * mnemonic
+                 * opcode
                  * needs counter?
                  */
                 typedef Tuple<std::string, unsigned, bool> Loop;
@@ -370,6 +426,7 @@ namespace gpu
                     void visit(const Instruction & i)
                     {
                         const AClause * aclause(std::find_if(aclause_instructions_begin, aclause_instructions_end, AClauseComparator(i.mnemonic)));
+                        const Branch * branch(std::find_if(branch_instructions_begin, branch_instructions_end, BranchComparator(i.mnemonic)));
                         const Loop * loop(std::find_if(loop_instructions_begin, loop_instructions_end, LoopComparator(i.mnemonic)));
 
                         if (aclause != aclause_instructions_end)
@@ -378,6 +435,16 @@ namespace gpu
                                 throw SyntaxError("expected 1 source operand, got " + stringify(i.operands.size()));
 
                             result = EntityPtr(new ALUClause(Enumeration<4>(aclause->second), i.operands.first()));
+                        }
+                        else if (branch != branch_instructions_end)
+                        {
+                            if (2 != i.operands.size())
+                                throw SyntaxError("expected 2 source operands, got " + stringify(i.operands.size()));
+
+                            std::string target(i.operands.first());
+                            unsigned count(destringify<unsigned>(i.operands.last()));
+
+                            result = EntityPtr(new BranchInstruction(Enumeration<7>(branch->second), target, count));
                         }
                         else if (loop != loop_instructions_end)
                         {

@@ -20,7 +20,7 @@ libgpur6xx_la_SOURCES = \
 	cf_generate.cc cf_generate.hh \
 	cf_section.cc cf_section.hh \
 	error.cc error.hh \
-	relocation.hh relocation.cc \
+	relocation.hh \
 	section.cc section-fwd.hh section.hh \
 	symbol.cc symbol.hh \
 	tex_destination_gpr.cc tex_destination_gpr.hh \

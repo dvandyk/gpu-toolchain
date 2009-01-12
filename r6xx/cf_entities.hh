@@ -35,7 +35,7 @@ namespace gpu
     {
         namespace cf
         {
-            typedef ConstVisitorTag<r6xx::cf::ALUClause, r6xx::cf::Label, r6xx::cf::LoopInstruction,
+            typedef ConstVisitorTag<r6xx::cf::ALUClause, r6xx::cf::BranchInstruction, r6xx::cf::Label, r6xx::cf::LoopInstruction,
                     r6xx::cf::NopInstruction, r6xx::cf::ProgramEnd, r6xx::cf::Size, r6xx::cf::TextureFetchClause> Entities;
 
             typedef ConstVisitor<Entities> EntityVisitor;
@@ -56,6 +56,22 @@ namespace gpu
                 ALUClause(const Enumeration<4> & opcode, const std::string &);
 
                 ~ALUClause();
+
+                void accept(EntityVisitor &) const;
+            };
+
+            struct BranchInstruction :
+                public Entity
+            {
+                unsigned count;
+
+                Enumeration<7> opcode;
+
+                std::string target;
+
+                BranchInstruction(const Enumeration<7> & opcode, const std::string & target, unsigned count);
+
+                ~BranchInstruction();
 
                 void accept(EntityVisitor &) const;
             };

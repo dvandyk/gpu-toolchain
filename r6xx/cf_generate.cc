@@ -25,6 +25,7 @@
 #include <r6xx/error.hh>
 #include <r6xx/section.hh>
 #include <utils/sequence-impl.hh>
+#include <utils/stringify.hh>
 
 #include <algorithm>
 #include <cstring>
@@ -174,6 +175,55 @@ namespace gpu
                         last_type = it_alu;
                     }
 
+                    void visit(const cf::BranchInstruction & b)
+                    {
+                        bool local_branch('.' == b.target[0]);
+
+                        // Relocations
+                        unsigned offset(instructions.size() * sizeof(InstructionData));
+                        if (local_branch)
+                        {
+                            // Needs relocation with addend
+                            //reltab.append(elf::Relocation(offset, ".cf", cfrel_pic, offset_of(b.target, sid_cf)));
+                        }
+                        else
+                        {
+                            reltab.append(elf::Relocation(offset, b.target, cfrel_branch));
+                        }
+
+                        // Microcode
+                        InstructionData instruction(0);
+                        DefaultData * dd(reinterpret_cast<DefaultData *>(&instruction));
+                        dd->address = (1LL << 32) - 1;
+                        dd->opcode = b.opcode;
+                        do
+                        {
+                            switch (b.opcode)
+                            {
+                                case 0x0d: /* call */
+                                    dd->call_count = b.count;
+                                    continue;
+
+                                case 0x0a: /* push */
+                                case 0x0c: /* pop */
+                                case 0x10: /* jump */
+                                case 0x11: /* else */
+                                    dd->pop_count = b.count;
+                                    continue;
+
+                                case 0x0b: /* push_else */
+                                case 0x0e: /* return */
+                                    continue;
+                            }
+
+                            throw InternalError("r6xx", "unhandled opcode '" + stringify(b.opcode) + "' for BranchInstruction");
+                        }
+                        while (false);
+
+                        instructions.push_back(instruction);
+                        last_type = it_default;
+                    }
+
                     void visit(const cf::LoopInstruction & i)
                     {
                         bool local_branch('.' == i.target[0]);
@@ -184,7 +234,12 @@ namespace gpu
                         // Relocations
                         // TODO loop counter relocation if needs_cf_const
                         unsigned offset(instructions.size() * sizeof(InstructionData));
-                        if (! local_branch)
+                        if (local_branch)
+                        {
+                            // Needs relocation with addend
+                            //reltab.append(elf::Relocation(offset, i.target, cfrel_pic, offset_of(i.target, sid_cf)));
+                        }
+                        else
                         {
                             reltab.append(elf::Relocation(offset, i.target, cfrel_branch));
                         }
@@ -195,14 +250,7 @@ namespace gpu
                         // Microcode
                         InstructionData instruction(0);
                         DefaultData * dd(reinterpret_cast<DefaultData *>(&instruction));
-                        if (local_branch)
-                        {
-                            dd->address = offset_of(i.target, sid_cf);
-                        }
-                        else
-                        {
-                            dd->address = (1LL << 32) - 1;
-                        }
+                        dd->address = (1LL << 32) - 1;
                         dd->cf_const = needs_cf_const ? (1 << 5) - 1 : 0;
                         dd->opcode = i.opcode;
 
