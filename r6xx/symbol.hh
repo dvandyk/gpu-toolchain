@@ -35,15 +35,18 @@ namespace gpu
 
             unsigned offset;
 
+            const std::string section;
+
             unsigned size;
 
-            const SectionId section;
+            unsigned type;
 
-            Symbol(const std::string & name, unsigned offset, SectionId section) :
+            Symbol(const std::string & name, unsigned offset, const std::string & section) :
                 name(name),
                 offset(offset),
+                section(section),
                 size(0),
-                section(section)
+                type(type)
             {
             }
         };

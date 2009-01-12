@@ -122,9 +122,9 @@ namespace gpu
                     {
                     }
 
-                    unsigned offset_of(const std::string & local_symbol, SectionId sid)
+                    unsigned offset_of(const std::string & local_symbol, const std::string & section)
                     {
-                        Sequence<r6xx::Symbol>::Iterator i(std::find_if(symbols.begin(), symbols.end(), SymbolComparator(Symbol(local_symbol, 0, sid))));
+                        Sequence<r6xx::Symbol>::Iterator i(std::find_if(symbols.begin(), symbols.end(), SymbolComparator(Symbol(local_symbol, 0, section))));
                         if (symbols.end() == i)
                             throw UnresolvedSymbolError(local_symbol);
 
@@ -184,7 +184,7 @@ namespace gpu
                         if (local_branch)
                         {
                             // Needs relocation with addend
-                            //reltab.append(elf::Relocation(offset, ".cf", cfrel_pic, offset_of(b.target, sid_cf)));
+                            //reltab.append(elf::Relocation(offset, ".cf", cfrel_pic, offset_of(b.target, ".cf")));
                         }
                         else
                         {
@@ -237,7 +237,7 @@ namespace gpu
                         if (local_branch)
                         {
                             // Needs relocation with addend
-                            //reltab.append(elf::Relocation(offset, i.target, cfrel_pic, offset_of(i.target, sid_cf)));
+                            //reltab.append(elf::Relocation(offset, i.target, cfrel_pic, offset_of(i.target, ".cf")));
                         }
                         else
                         {

@@ -104,27 +104,10 @@ namespace gpu
             for (Sequence<Symbol>::Iterator s(_imp->symbols.begin()), s_end(_imp->symbols.end()) ;
                     s != s_end ; ++s)
             {
-                if ('.' == s->name[0])
-                    continue;
-
-                std::string section;
-                switch (s->section)
-                {
-                    case sid_alu:
-                        section = ".alu";
-                        break;
-
-                    case sid_cf:
-                        section = ".cf";
-                        break;
-
-                    case sid_tex:
-                        section = ".tex";
-                }
-
-                elf::Symbol symbol(s->name, section);
+                elf::Symbol symbol(s->name, s->section);
                 symbol.value = s->offset;
                 symbol.size = s->size;
+                symbol.type = s->type;
 
                 _imp->symtab.append(symbol);
             }

@@ -30,6 +30,8 @@
 
 #include <algorithm>
 
+#include <elf.h>
+
 namespace gpu
 {
     namespace r6xx
@@ -44,11 +46,14 @@ namespace gpu
             {
                 Sequence<Symbol> symbols;
 
-                unsigned current_offsets[4];
+                unsigned current_offset;
 
-                void add_symbol(const std::string & name, unsigned offset, SectionId section)
+                std::string current_section;
+
+                void add_symbol(const std::string & name, unsigned offset, unsigned type = 0)
                 {
-                    Symbol symbol(name, offset, section);
+                    Symbol symbol(name, offset, current_section);
+                    symbol.type = type;
 
                     if (symbols.end() != std::find_if(symbols.begin(), symbols.end(), SymbolComparator(symbol)))
                         throw DuplicateSymbolError(name);
@@ -56,63 +61,74 @@ namespace gpu
                     symbols.append(symbol);
                 }
 
-                void set_symbol_size(const std::string & name, SectionId section, unsigned size)
+                void set_symbol_size(const std::string & name, unsigned size)
                 {
-                    Sequence<Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), SymbolComparator(Symbol(name, 0, section))));
+                    Sequence<Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), SymbolComparator(Symbol(name, 0, current_section))));
                     if (symbols.end() == s)
                         throw UnresolvedSymbolError(name);
 
                     s->size = size;
                 }
 
-                unsigned symbol_lookup(const std::string & name, SectionId section)
+                unsigned symbol_lookup(const std::string & name)
                 {
                     if ("." == name)
-                    {
-                        return current_offsets[section];
-                    }
-                    else
-                    {
-                        Sequence<Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), SymbolComparator(Symbol(name, 0, section))));
-                        if (symbols.end() == s)
-                            throw UnresolvedSymbolError(name);
+                        return current_offset;
 
-                        return s->offset;
-                    }
+                    Sequence<Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), SymbolComparator(Symbol(name, 0, current_section))));
+                    if (symbols.end() == s)
+                        throw UnresolvedSymbolError(name);
+
+                    return s->offset;
                 }
 
                 // SectionVisitor
                 void visit(const alu::Section & a)
                 {
-                    current_offsets[sid_alu] = 0;
+                    current_offset = 0;
+                    current_section = ".alu";
+
+                    add_symbol(".alu", 0, STT_SECTION);
 
                     for (Sequence<alu::EntityPtr>::Iterator i(a.entities.begin()), i_end(a.entities.end()) ;
                             i != i_end ; ++i)
                     {
                         (*i)->accept(*this);
                     }
+
+                    set_symbol_size(".alu", current_offset);
                 }
 
                 void visit(const cf::Section & c)
                 {
-                    current_offsets[sid_cf] = 0;
+                    current_offset = 0;
+                    current_section = ".cf";
+
+                    add_symbol(".cf", 0, STT_SECTION);
 
                     for (Sequence<cf::EntityPtr>::Iterator i(c.entities.begin()), i_end(c.entities.end()) ;
                             i != i_end ; ++i)
                     {
                         (*i)->accept(*this);
                     }
+
+                    set_symbol_size(".cf", current_offset);
                 }
 
                 void visit(const tex::Section & t)
                 {
-                    current_offsets[sid_tex] = 0;
+                    current_offset = 0;
+                    current_section = ".tex";
+
+                    add_symbol(".tex", 0, STT_SECTION);
 
                     for (Sequence<tex::EntityPtr>::Iterator i(t.entities.begin()), i_end(t.entities.end()) ;
                             i != i_end ; ++i)
                     {
                         (*i)->accept(*this);
                     }
+
+                    set_symbol_size(".tex", current_offset);
                 }
 
                 // alu::EntityVisitor
@@ -121,23 +137,23 @@ namespace gpu
 
                 void visit(const alu::Form2Instruction &)
                 {
-                    current_offsets[sid_alu] += 8; // size of an alu instruction
+                    current_offset += 8; // size of an alu instruction
                 }
 
                 void visit(const alu::Form3Instruction &)
                 {
-                    current_offsets[sid_alu] += 8; // size of an alu instruction
+                    current_offset += 8; // size of an alu instruction
                 }
 
                 void visit(const alu::Label & l)
                 {
-                    add_symbol(l.text, current_offsets[sid_alu], sid_alu);
+                    add_symbol(l.text, current_offset);
                 }
 
                 void visit(const alu::Size & s)
                 {
-                    ExpressionEvaluator e(std::tr1::bind(std::tr1::mem_fn(&SymbolStage::symbol_lookup), *this, std::tr1::placeholders::_1, sid_alu));
-                    set_symbol_size(s.symbol, sid_alu, e.evaluate(s.expression));
+                    ExpressionEvaluator e(std::tr1::bind(std::tr1::mem_fn(&SymbolStage::symbol_lookup), *this, std::tr1::placeholders::_1));
+                    set_symbol_size(s.symbol, e.evaluate(s.expression));
                 }
 
                 // cf::EntityVisitor
@@ -145,55 +161,55 @@ namespace gpu
 
                 void visit(const cf::ALUClause &)
                 {
-                    current_offsets[sid_cf] += 8; // size of a cf instruction
+                    current_offset += 8; // size of a cf instruction
                 }
 
                 void visit(const cf::BranchInstruction &)
                 {
-                    current_offsets[sid_cf] += 8; // size of a cf instruction
+                    current_offset += 8; // size of a cf instruction
                 }
 
                 void visit(const cf::Label & l)
                 {
-                    add_symbol(l.text, current_offsets[sid_cf], sid_cf);
+                    add_symbol(l.text, current_offset);
                 }
 
                 void visit(const cf::LoopInstruction &)
                 {
-                    current_offsets[sid_cf] += 8; // size of a cf instruction
+                    current_offset += 8; // size of a cf instruction
                 }
 
                 void visit(const cf::NopInstruction &)
                 {
-                    current_offsets[sid_cf] += 8; // size of a cf instruction
+                    current_offset += 8; // size of a cf instruction
                 }
 
                 void visit(const cf::Size & s)
                 {
-                    ExpressionEvaluator e(std::tr1::bind(std::tr1::mem_fn(&SymbolStage::symbol_lookup), *this, std::tr1::placeholders::_1, sid_cf));
-                    set_symbol_size(s.symbol, sid_cf, e.evaluate(s.expression));
+                    ExpressionEvaluator e(std::tr1::bind(std::tr1::mem_fn(&SymbolStage::symbol_lookup), *this, std::tr1::placeholders::_1));
+                    set_symbol_size(s.symbol, e.evaluate(s.expression));
                 }
 
                 void visit(const cf::TextureFetchClause &)
                 {
-                    current_offsets[sid_cf] += 8; // size of a cf instruction
+                    current_offset += 8; // size of a cf instruction
                 }
 
                 // tex::EntityVisitor
                 void visit(const tex::LoadInstruction &)
                 {
-                    current_offsets[sid_tex] += 16; // size of a tex instruction
+                    current_offset += 16; // size of a tex instruction
                 }
 
                 void visit(const tex::Label & l)
                 {
-                    add_symbol(l.text, current_offsets[sid_tex], sid_tex);
+                    add_symbol(l.text, current_offset);
                 }
 
                 void visit(const tex::Size & s)
                 {
-                    ExpressionEvaluator e(std::tr1::bind(std::tr1::mem_fn(&SymbolStage::symbol_lookup), *this, std::tr1::placeholders::_1, sid_tex));
-                    set_symbol_size(s.symbol, sid_tex, e.evaluate(s.expression));
+                    ExpressionEvaluator e(std::tr1::bind(std::tr1::mem_fn(&SymbolStage::symbol_lookup), *this, std::tr1::placeholders::_1));
+                    set_symbol_size(s.symbol, e.evaluate(s.expression));
                 }
             };
         }

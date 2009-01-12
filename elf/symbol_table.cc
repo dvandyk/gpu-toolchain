@@ -124,9 +124,6 @@ namespace gpu
             for (std::vector<Symbol>::const_iterator s(_imp->entries.begin()), s_end(_imp->entries.end()) ;
                     s != s_end ; ++s)
             {
-                if ('.' == s->name[0])
-                    continue;
-
                 Elf32_Sym symbol;
                 symbol.st_name = _imp->strtab[s->name];
                 symbol.st_info = ELF32_ST_INFO(s->bind, s->type);

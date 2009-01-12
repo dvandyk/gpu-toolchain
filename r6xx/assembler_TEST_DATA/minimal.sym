@@ -1,30 +1,48 @@
 Symbol(
+	name='.cf'
+	offset=0
+	size=40
+	section='.cf'
+)
+Symbol(
 	name='main'
 	offset=0
 	size=40
-	section=0
+	section='.cf'
 )
 Symbol(
 	name='.L0'
 	offset=8
 	size=0
-	section=0
+	section='.cf'
 )
 Symbol(
 	name='.L1'
 	offset=32
 	size=0
-	section=0
+	section='.cf'
+)
+Symbol(
+	name='.alu'
+	offset=0
+	size=32
+	section='.alu'
 )
 Symbol(
 	name='square'
 	offset=0
 	size=32
-	section=1
+	section='.alu'
+)
+Symbol(
+	name='.tex'
+	offset=0
+	size=16
+	section='.tex'
 )
 Symbol(
 	name='fetch'
 	offset=0
 	size=16
-	section=2
+	section='.tex'
 )

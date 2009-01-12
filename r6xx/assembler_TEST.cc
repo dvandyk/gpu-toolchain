@@ -164,7 +164,7 @@ struct AssemblerTest :
             symbols_output += "\tname='" + i->name + "'\n";
             symbols_output += "\toffset=" + stringify(i->offset) + "\n";
             symbols_output += "\tsize=" + stringify(i->size) + "\n";
-            symbols_output += "\tsection=" + stringify(i->section) +"\n";
+            symbols_output += "\tsection='" + i->section +"'\n";
             symbols_output += ")";
         }
         TEST_CHECK_EQUAL(symbols_output, symbols_string);
