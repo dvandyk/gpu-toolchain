@@ -72,6 +72,29 @@ namespace gpu
         {
         }
     };
+
+    template <typename Tuple_, typename T_, unsigned> class TupleComparator;
+
+    template <typename Tuple_, typename T_> class TupleComparator<Tuple_, T_, 1>
+    {
+        private:
+            const T_ reference;
+
+        public:
+            TupleComparator(const T_ & reference) :
+                reference(reference)
+            {
+            }
+
+            ~TupleComparator()
+            {
+            }
+
+            bool operator() (const Tuple_ & tuple)
+            {
+                return reference == tuple.first;
+            }
+    };
 }
 
 #endif
