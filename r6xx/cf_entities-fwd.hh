@@ -46,6 +46,8 @@ namespace gpu
 
             struct Size;
 
+            struct Type;
+
             struct TextureFetchClause;
         }
     }

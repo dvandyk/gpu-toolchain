@@ -38,7 +38,7 @@ namespace gpu
         namespace alu
         {
             typedef ConstVisitorTag<r6xx::alu::Form2Instruction, r6xx::alu::Form3Instruction,
-                    r6xx::alu::IndexMode, r6xx::alu::GroupEnd, r6xx::alu::Label, r6xx::alu::Size> Entities;
+                    r6xx::alu::IndexMode, r6xx::alu::GroupEnd, r6xx::alu::Label, r6xx::alu::Size, r6xx::alu::Type> Entities;
 
             typedef ConstVisitor<Entities> EntityVisitor;
 
@@ -132,6 +132,20 @@ namespace gpu
                 Size(const std::string &, const ExpressionPtr &);
 
                 ~Size();
+
+                void accept(EntityVisitor &) const;
+            };
+
+            struct Type :
+                public Entity
+            {
+                std::string symbol;
+
+                unsigned type;
+
+                Type(const std::string &, unsigned);
+
+                ~Type();
 
                 void accept(EntityVisitor &) const;
             };

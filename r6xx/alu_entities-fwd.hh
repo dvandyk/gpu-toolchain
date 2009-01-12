@@ -43,6 +43,8 @@ namespace gpu
             struct Label;
 
             struct Size;
+
+            struct Type;
         }
     }
 }

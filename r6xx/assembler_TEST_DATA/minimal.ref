@@ -8,6 +8,10 @@ LoopInstruction(opcode=5, target='.L0')
 Label(text='.L1')
 NopInstruction()
 ProgramEnd()
+Type(
+	symbol=main,
+	type=2
+)
 Size(
 	symbol=main,
 	expression=-(.,main),
@@ -44,6 +48,10 @@ Form2Instruction(
 	source[1]=SourceGPR(3, 0, false, true),
 )
 GroupEnd()
+Type(
+	symbol=square,
+	type=2
+)
 Size(
 	symbol=square,
 	expression=-(.,square),
@@ -53,6 +61,10 @@ Label(text='fetch')
 LoadInstruction(
 	opcode=3,
 	destination=DestinationGPR(index=0, relative=true, selector=<0, 1, 2, 3>),
+)
+Type(
+	symbol=fetch,
+	type=2
 )
 Size(
 	symbol=fetch,

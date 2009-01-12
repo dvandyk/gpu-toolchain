@@ -74,6 +74,11 @@ namespace gpu
     }
 
     template <>
+    ConstVisits<r6xx::cf::Type>::~ConstVisits()
+    {
+    }
+
+    template <>
     ConstVisits<r6xx::cf::TextureFetchClause>::~ConstVisits()
     {
     }
@@ -195,6 +200,22 @@ namespace gpu
                 static_cast<ConstVisits<Size> *>(&v)->visit(*this);
             }
 
+            Type::Type(const std::string & s, unsigned t) :
+                symbol(s),
+                type(t)
+            {
+            }
+
+            Type::~Type()
+            {
+            }
+
+            void
+            Type::accept(EntityVisitor & v) const
+            {
+                static_cast<ConstVisits<Type> *>(&v)->visit(*this);
+            }
+
             TextureFetchClause::TextureFetchClause(const std::string & clause) :
                 clause(clause)
             {
@@ -259,6 +280,14 @@ namespace gpu
                         output = "Size(\n";
                         output += "\tsymbol=" + s.symbol + ",\n";
                         output += "\texpression=" + p.print(s.expression) + ",\n";
+                        output += ")";
+                    }
+
+                    void visit(const Type & t)
+                    {
+                        output = "Type(\n";
+                        output += "\tsymbol=" + t.symbol + ",\n";
+                        output += "\ttype=" + stringify(t.type) + "\n";
                         output += ")";
                     }
 
@@ -416,6 +445,12 @@ namespace gpu
                             Tuple<std::string, ExpressionPtr> parameters(SizeParser::parse(d.params));
 
                             result = EntityPtr(new Size(parameters.first, parameters.second));
+                        }
+                        else if ("type" == d.name)
+                        {
+                            Tuple<std::string, unsigned> parameters(TypeParser::parse(d.params));
+
+                            result = EntityPtr(new Type(parameters.first, parameters.second));
                         }
                         else
                         {

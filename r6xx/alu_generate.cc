@@ -158,6 +158,7 @@ namespace gpu
                     // alu::EntityVisitor
                     void visit(const alu::Label &) { }
                     void visit(const alu::Size &) { }
+                    void visit(const alu::Type &) { }
 
                     void visit(const alu::Form2Instruction & i)
                     {

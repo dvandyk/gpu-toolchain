@@ -37,7 +37,8 @@ namespace gpu
     {
         namespace tex
         {
-            typedef ConstVisitorTag<r6xx::tex::Label, r6xx::tex::LoadInstruction, r6xx::tex::Size> Entities;
+            typedef ConstVisitorTag<r6xx::tex::Label, r6xx::tex::LoadInstruction,
+                    r6xx::tex::Size, r6xx::tex::Type> Entities;
 
             typedef ConstVisitor<Entities> EntityVisitor;
 
@@ -85,6 +86,20 @@ namespace gpu
                 Size(const std::string &, const ExpressionPtr &);
 
                 ~Size();
+
+                void accept(EntityVisitor &) const;
+            };
+
+            struct Type :
+                public Entity
+            {
+                std::string symbol;
+
+                unsigned type;
+
+                Type(const std::string &, unsigned);
+
+                ~Type();
 
                 void accept(EntityVisitor &) const;
             };

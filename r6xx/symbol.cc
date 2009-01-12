@@ -70,6 +70,15 @@ namespace gpu
                     s->size = size;
                 }
 
+                void set_symbol_type(const std::string & name, unsigned type)
+                {
+                    Sequence<Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), SymbolComparator(Symbol(name, 0, current_section))));
+                    if (symbols.end() == s)
+                        throw UnresolvedSymbolError(name);
+
+                    s->type = type;
+                }
+
                 unsigned symbol_lookup(const std::string & name)
                 {
                     if ("." == name)
@@ -156,6 +165,11 @@ namespace gpu
                     set_symbol_size(s.symbol, e.evaluate(s.expression));
                 }
 
+                void visit(const alu::Type & t)
+                {
+                    set_symbol_type(t.symbol, t.type);
+                }
+
                 // cf::EntityVisitor
                 void visit(const cf::ProgramEnd &) { }
 
@@ -190,6 +204,11 @@ namespace gpu
                     set_symbol_size(s.symbol, e.evaluate(s.expression));
                 }
 
+                void visit(const cf::Type & t)
+                {
+                    set_symbol_type(t.symbol, t.type);
+                }
+
                 void visit(const cf::TextureFetchClause &)
                 {
                     current_offset += 8; // size of a cf instruction
@@ -210,6 +229,11 @@ namespace gpu
                 {
                     ExpressionEvaluator e(std::tr1::bind(std::tr1::mem_fn(&SymbolStage::symbol_lookup), *this, std::tr1::placeholders::_1));
                     set_symbol_size(s.symbol, e.evaluate(s.expression));
+                }
+
+                void visit(const tex::Type & t)
+                {
+                    set_symbol_type(t.symbol, t.type);
                 }
             };
         }

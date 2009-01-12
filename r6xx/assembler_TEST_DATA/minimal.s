@@ -12,10 +12,12 @@ square:
 	fmul	$0.zr, $0.zr, $0.zr
 	fmul	$0.wr, $0.wr, $0.wr
 .groupend
+.type square, "func"
 .size square, .-square
 .section .tex
 fetch:
 	ld $0[xyzw]r, $127
+.type fetch, "func"
 .size fetch, .-fetch
 .section .cf
 main:
@@ -28,4 +30,5 @@ main:
 .L1:
 	nop
 .programend
+.type main, "func"
 .size main, .-main

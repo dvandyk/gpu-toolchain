@@ -153,6 +153,7 @@ namespace gpu
                     // cf::EntityVisitor
                     void visit(const cf::Label &) { }
                     void visit(const cf::Size &) { }
+                    void visit(const cf::Type &) { }
 
                     void visit(const cf::ALUClause & a)
                     {

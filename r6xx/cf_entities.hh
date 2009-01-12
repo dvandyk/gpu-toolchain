@@ -36,7 +36,7 @@ namespace gpu
         namespace cf
         {
             typedef ConstVisitorTag<r6xx::cf::ALUClause, r6xx::cf::BranchInstruction, r6xx::cf::Label, r6xx::cf::LoopInstruction,
-                    r6xx::cf::NopInstruction, r6xx::cf::ProgramEnd, r6xx::cf::Size, r6xx::cf::TextureFetchClause> Entities;
+                    r6xx::cf::NopInstruction, r6xx::cf::ProgramEnd, r6xx::cf::Size, r6xx::cf::Type, r6xx::cf::TextureFetchClause> Entities;
 
             typedef ConstVisitor<Entities> EntityVisitor;
 
@@ -134,6 +134,20 @@ namespace gpu
                 Size(const std::string &, const ExpressionPtr &);
 
                 ~Size();
+
+                void accept(EntityVisitor &) const;
+            };
+
+            struct Type :
+                public Entity
+            {
+                std::string symbol;
+
+                unsigned type;
+
+                Type(const std::string &, unsigned);
+
+                ~Type();
 
                 void accept(EntityVisitor &) const;
             };
