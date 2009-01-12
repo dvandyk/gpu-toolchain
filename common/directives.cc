@@ -22,6 +22,10 @@
 #include <common/syntax.hh>
 #include <utils/text_manipulation.hh>
 
+#include <algorithm>
+
+#include <elf.h>
+
 namespace gpu
 {
     Tuple<std::string, ExpressionPtr>
@@ -36,5 +40,34 @@ namespace gpu
         std::string expression(input.substr(sep + 1));
 
         return Tuple<std::string, ExpressionPtr>(symbol, ExpressionParser::parse(expression));
+    }
+
+    Tuple<std::string, unsigned>
+    TypeParser::parse(const std::string & input)
+    {
+        typedef Tuple<std::string, unsigned> Type;
+        typedef TupleComparator<Type, std::string, 1> TypeComparator;
+        static const Type types[] =
+        {
+            Type("\"func\"",        STT_FUNC),
+            Type("\"object\"",      STT_OBJECT),
+            Type("\"tls_object\"",  STT_TLS),
+            Type("\"common\"",      STT_COMMON)
+        };
+        static const Type * types_begin(types);
+        static const Type * types_end(types + sizeof(types) / sizeof(Type));
+
+        std::string::size_type sep(input.find(','));
+
+        if ((std::string::npos == sep) || (0 == sep) || ((input.size() - 1) == sep))
+            throw CommonSyntaxError("Expected 2 operands, got 1 operand");
+
+        std::string symbol(strip_whitespaces(input.substr(0, sep)));
+        std::string type(strip_whitespaces(input.substr(sep + 1)));
+        const Type * t(std::find_if(types_begin, types_end, TypeComparator(type)));
+        if (types_end == t)
+            throw CommonSyntaxError("Not a valid symbol type: '" + strip_whitespaces(input.substr(sep + 1)) + "'");
+
+        return Tuple<std::string, unsigned>(symbol, t->second);
     }
 }

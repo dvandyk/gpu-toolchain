@@ -31,6 +31,11 @@ namespace gpu
     {
         static Tuple<std::string, ExpressionPtr> parse(const std::string & input);
     };
+
+    struct TypeParser
+    {
+        static Tuple<std::string, unsigned> parse(const std::string & input);
+    };
 }
 
 #endif
