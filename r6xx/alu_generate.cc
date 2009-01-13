@@ -39,6 +39,76 @@ namespace gpu
             {
                 typedef uint64_t InstructionData;
 
+                struct SourceOperandData
+                {
+                    bool absolute;
+                    unsigned channel;
+                    bool negated;
+                    bool relative;
+                    unsigned selector;
+                };
+
+                struct SourceOperandGenerator :
+                    public alu::SourceOperandVisitor
+                {
+                    SourceOperandData * data;
+
+                    bool needs_literal;
+
+                    unsigned literal_data;
+
+                    SourceOperandGenerator(SourceOperandData * data) :
+                        data(data)
+                    {
+                    }
+
+                    // alu::SourceOperandVisitor
+                    void visit(const alu::SourceGPR & g)
+                    {
+                        needs_literal = false;
+
+                        data->absolute = false;
+                        data->channel = g.channel;
+                        data->negated = g.negated;
+                        data->relative = g.relative;
+                        data->selector = g.index;
+                    }
+
+                    void visit(const alu::SourceKCache & k)
+                    {
+                        needs_literal = false;
+
+                        data->absolute = false;
+                        data->channel = k.channel;
+                        data->negated = k.negated;
+                        data->relative = k.relative;
+                        data->selector = k.index + 128;
+                    }
+
+                    void visit(const alu::SourceCFile & c)
+                    {
+                        needs_literal = false;
+
+                        data->absolute = false;
+                        data->channel = c.channel;
+                        data->negated = c.negated;
+                        data->relative = c.relative;
+                        data->selector = c.index + 256;
+                    }
+
+                    void visit(const alu::SourceLiteral & l)
+                    {
+                        needs_literal = false;
+                        literal_data = l.data;
+
+                        data->absolute = false;
+                        data->channel = 0;
+                        data->negated = false;
+                        data->relative = false;
+                        data->selector = 253;
+                    }
+                };
+
                 struct Form2Data
                 {
                     /* ALU_DWORD0 */
@@ -124,6 +194,7 @@ namespace gpu
                 {
                     elf::Section alu_section;
 
+                    // ALU entity visitation
                     Enumeration<3> index_mode;
 
                     std::vector<InstructionData> instructions;
@@ -165,6 +236,28 @@ namespace gpu
                         InstructionData instruction(0);
                         Form2Data * form2(reinterpret_cast<Form2Data *>(&instruction));
 
+                        SourceOperandData sources[2];
+                        SourceOperandData * j(sources);
+                        for (Sequence<alu::SourceOperandPtr>::Iterator k(i.sources.begin()), k_end(i.sources.end()) ;
+                                k != k_end ; ++j, ++k)
+                        {
+                            SourceOperandGenerator g(j);
+
+                            (*k)->accept(g);
+                        }
+
+                        form2->src0_abs = 0;
+                        form2->src0_chan = sources[0].channel;
+                        form2->src0_neg = sources[0].negated;
+                        form2->src0_rel = sources[0].relative;
+                        form2->src0_sel = sources[0].selector;
+
+                        form2->src1_abs = 0;
+                        form2->src1_chan = sources[1].channel;
+                        form2->src1_neg = sources[1].negated;
+                        form2->src1_rel = sources[1].relative;
+                        form2->src1_sel = sources[1].selector;
+
                         form2->index_mode = index_mode;
                         form2->write_mask = 1;
                         form2->opcode = i.opcode;
@@ -179,6 +272,34 @@ namespace gpu
                     {
                         InstructionData instruction(0);
                         Form3Data * form3(reinterpret_cast<Form3Data *>(&instruction));
+
+                        SourceOperandData sources[3];
+                        SourceOperandData * j(sources);
+                        for (Sequence<alu::SourceOperandPtr>::Iterator k(i.sources.begin()), k_end(i.sources.end()) ;
+                                k != k_end ; ++j, ++k)
+                        {
+                            SourceOperandGenerator g(j);
+
+                            (*k)->accept(g);
+
+                            if (j->absolute)
+                                throw InternalError("r6xx", "Cannot use absolute values in Form3 instructions");
+                        }
+
+                        form3->src0_chan = sources[0].channel;
+                        form3->src0_neg = sources[0].negated;
+                        form3->src0_rel = sources[0].relative;
+                        form3->src0_sel = sources[0].selector;
+
+                        form3->src1_chan = sources[1].channel;
+                        form3->src1_neg = sources[1].negated;
+                        form3->src1_rel = sources[1].relative;
+                        form3->src1_sel = sources[1].selector;
+
+                        form3->src2_chan = sources[2].channel;
+                        form3->src2_neg = sources[2].negated;
+                        form3->src2_rel = sources[2].relative;
+                        form3->src2_sel = sources[2].selector;
 
                         form3->index_mode = index_mode;
                         form3->opcode = i.opcode;
@@ -198,7 +319,6 @@ namespace gpu
                     {
                         index_mode = i.mode;
                     }
-
                 };
             }
 
