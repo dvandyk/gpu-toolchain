@@ -104,6 +104,9 @@ namespace gpu
             for (Sequence<Symbol>::Iterator s(_imp->symbols.begin()), s_end(_imp->symbols.end()) ;
                     s != s_end ; ++s)
             {
+                if (".L" == s->name.substr(0, 2))
+                    continue;
+
                 elf::Symbol symbol(s->name, s->section);
                 symbol.value = s->offset;
                 symbol.size = s->size;

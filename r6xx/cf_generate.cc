@@ -138,7 +138,7 @@ namespace gpu
                         for (Sequence<r6xx::Symbol>::Iterator s(symbols.begin()), s_end(symbols.end()) ;
                                 s != s_end ; ++s)
                         {
-                            if ('.' != s->name[0])
+                            if (".L" != s->name.substr(0, 2))
                                 result = s;
 
                             if (symbol == s->name)
@@ -193,7 +193,7 @@ namespace gpu
 
                     void visit(const cf::BranchInstruction & b)
                     {
-                        bool local_branch('.' == b.target[0]);
+                        bool local_branch(".L" == b.target.substr(0, 2));
 
                         // Relocations
                         unsigned offset(instructions.size() * sizeof(InstructionData));
@@ -244,7 +244,7 @@ namespace gpu
 
                     void visit(const cf::LoopInstruction & i)
                     {
-                        bool local_branch('.' == i.target[0]);
+                        bool local_branch(".L" == i.target.substr(0, 2));
                         bool needs_cf_const(false);
                         if ((0x4 == i.opcode) || (0x7 == i.opcode))
                             needs_cf_const = true;
