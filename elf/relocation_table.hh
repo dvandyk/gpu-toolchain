@@ -32,13 +32,15 @@ namespace gpu
     {
         struct Relocation
         {
+            unsigned addend;
+
             unsigned offset;
 
             std::string symbol;
 
             unsigned type;
 
-            Relocation(unsigned offset, const std::string & symbol, unsigned type);
+            Relocation(unsigned offset, const std::string & symbol, unsigned type, unsigned addend);
         };
 
         class RelocationTable :

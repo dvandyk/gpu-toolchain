@@ -37,6 +37,7 @@ namespace gpu
             cfrel_alu_kcache1,
             cfrel_branch,
             cfrel_loop_counter,
+            cfrel_pic,
             cfrel_tex_clause
         };
 

@@ -110,7 +110,7 @@ namespace gpu
                         cf_rel(elf::Section::Parameters()
                                 .alignment(0x4)
                                 .name(".cf.rel")
-                                .type(SHT_REL)),
+                                .type(SHT_RELA)),
                         cf_text(elf::Section::Parameters()
                                 .alignment(0x4)
                                 .flags(SHF_ALLOC | SHF_EXECINSTR)
@@ -129,6 +129,23 @@ namespace gpu
                             throw UnresolvedSymbolError(local_symbol);
 
                         return i->offset;
+                    }
+
+                    std::string find_symbol_before(const std::string & symbol)
+                    {
+                        Sequence<r6xx::Symbol>::Iterator result(symbols.begin());
+
+                        for (Sequence<r6xx::Symbol>::Iterator s(symbols.begin()), s_end(symbols.end()) ;
+                                s != s_end ; ++s)
+                        {
+                            if ('.' != s->name[0])
+                                result = s;
+
+                            if (symbol == s->name)
+                                return result->name;
+                        }
+
+                        throw InternalError("r6xx", "Did not find symbol '" + symbol + "'");
                     }
 
                     // r6xx::SectionVisitor
@@ -162,7 +179,7 @@ namespace gpu
                         // TODO Clause relocation
                         // TODO KCache relocations
                         unsigned offset(instructions.size() * sizeof(InstructionData));
-                        reltab.append(elf::Relocation(offset, a.clause, cfrel_alu_clause));
+                        reltab.append(elf::Relocation(offset, a.clause, cfrel_alu_clause, 0));
 
                         // Microcode
                         InstructionData instruction(~0LL);
@@ -184,12 +201,14 @@ namespace gpu
                         unsigned offset(instructions.size() * sizeof(InstructionData));
                         if (local_branch)
                         {
-                            // Needs relocation with addend
-                            //reltab.append(elf::Relocation(offset, ".cf", cfrel_pic, offset_of(b.target, ".cf")));
+                            std::string symbol(find_symbol_before(b.target));
+                            unsigned addend(offset_of(b.target, ".cf") - offset_of(symbol, ".cf"));
+
+                            reltab.append(elf::Relocation(offset, symbol, cfrel_pic, addend));
                         }
                         else
                         {
-                            reltab.append(elf::Relocation(offset, b.target, cfrel_branch));
+                            reltab.append(elf::Relocation(offset, b.target, cfrel_branch, 0));
                         }
 
                         // Microcode
@@ -237,12 +256,14 @@ namespace gpu
                         unsigned offset(instructions.size() * sizeof(InstructionData));
                         if (local_branch)
                         {
-                            // Needs relocation with addend
-                            //reltab.append(elf::Relocation(offset, i.target, cfrel_pic, offset_of(i.target, ".cf")));
+                            std::string symbol(find_symbol_before(i.target));
+                            unsigned addend(offset_of(i.target, ".cf") - offset_of(symbol, ".cf"));
+
+                            reltab.append(elf::Relocation(offset, symbol, cfrel_pic, addend));
                         }
                         else
                         {
-                            reltab.append(elf::Relocation(offset, i.target, cfrel_branch));
+                            reltab.append(elf::Relocation(offset, i.target, cfrel_branch, 0));
                         }
                         if (needs_cf_const)
                         {

@@ -34,7 +34,7 @@ namespace gpu
     template <>
     struct Implementation<elf::RelocationTable>
     {
-        std::vector<Elf32_Rel> entries;
+        std::vector<Elf32_Rela> entries;
 
         elf::SymbolTable symtab;
 
@@ -46,7 +46,8 @@ namespace gpu
 
     namespace elf
     {
-        Relocation::Relocation(unsigned offset, const std::string & symbol, unsigned type) :
+        Relocation::Relocation(unsigned offset, const std::string & symbol, unsigned type, unsigned addend) :
+            addend(addend),
             offset(offset),
             symbol(symbol),
             type(type)
@@ -65,9 +66,14 @@ namespace gpu
         void
         RelocationTable::append(const Relocation & r)
         {
-            Elf32_Rel relocation;
-            relocation.r_offset = r.offset;
+            unsigned symbol_index(_imp->symtab[r.symbol]);
+            if (0 == symbol_index)
+                throw InternalError("elf", "Unresolved symbol '" + r.symbol + "'");
+
+            Elf32_Rela relocation;
+            relocation.r_addend = r.addend;
             relocation.r_info = ELF32_R_INFO(_imp->symtab[r.symbol], r.type);
+            relocation.r_offset = r.offset;
 
             _imp->entries.push_back(relocation);
         }
@@ -75,7 +81,7 @@ namespace gpu
         void
         RelocationTable::write(Data data)
         {
-            unsigned size(_imp->entries.size() * sizeof(Elf32_Rel));
+            unsigned size(_imp->entries.size() * sizeof(Elf32_Rela));
 
             data.resize(size);
             data.write(0, reinterpret_cast<char *>(&_imp->entries[0]), size);
