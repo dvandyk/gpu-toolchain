@@ -175,8 +175,6 @@ namespace gpu
                     void visit(const cf::ALUClause & a)
                     {
                         // Relocations
-                        // FIXME Dummy
-                        // TODO Clause relocation
                         // TODO KCache relocations
                         unsigned offset(instructions.size() * sizeof(InstructionData));
                         reltab.append(elf::Relocation(offset, a.clause, cfrel_alu_clause, 0));
