@@ -11,6 +11,12 @@ Symbol(
 	section='.cf'
 )
 Symbol(
+	name='loopcounter'
+	offset=0
+	size=0
+	section=''
+)
+Symbol(
 	name='.L0'
 	offset=8
 	size=0

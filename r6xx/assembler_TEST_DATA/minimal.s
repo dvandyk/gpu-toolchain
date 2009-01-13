@@ -21,8 +21,7 @@ fetch:
 .size fetch, .-fetch
 .section .cf
 main:
-#.loopcount count
-	loop_start	.L1, count
+	loop_start	.L1, loopcounter
 .L0:
 	tex	fetch
 	alu	square

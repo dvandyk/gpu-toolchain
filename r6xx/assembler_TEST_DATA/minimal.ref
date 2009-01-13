@@ -1,6 +1,6 @@
 Section(name='.cf')
 Label(text='main')
-LoopInstruction(opcode=4, target='.L1', counter='count')
+LoopInstruction(opcode=4, target='.L1', counter='loopcounter')
 Label(text='.L0')
 TextureFetchClause(clause='fetch')
 ALUClause(clause='square')

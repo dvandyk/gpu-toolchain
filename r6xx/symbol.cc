@@ -50,6 +50,17 @@ namespace gpu
 
                 std::string current_section;
 
+                void add_undefined_symbol(const std::string & name, unsigned type)
+                {
+                    Symbol symbol(name, 0, "");
+                    symbol.type = type;
+
+                    if (symbols.end() != std::find_if(symbols.begin(), symbols.end(), SymbolComparator(symbol)))
+                        throw DuplicateSymbolError(name);
+
+                    symbols.append(symbol);
+                }
+
                 void add_symbol(const std::string & name, unsigned offset, unsigned type = 0)
                 {
                     Symbol symbol(name, offset, current_section);
@@ -188,9 +199,14 @@ namespace gpu
                     add_symbol(l.text, current_offset);
                 }
 
-                void visit(const cf::LoopInstruction &)
+                void visit(const cf::LoopInstruction & l)
                 {
                     current_offset += 8; // size of a cf instruction
+
+                    if (! l.counter.empty())
+                    {
+                        add_undefined_symbol(l.counter, STT_OBJECT);
+                    }
                 }
 
                 void visit(const cf::NopInstruction &)
