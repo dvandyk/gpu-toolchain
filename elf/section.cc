@@ -144,7 +144,7 @@ namespace gpu
         {
             std::map<std::string, unsigned>::const_iterator s(_imp->sections.find(section));
             if (_imp->sections.end() == s)
-                throw InternalError("elf", "Unknown section '" + section + "'");
+                return 0;
 
             return s->second;
         }
