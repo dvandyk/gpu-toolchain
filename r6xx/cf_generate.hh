@@ -36,7 +36,7 @@ namespace gpu
             struct Generator
             {
                 static Sequence<elf::Section> generate(const Sequence<r6xx::SectionPtr> & sections, const elf::SymbolTable & symtab,
-                        const Sequence<r6xx::Symbol> & symbols);
+                        const Sequence<elf::Symbol> & symbols);
             };
         }
     }

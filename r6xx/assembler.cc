@@ -41,7 +41,7 @@ namespace gpu
     {
         Sequence<r6xx::SectionPtr> sections;
 
-        Sequence<r6xx::Symbol> symbols;
+        Sequence<elf::Symbol> symbols;
 
         elf::StringTable strtab;
 
@@ -76,19 +76,13 @@ namespace gpu
                     .type(ET_REL));
 
             // generate symbols
-            for (Sequence<Symbol>::Iterator s(_imp->symbols.begin()), s_end(_imp->symbols.end()) ;
+            for (Sequence<elf::Symbol>::Iterator s(_imp->symbols.begin()), s_end(_imp->symbols.end()) ;
                     s != s_end ; ++s)
             {
                 if (".L" == s->name.substr(0, 2))
                     continue;
 
-                elf::Symbol symbol(s->name);
-                symbol.section = s->section;
-                symbol.value = s->offset;
-                symbol.size = s->size;
-                symbol.type = s->type;
-
-                _imp->symtab.append(symbol);
+                _imp->symtab.append(*s);
             }
 
             // generate and emit CF instructions

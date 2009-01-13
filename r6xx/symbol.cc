@@ -44,7 +44,7 @@ namespace gpu
                 public cf::EntityVisitor,
                 public tex::EntityVisitor
             {
-                Sequence<Symbol> symbols;
+                Sequence<elf::Symbol> symbols;
 
                 unsigned current_offset;
 
@@ -52,7 +52,7 @@ namespace gpu
 
                 void add_undefined_symbol(const std::string & name, unsigned type)
                 {
-                    Symbol symbol(name, 0, "");
+                    elf::Symbol symbol(name);
                     symbol.type = type;
 
                     if (symbols.end() != std::find_if(symbols.begin(), symbols.end(), SymbolComparator(symbol)))
@@ -63,8 +63,10 @@ namespace gpu
 
                 void add_symbol(const std::string & name, unsigned offset, unsigned type = 0)
                 {
-                    Symbol symbol(name, offset, current_section);
+                    elf::Symbol symbol(name);
+                    symbol.section = current_section;
                     symbol.type = type;
+                    symbol.value = offset;
 
                     if (symbols.end() != std::find_if(symbols.begin(), symbols.end(), SymbolComparator(symbol)))
                         throw DuplicateSymbolError(name);
@@ -74,7 +76,10 @@ namespace gpu
 
                 void set_symbol_size(const std::string & name, unsigned size)
                 {
-                    Sequence<Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), SymbolComparator(Symbol(name, 0, current_section))));
+                    elf::Symbol symbol(name);
+                    symbol.section = current_section;
+
+                    Sequence<elf::Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), SymbolComparator(symbol)));
                     if (symbols.end() == s)
                         throw UnresolvedSymbolError(name);
 
@@ -83,7 +88,10 @@ namespace gpu
 
                 void set_symbol_type(const std::string & name, unsigned type)
                 {
-                    Sequence<Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), SymbolComparator(Symbol(name, 0, current_section))));
+                    elf::Symbol symbol(name);
+                    symbol.section = current_section;
+
+                    Sequence<elf::Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), SymbolComparator(symbol)));
                     if (symbols.end() == s)
                         throw UnresolvedSymbolError(name);
 
@@ -95,11 +103,14 @@ namespace gpu
                     if ("." == name)
                         return current_offset;
 
-                    Sequence<Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), SymbolComparator(Symbol(name, 0, current_section))));
+                    elf::Symbol symbol(name);
+                    symbol.section = current_section;
+
+                    Sequence<elf::Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), SymbolComparator(symbol)));
                     if (symbols.end() == s)
                         throw UnresolvedSymbolError(name);
 
-                    return s->offset;
+                    return s->value;
                 }
 
                 // SectionVisitor
@@ -254,7 +265,7 @@ namespace gpu
             };
         }
 
-        Sequence<Symbol>
+        Sequence<elf::Symbol>
         SymbolScanner::scan(const Sequence<SectionPtr> & sections)
         {
             internal::SymbolStage ss;

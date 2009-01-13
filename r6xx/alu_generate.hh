@@ -34,7 +34,7 @@ namespace gpu
         {
             struct Generator
             {
-                static elf::Section generate(const Sequence<r6xx::SectionPtr> & sections, const Sequence<r6xx::Symbol> & symbols);
+                static elf::Section generate(const Sequence<r6xx::SectionPtr> & sections, const Sequence<elf::Symbol> & symbols);
             };
         }
     }

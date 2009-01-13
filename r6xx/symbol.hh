@@ -20,6 +20,7 @@
 #ifndef GPU_GUARD_R6XX_SYMBOL_HH
 #define GPU_GUARD_R6XX_SYMBOL_HH 1
 
+#include <elf/symbol.hh>
 #include <r6xx/section.hh>
 #include <utils/sequence.hh>
 
@@ -29,38 +30,16 @@ namespace gpu
 {
     namespace r6xx
     {
-        struct Symbol
-        {
-            const std::string name;
-
-            unsigned offset;
-
-            const std::string section;
-
-            unsigned size;
-
-            unsigned type;
-
-            Symbol(const std::string & name, unsigned offset, const std::string & section) :
-                name(name),
-                offset(offset),
-                section(section),
-                size(0),
-                type(type)
-            {
-            }
-        };
-
         struct SymbolComparator
         {
-            Symbol reference;
+            elf::Symbol reference;
 
-            SymbolComparator(const Symbol & s) :
+            SymbolComparator(const elf::Symbol & s) :
                 reference(s)
             {
             }
 
-            bool operator() (const Symbol & s)
+            bool operator() (const elf::Symbol & s)
             {
                 return (reference.name == s.name) && (reference.section == s.section);
             }
@@ -68,7 +47,7 @@ namespace gpu
 
         struct SymbolScanner
         {
-            static Sequence<Symbol> scan(const Sequence<SectionPtr> & sections);
+            static Sequence<elf::Symbol> scan(const Sequence<SectionPtr> & sections);
         };
     }
 }

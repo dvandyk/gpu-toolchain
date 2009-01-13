@@ -323,7 +323,7 @@ namespace gpu
             }
 
             elf::Section
-            Generator::generate(const Sequence<r6xx::SectionPtr> & sections, const Sequence<r6xx::Symbol> &)
+            Generator::generate(const Sequence<r6xx::SectionPtr> & sections, const Sequence<elf::Symbol> &)
             {
                 internal::Generator g;
 

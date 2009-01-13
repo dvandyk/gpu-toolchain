@@ -102,9 +102,9 @@ namespace gpu
 
                     elf::RelocationTable reltab;
 
-                    Sequence<r6xx::Symbol> symbols;
+                    Sequence<elf::Symbol> symbols;
 
-                    Generator(const elf::SymbolTable & symtab, const Sequence<r6xx::Symbol> & symbols) :
+                    Generator(const elf::SymbolTable & symtab, const Sequence<elf::Symbol> & symbols) :
                         cf_rel(elf::Section::Parameters()
                                 .alignment(0x8)
                                 .name(".cf.rel")
@@ -122,18 +122,21 @@ namespace gpu
 
                     unsigned offset_of(const std::string & local_symbol, const std::string & section)
                     {
-                        Sequence<r6xx::Symbol>::Iterator i(std::find_if(symbols.begin(), symbols.end(), SymbolComparator(Symbol(local_symbol, 0, section))));
+                        elf::Symbol symbol(local_symbol);
+                        symbol.section = section;
+
+                        Sequence<elf::Symbol>::Iterator i(std::find_if(symbols.begin(), symbols.end(), SymbolComparator(symbol)));
                         if (symbols.end() == i)
                             throw UnresolvedSymbolError(local_symbol);
 
-                        return i->offset;
+                        return i->value;
                     }
 
                     std::string find_symbol_before(const std::string & symbol, const std::string & section)
                     {
-                        Sequence<r6xx::Symbol>::Iterator result(symbols.begin());
+                        Sequence<elf::Symbol>::Iterator result(symbols.begin());
 
-                        for (Sequence<r6xx::Symbol>::Iterator s(symbols.begin()), s_end(symbols.end()) ;
+                        for (Sequence<elf::Symbol>::Iterator s(symbols.begin()), s_end(symbols.end()) ;
                                 s != s_end ; ++s)
                         {
                             if (section != s->section)
@@ -311,7 +314,7 @@ namespace gpu
 
             Sequence<elf::Section>
             Generator::generate(const Sequence<r6xx::SectionPtr> & sections, const elf::SymbolTable & symtab,
-                    const Sequence<r6xx::Symbol> & symbols)
+                    const Sequence<elf::Symbol> & symbols)
             {
                 Sequence<elf::Section> result;
                 internal::Generator g(symtab, symbols);
