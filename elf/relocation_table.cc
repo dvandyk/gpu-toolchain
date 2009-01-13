@@ -72,7 +72,7 @@ namespace gpu
 
             Elf32_Rela relocation;
             relocation.r_addend = r.addend;
-            relocation.r_info = ELF32_R_INFO(_imp->symtab[r.symbol], r.type);
+            relocation.r_info = ELF32_R_INFO(symbol_index, r.type);
             relocation.r_offset = r.offset;
 
             _imp->entries.push_back(relocation);
