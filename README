@@ -1,0 +1,16 @@
+GPU Toolchain
+=============
+
+This is very very untested software. Do not expect too much of it!
+
+Todos for v0.2 (initial) release
+--------------------------------
+
+ * Refactor code generation interface
+ * Add executables to actually generate object files
+ * Add support for generating R6xx Texture Fetch instructions (parsing is already done)
+ * Add support for taking the absolute value of sources in R6xx ALU Form2 instructions.
+ * Add .gpgpu section
+ * Add linking
+ * Add executable generation
+
