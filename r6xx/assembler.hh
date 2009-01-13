@@ -38,18 +38,6 @@ namespace gpu
 
                 ~Assembler();
 
-                struct SectionTag;
-                typedef WrappedForwardIterator<SectionTag, r6xx::SectionPtr> SectionIterator;
-
-                SectionIterator begin_sections() const;
-                SectionIterator end_sections() const;
-
-                struct SymbolTag;
-                typedef WrappedForwardIterator<SymbolTag, r6xx::Symbol> SymbolIterator;
-
-                SymbolIterator begin_symbols() const;
-                SymbolIterator end_symbols() const;
-
                 void write(const std::string & filename) const;
         };
     }

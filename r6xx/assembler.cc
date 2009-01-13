@@ -28,7 +28,6 @@
 #include <r6xx/symbol.hh>
 #include <utils/private_implementation_pattern-impl.hh>
 #include <utils/sequence-impl.hh>
-#include <utils/wrapped_forward_iterator-impl.hh>
 
 #include <algorithm>
 #include <list>
@@ -66,30 +65,6 @@ namespace gpu
 
         Assembler::~Assembler()
         {
-        }
-
-        Assembler::SectionIterator
-        Assembler::begin_sections() const
-        {
-            return SectionIterator(_imp->sections.begin());
-        }
-
-        Assembler::SectionIterator
-        Assembler::end_sections() const
-        {
-            return SectionIterator(_imp->sections.end());
-        }
-
-        Assembler::SymbolIterator
-        Assembler::begin_symbols() const
-        {
-            return SymbolIterator(_imp->symbols.begin());
-        }
-
-        Assembler::SymbolIterator
-        Assembler::end_symbols() const
-        {
-            return SymbolIterator(_imp->symbols.end());
         }
 
         void

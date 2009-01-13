@@ -32,77 +32,6 @@
 using namespace gpu;
 using namespace tests;
 
-struct AssemblerSectionsTest :
-    public Test
-{
-    AssemblerSectionsTest() :
-        Test("assembler_sections_test")
-    {
-    }
-
-    void run_one(const std::string & s)
-    {
-        std::string input_name(std::string(GPU_SRCDIR) + "/r6xx/assembler_TEST_DATA/" + s + ".s");
-        std::fstream input(input_name.c_str(), std::ios_base::in);
-
-        Sequence<std::tr1::shared_ptr<AssemblyEntity> > entities(AssemblyParser::parse(input));
-
-        r6xx::Assembler g(entities);
-        TEST_CHECK(g.end_sections() != std::find_if(g.begin_sections(), g.end_sections(), r6xx::SectionNameComparator(".alu")));
-        TEST_CHECK(g.end_sections() != std::find_if(g.begin_sections(), g.end_sections(), r6xx::SectionNameComparator(".cf")));
-    }
-
-    virtual void run()
-    {
-        run_one("section");
-        run_one("pushpop");
-        run_one("shortcut");
-    }
-} assembler_sections_test;
-
-struct AssemblerFilterTest :
-    public Test
-{
-    AssemblerFilterTest() :
-        Test("assembler_filter_test")
-    {
-    }
-
-    void run_one(const std::string & s)
-    {
-        std::string input_name(std::string(GPU_SRCDIR) + "/r6xx/assembler_TEST_DATA/" + s + ".s");
-        std::fstream input(input_name.c_str(), std::ios_base::in);
-
-        Sequence<std::tr1::shared_ptr<AssemblyEntity> > entities(AssemblyParser::parse(input));
-        r6xx::Assembler g(entities);
-
-        for (r6xx::Assembler::SectionIterator i(g.begin_sections()), i_end(g.end_sections()) ;
-                i != i_end ; ++i)
-        {
-            std::string ref_name(std::string(GPU_SRCDIR) + "/r6xx/assembler_TEST_DATA/" + (*i)->name().substr(1) + ".ref");
-            std::fstream ref(ref_name.c_str(), std::ios_base::in);
-
-            std::string ref_str, line;
-            while (std::getline(ref, line))
-            {
-                if (! ref_str.empty())
-                    ref_str += "\n";
-
-                ref_str += line;
-            }
-
-            TEST_CHECK_EQUAL(r6xx::SectionPrinter::print(*i), ref_str);
-        }
-    }
-
-    virtual void run()
-    {
-        run_one("section");
-        run_one("pushpop");
-        run_one("shortcut");
-    }
-} assembler_filter_test;
-
 struct AssemblerTest :
     public Test
 {
@@ -117,57 +46,8 @@ struct AssemblerTest :
         SyntaxContext::File f(input_name);
         std::fstream input(input_name.c_str(), std::ios_base::in);
 
-        std::string reference_name(std::string(GPU_SRCDIR) + "/r6xx/assembler_TEST_DATA/" + s + ".ref");
-        std::fstream reference(reference_name.c_str(), std::ios_base::in);
-        std::string reference_string, line;
-        while (std::getline(reference, line))
-        {
-            if (! reference_string.empty())
-                reference_string += "\n";
-
-            reference_string += line;
-        }
-
-        std::string symbols_name(std::string(GPU_SRCDIR) + "/r6xx/assembler_TEST_DATA/" + s + ".sym");
-        std::fstream symbols(symbols_name.c_str(), std::ios_base::in);
-        std::string symbols_string;
-        while (std::getline(symbols, line))
-        {
-            if (! symbols_string.empty())
-                symbols_string += "\n";
-
-            symbols_string += line;
-        }
-
         Sequence<std::tr1::shared_ptr<AssemblyEntity> > entities(AssemblyParser::parse(input));
         r6xx::Assembler a(entities);
-
-        std::string section_output;
-        for (r6xx::Assembler::SectionIterator i(a.begin_sections()), i_end(a.end_sections()) ;
-                i != i_end ; ++i)
-        {
-            if (! section_output.empty())
-                section_output += "\n";
-
-            section_output += r6xx::SectionPrinter::print(*i);
-        }
-        TEST_CHECK_EQUAL(section_output, reference_string);
-
-        std::string symbols_output;
-        for (r6xx::Assembler::SymbolIterator i(a.begin_symbols()), i_end(a.end_symbols()) ;
-                i != i_end ; ++i)
-        {
-            if (! symbols_output.empty())
-                symbols_output += "\n";
-
-            symbols_output += "Symbol(\n";
-            symbols_output += "\tname='" + i->name + "'\n";
-            symbols_output += "\toffset=" + stringify(i->offset) + "\n";
-            symbols_output += "\tsize=" + stringify(i->size) + "\n";
-            symbols_output += "\tsection='" + i->section +"'\n";
-            symbols_output += ")";
-        }
-        TEST_CHECK_EQUAL(symbols_output, symbols_string);
 
         a.write(std::string(GPU_BUILDDIR) + "/r6xx/assembler_TEST_" + s + ".output");
     }
