@@ -107,7 +107,8 @@ namespace gpu
                 if (".L" == s->name.substr(0, 2))
                     continue;
 
-                elf::Symbol symbol(s->name, s->section);
+                elf::Symbol symbol(s->name);
+                symbol.section = s->section;
                 symbol.value = s->offset;
                 symbol.size = s->size;
                 symbol.type = s->type;

@@ -17,36 +17,44 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef GPU_GUARD_ELF_SYMBOL_TABLE_HH
-#define GPU_GUARD_ELF_SYMBOL_TABLE_HH 1
-
-#include <elf/data.hh>
-#include <elf/section.hh>
-#include <elf/string_table.hh>
 #include <elf/symbol.hh>
-#include <utils/private_implementation_pattern.hh>
-
-#include <string>
 
 namespace gpu
 {
     namespace elf
     {
-        class SymbolTable :
-            public PrivateImplementationPattern<elf::SymbolTable>
+        Symbol::Symbol(const std::string & name) :
+            bind(0),
+            name(name),
+            section(""),
+            size(0),
+            type(0),
+            value(0)
         {
-            public:
-                SymbolTable(const StringTable & strtab);
+        }
 
-                ~SymbolTable();
+        bool
+        Symbol::operator== (const Symbol & other) const
+        {
+            if (other.name != name)
+                return false;
 
-                unsigned operator[] (const std::string & name);
+            if (other.section != section)
+                return false;
 
-                void append(const Symbol & symbol);
+            if (other.bind != bind)
+                return false;
 
-                void write(const SectionTable & section_table, Data data);
-        };
+            if (other.type != type)
+                return false;
+
+            if (other.value != value)
+                return false;
+
+            if (other.size != size)
+                return false;
+
+            return true;
+        }
     }
 }
-
-#endif

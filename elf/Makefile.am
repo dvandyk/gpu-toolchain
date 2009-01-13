@@ -16,6 +16,7 @@ libgpuelf_la_SOURCES = \
 	relocation_table.cc relocation_table.hh \
 	section.cc section.hh \
 	string_table.cc string_table.hh \
+	symbol.cc symbol.hh \
 	symbol_table.cc symbol_table.hh
 libgpuutils_la_CXXFLAGS = -I$(top_srcdir)
 
