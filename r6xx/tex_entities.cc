@@ -208,27 +208,13 @@ namespace gpu
                  * opcode
                  */
                 typedef Tuple<std::string, unsigned> Load;
+                typedef TupleComparator<Load, std::string, 1> LoadComparator;
                 const static Load load_instructions[] =
                 {
                     Load("ld", 3)
                 };
                 const static Load * load_instructions_begin(load_instructions);
                 const static Load * load_instructions_end(load_instructions + sizeof(load_instructions) / sizeof(Load));
-
-                struct LoadComparator
-                {
-                    std::string mnemonic;
-
-                    LoadComparator(const std::string mnemonic) :
-                        mnemonic(mnemonic)
-                    {
-                    }
-
-                    bool operator() (const Load & f)
-                    {
-                        return mnemonic == f.first;
-                    }
-                };
 
                 struct EntityConverter :
                     public AssemblyEntityVisitor

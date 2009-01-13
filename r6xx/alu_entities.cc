@@ -314,7 +314,7 @@ namespace gpu
                  * instruction slots
                  */
                 typedef Tuple<std::string, unsigned, unsigned, unsigned> Form2;
-
+                typedef TupleComparator<Form2, std::string, 1> Form2Comparator;
                 const static Form2 form2_instructions[] =
                 {
                     /* arithmetic */
@@ -425,27 +425,13 @@ namespace gpu
                 const Form2 * form2_instructions_begin(form2_instructions);
                 const Form2 * form2_instructions_end(form2_instructions + sizeof(form2_instructions) / sizeof(Form2));
 
-                struct Form2Comparator
-                {
-                    std::string mnemonic;
-
-                    Form2Comparator(const std::string mnemonic) :
-                        mnemonic(mnemonic)
-                    {
-                    }
-
-                    bool operator() (const Form2 & f)
-                    {
-                        return mnemonic == f.first;
-                    }
-                };
-
                 /*
                  * mnemonic
                  * opcode
                  * slots
                  */
                 typedef Tuple<std::string, unsigned, unsigned> Form3;
+                typedef TupleComparator<Form3, std::string, 1> Form3Comparator;
                 const static Form3 form3_instructions[] =
                 {
                     /* float double */
@@ -476,21 +462,6 @@ namespace gpu
                 };
                 const Form3 * form3_instructions_begin(form3_instructions);
                 const Form3 * form3_instructions_end(form3_instructions + sizeof(form3_instructions) / sizeof(Form3));
-
-                struct Form3Comparator
-                {
-                    std::string mnemonic;
-
-                    Form3Comparator(const std::string mnemonic) :
-                        mnemonic(mnemonic)
-                    {
-                    }
-
-                    bool operator() (const Form3 & f)
-                    {
-                        return mnemonic == f.first;
-                    }
-                };
 
                 struct EntityConverter :
                     public AssemblyEntityVisitor

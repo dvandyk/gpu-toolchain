@@ -337,7 +337,7 @@ namespace gpu
                  * opcode
                  */
                 typedef Tuple<std::string, unsigned> AClause;
-
+                typedef TupleComparator<AClause, std::string, 1> AClauseComparator;
                 const static AClause aclause_instructions[] =
                 {
                     AClause("alu", 8),
@@ -351,27 +351,12 @@ namespace gpu
                 const static AClause * aclause_instructions_begin(aclause_instructions);
                 const static AClause * aclause_instructions_end(aclause_instructions + sizeof(aclause_instructions) / sizeof(AClause));
 
-                struct AClauseComparator
-                {
-                    std::string mnemonic;
-
-                    AClauseComparator(const std::string mnemonic) :
-                        mnemonic(mnemonic)
-                    {
-                    }
-
-                    bool operator() (const AClause & f)
-                    {
-                        return mnemonic == f.first;
-                    }
-                };
-
                 /*
                  * mnemonic
                  * opcode
                  */
                 typedef Tuple<std::string, unsigned> Branch;
-
+                typedef TupleComparator<Branch, std::string, 1> BranchComparator;
                 const static Branch branch_instructions[] =
                 {
                     Branch("call", 0x0d)
@@ -379,27 +364,13 @@ namespace gpu
                 const static Branch * branch_instructions_begin(branch_instructions);
                 const static Branch * branch_instructions_end(branch_instructions + sizeof(branch_instructions) / sizeof(Branch));
 
-                struct BranchComparator
-                {
-                    std::string mnemonic;
-
-                    BranchComparator(const std::string mnemonic) :
-                        mnemonic(mnemonic)
-                    {
-                    }
-
-                    bool operator() (const Branch & b)
-                    {
-                        return mnemonic == b.first;
-                    }
-                };
-
                 /*
                  * mnemonic
                  * opcode
                  * needs counter?
                  */
                 typedef Tuple<std::string, unsigned, bool> Loop;
+                typedef TupleComparator<Loop, std::string, 1> LoopComparator;
                 const static Loop loop_instructions[] =
                 {
                     Loop("loop_start", 4, true),
@@ -407,21 +378,6 @@ namespace gpu
                 };
                 const static Loop * loop_instructions_begin(loop_instructions);
                 const static Loop * loop_instructions_end(loop_instructions + sizeof(loop_instructions) / sizeof(Loop));
-
-                struct LoopComparator
-                {
-                    std::string mnemonic;
-
-                    LoopComparator(const std::string mnemonic) :
-                        mnemonic(mnemonic)
-                    {
-                    }
-
-                    bool operator() (const Loop & f)
-                    {
-                        return mnemonic == f.first;
-                    }
-                };
 
                 struct EntityConverter :
                     public AssemblyEntityVisitor
