@@ -340,13 +340,13 @@ namespace gpu
                 typedef TupleComparator<AClause, std::string, 1> AClauseComparator;
                 const static AClause aclause_instructions[] =
                 {
-                    AClause("alu", 8),
-                    AClause("alu_push_before", 9),
-                    AClause("alu_pop_after", 10),
-                    AClause("alu_pop_twice_after", 11),
-                    AClause("alu_continue", 13),
-                    AClause("alu_break", 14),
-                    AClause("alu_else_after", 15)
+                    AClause("alu",                    0x08),
+                    AClause("alu_break",              0x0e),
+                    AClause("alu_continue",           0x0d),
+                    AClause("alu_else_after",         0x0f),
+                    AClause("alu_pop_after",          0x0a),
+                    AClause("alu_pop_twice_after",    0x0b),
+                    AClause("alu_push_before",        0x09)
                 };
                 const static AClause * aclause_instructions_begin(aclause_instructions);
                 const static AClause * aclause_instructions_end(aclause_instructions + sizeof(aclause_instructions) / sizeof(AClause));
@@ -359,7 +359,12 @@ namespace gpu
                 typedef TupleComparator<Branch, std::string, 1> BranchComparator;
                 const static Branch branch_instructions[] =
                 {
-                    Branch("call", 0x0d)
+                    Branch("call",      0x0d),
+                    Branch("else",      0x11),
+                    Branch("jump",      0x10),
+                    Branch("kill",      0x15),
+                    Branch("push",      0x0a),
+                    Branch("return",    0x0e)
                 };
                 const static Branch * branch_instructions_begin(branch_instructions);
                 const static Branch * branch_instructions_end(branch_instructions + sizeof(branch_instructions) / sizeof(Branch));
@@ -373,8 +378,11 @@ namespace gpu
                 typedef TupleComparator<Loop, std::string, 1> LoopComparator;
                 const static Loop loop_instructions[] =
                 {
-                    Loop("loop_start", 4, true),
-                    Loop("loop_end", 5, false)
+                    Loop("loop_break",          0x09, false),
+                    Loop("loop_continue",       0x08, false),
+                    Loop("loop_end",            0x05, false),
+                    Loop("loop_start",          0x04, true),
+                    Loop("loop_start_no_al",    0x07, false)
                 };
                 const static Loop * loop_instructions_begin(loop_instructions);
                 const static Loop * loop_instructions_end(loop_instructions + sizeof(loop_instructions) / sizeof(Loop));
