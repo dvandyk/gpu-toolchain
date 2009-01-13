@@ -33,8 +33,6 @@
 
 #include <elf.h>
 
-#include <iostream>
-
 namespace gpu
 {
     namespace r6xx
@@ -131,13 +129,16 @@ namespace gpu
                         return i->offset;
                     }
 
-                    std::string find_symbol_before(const std::string & symbol)
+                    std::string find_symbol_before(const std::string & symbol, const std::string & section)
                     {
                         Sequence<r6xx::Symbol>::Iterator result(symbols.begin());
 
                         for (Sequence<r6xx::Symbol>::Iterator s(symbols.begin()), s_end(symbols.end()) ;
                                 s != s_end ; ++s)
                         {
+                            if (section != s->section)
+                                continue;
+
                             if (".L" != s->name.substr(0, 2))
                                 result = s;
 
@@ -199,7 +200,7 @@ namespace gpu
                         unsigned offset(instructions.size() * sizeof(InstructionData));
                         if (local_branch)
                         {
-                            std::string symbol(find_symbol_before(b.target));
+                            std::string symbol(find_symbol_before(b.target, ".cf"));
                             unsigned addend(offset_of(b.target, ".cf") - offset_of(symbol, ".cf"));
 
                             reltab.append(elf::Relocation(offset, symbol, cfrel_pic, addend));
@@ -254,7 +255,7 @@ namespace gpu
                         unsigned offset(instructions.size() * sizeof(InstructionData));
                         if (local_branch)
                         {
-                            std::string symbol(find_symbol_before(i.target));
+                            std::string symbol(find_symbol_before(i.target, ".cf"));
                             unsigned addend(offset_of(i.target, ".cf") - offset_of(symbol, ".cf"));
 
                             reltab.append(elf::Relocation(offset, symbol, cfrel_pic, addend));
