@@ -108,11 +108,11 @@ namespace gpu
 
                     Generator(const elf::SymbolTable & symtab, const Sequence<r6xx::Symbol> & symbols) :
                         cf_rel(elf::Section::Parameters()
-                                .alignment(0x4)
+                                .alignment(0x8)
                                 .name(".cf.rel")
                                 .type(SHT_RELA)),
                         cf_text(elf::Section::Parameters()
-                                .alignment(0x4)
+                                .alignment(0x8)
                                 .flags(SHF_ALLOC | SHF_EXECINSTR)
                                 .name(".cf")
                                 .type(SHT_PROGBITS)),

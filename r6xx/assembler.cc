@@ -121,8 +121,8 @@ namespace gpu
             file.append(alu::Generator::generate(_imp->sections, _imp->symbols));
 
             elf::Section tex_section(elf::Section::Parameters()
-                    .alignment(0x4)
-                    .flags(SHF_ALLOC)
+                    .alignment(0x10)
+                    .flags(SHF_ALLOC | SHF_EXECINSTR)
                     .name(".tex")
                     .type(SHT_PROGBITS));
             file.append(tex_section);

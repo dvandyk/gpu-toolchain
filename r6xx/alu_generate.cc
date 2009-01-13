@@ -201,7 +201,7 @@ namespace gpu
 
                     Generator() :
                         alu_section(elf::Section::Parameters()
-                                .alignment(0x4)
+                                .alignment(0x8)
                                 .flags(SHF_ALLOC | SHF_EXECINSTR)
                                 .name(".alu")
                                 .type(SHT_PROGBITS)),
