@@ -7,16 +7,16 @@
 .section .alu
 square:
 .indexmode loop
-	fmul	$0.xr, $0.xr, $0.xr
-	fmul	$0.yr, $0.yr, $0.yr
-	fmul	$0.zr, $0.zr, $0.zr
-	fmul	$0.wr, $0.wr, $0.wr
+	fmul	$0.x, $0.x, $0.x
+	fmul	$0.y, $0.y, $0.y
+	fmul	$0.z, $0.z, $0.z
+	fmul	$0.w, $0.w, $0.w
 .groupend
 .type square, "func"
 .size square, .-square
 .section .tex
 fetch:
-	ld $0[xyzw]r, $127
+	ld $0[xyzw], $127
 .type fetch, "func"
 .size fetch, .-fetch
 .section .cf
