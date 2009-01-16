@@ -35,10 +35,6 @@ namespace gpu
 {
     namespace r6xx
     {
-        Section::~Section()
-        {
-        }
-
         SectionPtr
         Section::make(const std::string & name)
         {
@@ -77,53 +73,6 @@ namespace gpu
             const static std::string * const section_names_end(section_names_begin + sizeof(section_names) / sizeof(section_names[0]));
 
             return section_names_end != std::find(section_names_begin, section_names_end, name);
-        }
-
-        namespace internal
-        {
-            struct SectionPrinter :
-                public SectionVisitor
-            {
-                std::string result;
-
-                void visit(const alu::Section & a)
-                {
-                    result = "Section(name='.alu')";
-
-                    if (! a.entities.empty())
-                        result += "\n";
-
-                    result += alu::EntityPrinter::print(a.entities);
-                }
-
-                void visit(const cf::Section & c)
-                {
-                    result = "Section(name='.cf')";
-                    if (! c.entities.empty())
-                        result += "\n";
-
-                    result += cf::EntityPrinter::print(c.entities);
-                }
-
-                void visit(const tex::Section & t)
-                {
-                    result = "Section(name='.tex')";
-                    if (! t.entities.empty())
-                        result += "\n";
-
-                    result += tex::EntityPrinter::print(t.entities);
-                }
-            };
-        }
-
-        std::string
-        SectionPrinter::print(const SectionPtr & input)
-        {
-            internal::SectionPrinter p;
-
-            input->accept(p);
-
-            return p.result;
         }
 
         namespace internal
@@ -172,7 +121,7 @@ namespace gpu
 
                 r6xx::SectionPtr find_or_add(const std::string & name)
                 {
-                    Sequence<SectionPtr>::Iterator s(std::find_if(sections.begin(), sections.end(), r6xx::SectionNameComparator(name)));
+                    Sequence<SectionPtr>::Iterator s(std::find_if(sections.begin(), sections.end(), r6xx::SectionByName(name)));
                     if (sections.end() != s)
                         return *s;
 

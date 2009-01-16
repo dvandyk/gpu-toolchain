@@ -153,12 +153,6 @@ namespace gpu
                 return ".tex";
             }
 
-            void
-            Section::accept(SectionVisitor & v) const
-            {
-                static_cast<ConstVisits<r6xx::tex::Section> *>(&v)->visit(*this);
-            }
-
             Sequence<elf::Section>
             Section::sections(const elf::SymbolTable &, const Sequence<elf::Symbol> &) const
             {

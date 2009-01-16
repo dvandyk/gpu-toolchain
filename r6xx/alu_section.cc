@@ -452,12 +452,6 @@ namespace gpu
                 return ".alu";
             }
 
-            void
-            Section::accept(SectionVisitor & v) const
-            {
-                static_cast<ConstVisits<r6xx::alu::Section> *>(&v)->visit(*this);
-            }
-
             Sequence<elf::Section>
             Section::sections(const elf::SymbolTable &, const Sequence<elf::Symbol> &) const
             {

@@ -14,6 +14,7 @@ libgpucommon_la_SOURCES = \
 	assembly_parser.cc assembly_parser.hh \
 	directives.cc directives.hh \
 	expression.cc expression-fwd.hh expression.hh \
+	section.cc section.hh \
 	syntax.cc syntax.hh
 libgpuutils_la_CXXFLAGS = -I$(top_srcdir)
 

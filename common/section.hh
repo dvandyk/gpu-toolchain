@@ -17,38 +17,35 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef GPU_GUARD_R6XX_TEX_SECTION_HH
-#define GPU_GUARD_R6XX_TEX_SECTION_HH 1
+#ifndef GPU_GUARD_COMMON_SECTION_HH
+#define GPU_GUARD_COMMON_SECTION_HH 1
 
-#include <r6xx/tex_entities.hh>
-#include <r6xx/section.hh>
+#include <common/assembly_entities-fwd.hh>
+#include <elf/section.hh>
+#include <elf/symbol.hh>
+#include <elf/symbol_table.hh>
+#include <utils/memory.hh>
 #include <utils/sequence.hh>
+
+#include <string>
 
 namespace gpu
 {
-    namespace r6xx
+    class Section
     {
-        namespace tex
-        {
-            struct Section :
-                public r6xx::Section
-            {
-                Sequence<EntityPtr> entities;
+        public:
+            virtual ~Section() = 0;
 
-                Section();
+            virtual void append(const AssemblyEntityPtr &) = 0;
 
-                virtual ~Section();
+            virtual std::string name() const = 0;
 
-                virtual void append(const AssemblyEntityPtr &);
+            virtual Sequence<elf::Section> sections(const elf::SymbolTable &, const Sequence<elf::Symbol> &) const = 0;
 
-                virtual std::string name() const;
+            virtual Sequence<elf::Symbol> symbols() const = 0;
+    };
 
-                virtual Sequence<elf::Section> sections(const elf::SymbolTable &, const Sequence<elf::Symbol> &) const;
-
-                virtual Sequence<elf::Symbol> symbols() const;
-            };
-        }
-    }
+    typedef std::tr1::shared_ptr<Section> SectionPtr;
 }
 
 #endif

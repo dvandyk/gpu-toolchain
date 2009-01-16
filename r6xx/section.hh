@@ -21,6 +21,7 @@
 #define GPU_GUARD_R6XX_SECTION_HH 1
 
 #include <common/assembly_entities-fwd.hh>
+#include <common/section.hh>
 #include <elf/section.hh>
 #include <elf/symbol.hh>
 #include <elf/symbol_table.hh>
@@ -35,43 +36,22 @@ namespace gpu
 {
     namespace r6xx
     {
-        typedef ConstVisitorTag<r6xx::alu::Section, r6xx::cf::Section, r6xx::tex::Section> Sections;
-
-        typedef ConstVisitor<Sections> SectionVisitor;
-
-        enum SectionId
-        {
-            sid_cf = 0,
-            sid_alu = 1,
-            sid_tex = 2
-        };
-
         class Section :
-            public ConstVisitable<Sections>
+            public gpu::Section
         {
             public:
-                virtual ~Section() = 0;
-
-                virtual void append(const AssemblyEntityPtr &) = 0;
-
-                virtual std::string name() const = 0;
-
-                virtual Sequence<elf::Section> sections(const elf::SymbolTable & symtab, const Sequence<elf::Symbol> & symbols) const = 0;
-
-                virtual Sequence<elf::Symbol> symbols() const = 0;
-
                 static SectionPtr make(const std::string & name);
 
                 static bool valid(const std::string & name);
         };
 
-        class SectionNameComparator
+        class SectionByName
         {
             private:
                 const std::string _name;
 
             public:
-                SectionNameComparator(const std::string & name) :
+                SectionByName(const std::string & name) :
                     _name(name)
                 {
                 }
@@ -80,11 +60,6 @@ namespace gpu
                 {
                     return section->name() == _name;
                 }
-        };
-
-        struct SectionPrinter
-        {
-            static std::string print(const SectionPtr &);
         };
 
         struct SectionConverter

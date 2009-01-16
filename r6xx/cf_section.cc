@@ -456,12 +456,6 @@ namespace gpu
                 return ".cf";
             }
 
-            void
-            Section::accept(SectionVisitor & v) const
-            {
-                static_cast<ConstVisits<r6xx::cf::Section> *>(&v)->visit(*this);
-            }
-
             Sequence<elf::Symbol>
             Section::symbols() const
             {

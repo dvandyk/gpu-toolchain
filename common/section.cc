@@ -17,38 +17,11 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef GPU_GUARD_R6XX_TEX_SECTION_HH
-#define GPU_GUARD_R6XX_TEX_SECTION_HH 1
-
-#include <r6xx/tex_entities.hh>
-#include <r6xx/section.hh>
-#include <utils/sequence.hh>
+#include <common/section.hh>
 
 namespace gpu
 {
-    namespace r6xx
+    Section::~Section()
     {
-        namespace tex
-        {
-            struct Section :
-                public r6xx::Section
-            {
-                Sequence<EntityPtr> entities;
-
-                Section();
-
-                virtual ~Section();
-
-                virtual void append(const AssemblyEntityPtr &);
-
-                virtual std::string name() const;
-
-                virtual Sequence<elf::Section> sections(const elf::SymbolTable &, const Sequence<elf::Symbol> &) const;
-
-                virtual Sequence<elf::Symbol> symbols() const;
-            };
-        }
     }
 }
-
-#endif

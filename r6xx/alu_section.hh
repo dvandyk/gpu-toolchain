@@ -46,8 +46,6 @@ namespace gpu
                 virtual Sequence<elf::Section> sections(const elf::SymbolTable &, const Sequence<elf::Symbol> &) const;
 
                 virtual Sequence<elf::Symbol> symbols() const;
-
-                virtual void accept(SectionVisitor &) const;
             };
         }
     }
