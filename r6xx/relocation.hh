@@ -39,27 +39,6 @@ namespace gpu
             cfrel_pic,
             cfrel_tex_clause
         };
-
-        struct Relocation
-        {
-            const SectionId section;
-
-            const std::string symbol;
-
-            const unsigned type;
-
-            Relocation(SectionId section, const std::string & symbol, unsigned type) :
-                section(section),
-                symbol(symbol),
-                type(type)
-            {
-            }
-        };
-
-        struct RelocationScanner
-        {
-            static Sequence<Relocation> scan(const Sequence<SectionPtr> & sections);
-        };
     }
 }
 
