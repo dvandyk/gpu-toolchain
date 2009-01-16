@@ -25,7 +25,6 @@
 #include <r6xx/assembler.hh>
 #include <r6xx/error.hh>
 #include <r6xx/section.hh>
-#include <r6xx/symbol.hh>
 #include <utils/private_implementation_pattern-impl.hh>
 #include <utils/sequence-impl.hh>
 
@@ -60,7 +59,11 @@ namespace gpu
         {
             _imp->sections = SectionConverter::convert(entities);
 
-            _imp->symbols = SymbolScanner::scan(_imp->sections);
+            for (Sequence<r6xx::SectionPtr>::Iterator i(_imp->sections.begin()), i_end(_imp->sections.end()) ;
+                    i != i_end ; ++i)
+            {
+                _imp->symbols.append((*i)->symbols());
+            }
         }
 
         Assembler::~Assembler()
@@ -75,7 +78,7 @@ namespace gpu
                     .machine(0xA600)
                     .type(ET_REL));
 
-            // generate symbols
+            // write symbols to symbol table
             for (Sequence<elf::Symbol>::Iterator s(_imp->symbols.begin()), s_end(_imp->symbols.end()) ;
                     s != s_end ; ++s)
             {
@@ -88,6 +91,7 @@ namespace gpu
             // generate and emit CF instructions
             file.append(cf::Generator::generate(_imp->sections, _imp->symtab, _imp->symbols));
 
+            // generate and emit ALU instructions
             file.append(alu::Generator::generate(_imp->sections, _imp->symbols));
 
             elf::Section tex_section(elf::Section::Parameters()

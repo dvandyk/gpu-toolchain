@@ -43,6 +43,8 @@ namespace gpu
 
                 virtual std::string name() const;
 
+                virtual Sequence<elf::Symbol> symbols() const;
+
                 virtual void accept(SectionVisitor &) const;
             };
         }

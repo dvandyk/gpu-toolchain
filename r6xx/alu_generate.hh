@@ -23,7 +23,6 @@
 #include <elf/section.hh>
 #include <r6xx/relocation.hh>
 #include <r6xx/section.hh>
-#include <r6xx/symbol.hh>
 #include <utils/sequence.hh>
 
 namespace gpu

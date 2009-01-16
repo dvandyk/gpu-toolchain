@@ -18,7 +18,14 @@
  */
 
 #include <common/assembly_entities.hh>
+#include <common/expression.hh>
 #include <r6xx/cf_section.hh>
+#include <r6xx/error.hh>
+#include <utils/sequence-impl.hh>
+
+#include <algorithm>
+
+#include <elf.h>
 
 namespace gpu
 {
@@ -31,6 +38,134 @@ namespace gpu
     {
         namespace cf
         {
+            namespace internal
+            {
+                struct SymbolScanner :
+                    public cf::EntityVisitor
+                {
+                    Sequence<elf::Symbol> symbols;
+
+                    unsigned current_offset;
+
+                    SymbolScanner(const Sequence<cf::EntityPtr> & cf_entities) :
+                        current_offset(0)
+                    {
+                        add_symbol(".cf", 0, STT_SECTION);
+
+                        for (Sequence<cf::EntityPtr>::Iterator i(cf_entities.begin()), i_end(cf_entities.end()) ;
+                                i != i_end ; ++i)
+                        {
+                            (*i)->accept(*this);
+                        }
+
+                        set_symbol_size(".cf", current_offset);
+                    }
+
+                    void add_undefined_symbol(const std::string & name, unsigned type)
+                    {
+                        elf::Symbol symbol(name);
+                        symbol.type = type;
+
+                        if (symbols.end() != std::find_if(symbols.begin(), symbols.end(), elf::SymbolByName(name)))
+                            throw DuplicateSymbolError(name);
+
+                        symbols.append(symbol);
+                    }
+
+                    void add_symbol(const std::string & name, unsigned offset, unsigned type = 0)
+                    {
+                        elf::Symbol symbol(name);
+                        symbol.section = ".cf";
+                        symbol.type = type;
+                        symbol.value = offset;
+
+                        if (symbols.end() != std::find_if(symbols.begin(), symbols.end(), elf::SymbolByName(name)))
+                            throw DuplicateSymbolError(name);
+
+                        symbols.append(symbol);
+                    }
+
+                    void set_symbol_size(const std::string & name, unsigned size)
+                    {
+                        Sequence<elf::Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), elf::SymbolByName(name)));
+                        if (symbols.end() == s)
+                            throw UnresolvedSymbolError(name);
+
+                        s->size = size;
+                    }
+
+                    void set_symbol_type(const std::string & name, unsigned type)
+                    {
+                        Sequence<elf::Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), elf::SymbolByName(name)));
+                        if (symbols.end() == s)
+                            throw UnresolvedSymbolError(name);
+
+                        s->type = type;
+                    }
+
+                    unsigned symbol_lookup(const std::string & name)
+                    {
+                        if ("." == name)
+                            return current_offset;
+
+                        Sequence<elf::Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), elf::SymbolByName(name)));
+                        if (symbols.end() == s)
+                            throw UnresolvedSymbolError(name);
+
+                        return s->value;
+                    }
+
+                    // cf::EntityVisitor
+                    void visit(const cf::ProgramEnd &) { }
+
+                    void visit(const cf::ALUClause &)
+                    {
+                        current_offset += 8; // size of a cf instruction
+                    }
+
+                    void visit(const cf::BranchInstruction &)
+                    {
+                        current_offset += 8; // size of a cf instruction
+                    }
+
+                    void visit(const cf::Label & l)
+                    {
+                        add_symbol(l.text, current_offset);
+                    }
+
+                    void visit(const cf::LoopInstruction & l)
+                    {
+                        current_offset += 8; // size of a cf instruction
+
+                        if (! l.counter.empty())
+                        {
+                            add_undefined_symbol(l.counter, STT_OBJECT);
+                        }
+                    }
+
+                    void visit(const cf::NopInstruction &)
+                    {
+                        current_offset += 8; // size of a cf instruction
+                    }
+
+                    void visit(const cf::Size & s)
+                    {
+                        ExpressionEvaluator e(std::tr1::bind(std::tr1::mem_fn(&SymbolScanner::symbol_lookup), *this, std::tr1::placeholders::_1));
+                        set_symbol_size(s.symbol, e.evaluate(s.expression));
+                    }
+
+                    void visit(const cf::Type & t)
+                    {
+                        set_symbol_type(t.symbol, t.type);
+                    }
+
+                    void visit(const cf::TextureFetchClause &)
+                    {
+                        current_offset += 8; // size of a cf instruction
+                    }
+                };
+            }
+
             Section::Section()
             {
             }
@@ -62,6 +197,13 @@ namespace gpu
                 static_cast<ConstVisits<r6xx::cf::Section> *>(&v)->visit(*this);
             }
 
+            Sequence<elf::Symbol>
+            Section::symbols() const
+            {
+                internal::SymbolScanner ss(entities);
+
+                return ss.symbols;
+            }
         }
     }
 }

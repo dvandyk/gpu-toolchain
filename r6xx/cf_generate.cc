@@ -122,12 +122,12 @@ namespace gpu
 
                     unsigned offset_of(const std::string & local_symbol, const std::string & section)
                     {
-                        elf::Symbol symbol(local_symbol);
-                        symbol.section = section;
-
-                        Sequence<elf::Symbol>::Iterator i(std::find_if(symbols.begin(), symbols.end(), SymbolComparator(symbol)));
+                        Sequence<elf::Symbol>::Iterator i(std::find_if(symbols.begin(), symbols.end(), elf::SymbolByName(local_symbol)));
                         if (symbols.end() == i)
                             throw UnresolvedSymbolError(local_symbol);
+
+                        if (section != i->section)
+                            throw InternalError("r6xx", "local symbol '" + local_symbol + "' not in section '" + section + "' as expected");
 
                         return i->value;
                     }
@@ -149,7 +149,7 @@ namespace gpu
                                 return result->name;
                         }
 
-                        throw InternalError("r6xx", "Did not find symbol '" + symbol + "'");
+                        throw InternalError("r6xx", "Did not find symbol before '" + symbol + "'");
                     }
 
                     // r6xx::SectionVisitor

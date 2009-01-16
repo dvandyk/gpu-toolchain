@@ -21,7 +21,6 @@
 #define GPU_GUARD_R6XX_RELOCATION_HH 1
 
 #include <r6xx/section.hh>
-#include <r6xx/symbol.hh>
 #include <utils/sequence.hh>
 
 #include <string>

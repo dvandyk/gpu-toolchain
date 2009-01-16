@@ -18,8 +18,13 @@
  */
 
 #include <common/assembly_entities.hh>
+#include <common/expression.hh>
 #include <r6xx/alu_section.hh>
-#include <utils/wrapped_forward_iterator-impl.hh>
+#include <r6xx/error.hh>
+
+#include <algorithm>
+
+#include <elf.h>
 
 namespace gpu
 {
@@ -32,6 +37,116 @@ namespace gpu
     {
         namespace alu
         {
+            namespace internal
+            {
+                struct SymbolScanner :
+                    public alu::EntityVisitor
+                {
+                    Sequence<elf::Symbol> symbols;
+
+                    unsigned current_offset;
+
+                    SymbolScanner(const Sequence<alu::EntityPtr> & alu_entities) :
+                        current_offset(0)
+                    {
+                        add_symbol(".alu", 0, STT_SECTION);
+
+                        for (Sequence<alu::EntityPtr>::Iterator i(alu_entities.begin()), i_end(alu_entities.end()) ;
+                                i != i_end ; ++i)
+                        {
+                            (*i)->accept(*this);
+                        }
+
+                        set_symbol_size(".alu", current_offset);
+                    }
+
+                    void add_symbol(const std::string & name, unsigned offset, unsigned type = 0)
+                    {
+                        elf::Symbol symbol(name);
+                        symbol.section = ".alu";
+                        symbol.type = type;
+                        symbol.value = offset;
+
+                        if (symbols.end() != std::find_if(symbols.begin(), symbols.end(), elf::SymbolByName(name)))
+                            throw DuplicateSymbolError(name);
+
+                        symbols.append(symbol);
+                    }
+
+                    void set_symbol_size(const std::string & name, unsigned size)
+                    {
+                        elf::Symbol symbol(name);
+                        symbol.section = ".alu";
+
+                        Sequence<elf::Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), elf::SymbolByName(name)));
+                        if (symbols.end() == s)
+                            throw UnresolvedSymbolError(name);
+
+                        s->size = size;
+                    }
+
+                    void set_symbol_type(const std::string & name, unsigned type)
+                    {
+                        elf::Symbol symbol(name);
+                        symbol.section = ".alu";
+
+                        Sequence<elf::Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), elf::SymbolByName(name)));
+                        if (symbols.end() == s)
+                            throw UnresolvedSymbolError(name);
+
+                        s->type = type;
+                    }
+
+                    unsigned symbol_lookup(const std::string & name)
+                    {
+                        if ("." == name)
+                            return current_offset;
+
+                        elf::Symbol symbol(name);
+                        symbol.section = ".alu";
+
+                        Sequence<elf::Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), elf::SymbolByName(name)));
+                        if (symbols.end() == s)
+                            throw UnresolvedSymbolError(name);
+
+                        return s->value;
+                    }
+
+
+                    // alu::EntityVisitor
+                    void visit(const alu::GroupEnd &) { }
+                    void visit(const alu::IndexMode &) { }
+
+                    void visit(const alu::Form2Instruction &)
+                    {
+                        // TODO literals
+                        current_offset += 8; // size of an alu instruction
+                    }
+
+                    void visit(const alu::Form3Instruction &)
+                    {
+                        // TODO literals
+                        current_offset += 8; // size of an alu instruction
+                    }
+
+                    void visit(const alu::Label & l)
+                    {
+                        add_symbol(l.text, current_offset);
+                    }
+
+                    void visit(const alu::Size & s)
+                    {
+                        ExpressionEvaluator e(std::tr1::bind(std::tr1::mem_fn(&SymbolScanner::symbol_lookup), *this, std::tr1::placeholders::_1));
+                        set_symbol_size(s.symbol, e.evaluate(s.expression));
+                    }
+
+                    void visit(const alu::Type & t)
+                    {
+                        set_symbol_type(t.symbol, t.type);
+                    }
+                };
+            }
+
             Section::Section()
             {
             }
@@ -61,6 +176,14 @@ namespace gpu
             Section::accept(SectionVisitor & v) const
             {
                 static_cast<ConstVisits<r6xx::alu::Section> *>(&v)->visit(*this);
+            }
+
+            Sequence<elf::Symbol>
+            Section::symbols() const
+            {
+                internal::SymbolScanner ss(entities);
+
+                return ss.symbols;
             }
         }
     }

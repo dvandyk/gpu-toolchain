@@ -22,7 +22,6 @@ libgpur6xx_la_SOURCES = \
 	error.cc error.hh \
 	relocation.hh \
 	section.cc section-fwd.hh section.hh \
-	symbol.cc symbol.hh \
 	tex_destination_gpr.cc tex_destination_gpr.hh \
 	tex_entities.cc tex_entities-fwd.hh tex_entities.hh \
 	tex_section.cc tex_section.hh \
@@ -39,13 +38,13 @@ TESTS = \
 check_PROGRAMS = $(TESTS)
 
 alu_entities_TEST_SOURCES = alu_entities_TEST.cc
-alu_entities_TEST_LDADD = libgpur6xx.la ../common/libgpucommon.la ../tests/libgputests.a ../utils/libgpuutils.la
+alu_entities_TEST_LDADD = libgpur6xx.la ../common/libgpucommon.la ../elf/libgpuelf.la ../tests/libgputests.a ../utils/libgpuutils.la
 
 alu_destination_gpr_TEST_SOURCES = alu_destination_gpr_TEST.cc
-alu_destination_gpr_TEST_LDADD = libgpur6xx.la ../common/libgpucommon.la ../tests/libgputests.a ../utils/libgpuutils.la
+alu_destination_gpr_TEST_LDADD = libgpur6xx.la ../common/libgpucommon.la ../elf/libgpuelf.la ../tests/libgputests.a ../utils/libgpuutils.la
 
 alu_source_operand_TEST_SOURCES = alu_source_operand_TEST.cc
-alu_source_operand_TEST_LDADD = libgpur6xx.la ../common/libgpucommon.la ../tests/libgputests.a ../utils/libgpuutils.la
+alu_source_operand_TEST_LDADD = libgpur6xx.la ../common/libgpucommon.la ../elf/libgpuelf.la ../tests/libgputests.a ../utils/libgpuutils.la
 
 assembler_TEST_SOURCES = assembler_TEST.cc
 assembler_TEST_LDADD = libgpur6xx.la ../common/libgpucommon.la ../elf/libgpuelf.la ../tests/libgputests.a ../utils/libgpuutils.la
@@ -61,5 +60,5 @@ EXTRA_DIST += \
 	assembler_TEST_DATA/minimal.reloc
 
 section_TEST_SOURCES = section_TEST.cc
-section_TEST_LDADD = libgpur6xx.la ../common/libgpucommon.la ../tests/libgputests.a ../utils/libgpuutils.la
+section_TEST_LDADD = libgpur6xx.la ../common/libgpucommon.la ../elf/libgpuelf.la ../tests/libgputests.a ../utils/libgpuutils.la
 

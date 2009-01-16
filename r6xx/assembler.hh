@@ -22,7 +22,6 @@
 
 #include <common/assembly_entities-fwd.hh>
 #include <r6xx/section.hh>
-#include <r6xx/symbol.hh>
 #include <utils/private_implementation_pattern.hh>
 #include <utils/sequence.hh>
 
