@@ -67,6 +67,13 @@ namespace gpu
     }
 
     template <typename T_>
+    void
+    Sequence<T_>::append(const Sequence<T_> & other) const
+    {
+        this->_imp->list.splice(this->_imp->list.end(), other._imp->list);
+    }
+
+    template <typename T_>
     bool
     Sequence<T_>::empty() const
     {
