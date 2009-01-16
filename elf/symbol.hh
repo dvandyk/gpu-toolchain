@@ -42,8 +42,24 @@ namespace gpu
 
             Symbol(const std::string & name);
 
-            bool operator== (const Symbol &) const;
+            bool operator< (const Symbol &) const;
         };
+
+        struct SymbolByName
+        {
+            std::string reference;
+
+            SymbolByName(const std::string & s) :
+                reference(s)
+            {
+            }
+
+            bool operator() (const elf::Symbol & s)
+            {
+                return (reference == s.name);
+            }
+        };
+
     }
 }
 

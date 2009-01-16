@@ -34,27 +34,9 @@ namespace gpu
         }
 
         bool
-        Symbol::operator== (const Symbol & other) const
+        Symbol::operator< (const Symbol & other) const
         {
-            if (other.name != name)
-                return false;
-
-            if (other.section != section)
-                return false;
-
-            if (other.bind != bind)
-                return false;
-
-            if (other.type != type)
-                return false;
-
-            if (other.value != value)
-                return false;
-
-            if (other.size != size)
-                return false;
-
-            return true;
+            return name < other.name;
         }
     }
 }
