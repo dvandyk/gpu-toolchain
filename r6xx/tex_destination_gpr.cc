@@ -130,10 +130,12 @@ namespace gpu
                     throw DestinationGPRSyntaxError("unexpected ']'");
 
                 DestinationGPR::Selector selector(selector_from_string(operand.substr(sel_begin, sel_end)));
-                operand.erase(sel_begin, sel_end);
+                std::string suffix(operand.substr(sel_end + 1));
+                operand.erase(sel_begin);
 
-                bool relative(relative_from_char(operand[operand.size() - 1]));
-                operand.erase(operand.size() - 1);
+                bool relative(false);
+                if (! suffix.empty())
+                    relative = relative_from_char(suffix[0]);
 
                 if (std::string::npos != operand.find_first_not_of(digits))
                     throw DestinationGPRSyntaxError("register index '" + operand + "' is not a number");
