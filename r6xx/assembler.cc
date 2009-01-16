@@ -36,7 +36,7 @@ namespace gpu
     template <>
     struct Implementation<r6xx::Assembler>
     {
-        Sequence<r6xx::SectionPtr> sections;
+        Sequence<gpu::SectionPtr> sections;
 
         Sequence<elf::Symbol> symbols;
 
@@ -57,7 +57,7 @@ namespace gpu
         {
             _imp->sections = SectionConverter::convert(entities);
 
-            for (Sequence<r6xx::SectionPtr>::Iterator i(_imp->sections.begin()), i_end(_imp->sections.end()) ;
+            for (Sequence<gpu::SectionPtr>::Iterator i(_imp->sections.begin()), i_end(_imp->sections.end()) ;
                     i != i_end ; ++i)
             {
                 _imp->symbols.append((*i)->symbols());
@@ -87,7 +87,7 @@ namespace gpu
             }
 
             // generate and emit instructions
-            for (Sequence<r6xx::SectionPtr>::Iterator i(_imp->sections.begin()), i_end(_imp->sections.end()) ;
+            for (Sequence<gpu::SectionPtr>::Iterator i(_imp->sections.begin()), i_end(_imp->sections.end()) ;
                     i != i_end ; ++i)
             {
                 file.append((*i)->sections(_imp->symtab, _imp->symbols));

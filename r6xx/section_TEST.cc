@@ -36,7 +36,7 @@ struct SectionTest :
     {
         try
         {
-            r6xx::SectionPtr test(r6xx::Section::make(n));
+            gpu::SectionPtr test(r6xx::Section::make(n));
         }
         catch (r6xx::InvalidSectionNameError & e)
         {

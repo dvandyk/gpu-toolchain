@@ -52,6 +52,10 @@ namespace gpu
             {
                 result = SectionPtr(new tex::Section);
             }
+            else if (gpu::SectionFactory::valid(name))
+            {
+                result = SectionFactory::make(name);
+            }
             else
             {
                 throw InvalidSectionNameError(name);
@@ -72,7 +76,7 @@ namespace gpu
             const static std::string * const section_names_begin(&section_names[0]);
             const static std::string * const section_names_end(section_names_begin + sizeof(section_names) / sizeof(section_names[0]));
 
-            return section_names_end != std::find(section_names_begin, section_names_end, name);
+            return (section_names_end != std::find(section_names_begin, section_names_end, name)) || SectionFactory::valid(name);
         }
 
         namespace internal
@@ -80,7 +84,7 @@ namespace gpu
             struct ConversionStage :
                 public AssemblyEntityVisitor
             {
-                Sequence<r6xx::SectionPtr> sections;
+                Sequence<gpu::SectionPtr> sections;
                 std::list<SectionPtr> stack;
 
                 ConversionStage()
@@ -119,7 +123,7 @@ namespace gpu
                     SyntaxContext::Line(l.number);
                 }
 
-                r6xx::SectionPtr find_or_add(const std::string & name)
+                gpu::SectionPtr find_or_add(const std::string & name)
                 {
                     Sequence<SectionPtr>::Iterator s(std::find_if(sections.begin(), sections.end(), r6xx::SectionByName(name)));
                     if (sections.end() != s)

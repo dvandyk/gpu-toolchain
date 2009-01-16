@@ -46,6 +46,13 @@ namespace gpu
     };
 
     typedef std::tr1::shared_ptr<Section> SectionPtr;
+
+    struct SectionFactory
+    {
+        static bool valid(const std::string & name);
+
+        static SectionPtr make(const std::string & name);
+    };
 }
 
 #endif

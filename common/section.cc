@@ -19,9 +19,29 @@
 
 #include <common/section.hh>
 
+#include <algorithm>
+
 namespace gpu
 {
     Section::~Section()
     {
+    }
+
+    bool
+    SectionFactory::valid(const std::string & name)
+    {
+        const static std::string section_names[] =
+        {
+        };
+        const static std::string * const section_names_begin(&section_names[0]);
+        const static std::string * const section_names_end(section_names_begin + sizeof(section_names) / sizeof(section_names[0]));
+
+        return (section_names_end != std::find(section_names_begin, section_names_end, name));
+    }
+
+    SectionPtr
+    SectionFactory::make(const std::string & name)
+    {
+        return SectionPtr();
     }
 }

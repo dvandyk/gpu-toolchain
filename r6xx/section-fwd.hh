@@ -28,8 +28,6 @@ namespace gpu
     {
         class Section;
 
-        typedef std::tr1::shared_ptr<Section> SectionPtr;
-
         namespace alu
         {
             struct Section;
