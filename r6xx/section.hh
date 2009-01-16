@@ -21,7 +21,9 @@
 #define GPU_GUARD_R6XX_SECTION_HH 1
 
 #include <common/assembly_entities-fwd.hh>
+#include <elf/section.hh>
 #include <elf/symbol.hh>
+#include <elf/symbol_table.hh>
 #include <r6xx/section-fwd.hh>
 #include <utils/private_implementation_pattern.hh>
 #include <utils/sequence.hh>
@@ -53,6 +55,8 @@ namespace gpu
                 virtual void append(const AssemblyEntityPtr &) = 0;
 
                 virtual std::string name() const = 0;
+
+                virtual Sequence<elf::Section> sections(const elf::SymbolTable & symtab, const Sequence<elf::Symbol> & symbols) const = 0;
 
                 virtual Sequence<elf::Symbol> symbols() const = 0;
 

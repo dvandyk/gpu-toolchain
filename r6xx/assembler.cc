@@ -20,8 +20,6 @@
 #include <elf/file.hh>
 #include <elf/string_table.hh>
 #include <elf/symbol_table.hh>
-#include <r6xx/alu_generate.hh>
-#include <r6xx/cf_generate.hh>
 #include <r6xx/assembler.hh>
 #include <r6xx/error.hh>
 #include <r6xx/section.hh>
@@ -88,18 +86,12 @@ namespace gpu
                 _imp->symtab.append(*s);
             }
 
-            // generate and emit CF instructions
-            file.append(cf::Generator::generate(_imp->sections, _imp->symtab, _imp->symbols));
-
-            // generate and emit ALU instructions
-            file.append(alu::Generator::generate(_imp->sections, _imp->symbols));
-
-            elf::Section tex_section(elf::Section::Parameters()
-                    .alignment(0x10)
-                    .flags(SHF_ALLOC | SHF_EXECINSTR)
-                    .name(".tex")
-                    .type(SHT_PROGBITS));
-            file.append(tex_section);
+            // generate and emit instructions
+            for (Sequence<r6xx::SectionPtr>::Iterator i(_imp->sections.begin()), i_end(_imp->sections.end()) ;
+                    i != i_end ; ++i)
+            {
+                file.append((*i)->sections(_imp->symtab, _imp->symbols));
+            }
 
             // string table
             elf::Section strtab_section(elf::Section::Parameters()

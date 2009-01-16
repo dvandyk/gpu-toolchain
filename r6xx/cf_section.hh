@@ -43,6 +43,8 @@ namespace gpu
 
                 virtual std::string name() const;
 
+                virtual Sequence<elf::Section> sections(const elf::SymbolTable & symtab, const Sequence<elf::Symbol> & symbols) const;
+
                 virtual Sequence<elf::Symbol> symbols() const;
 
                 virtual void accept(SectionVisitor &) const;

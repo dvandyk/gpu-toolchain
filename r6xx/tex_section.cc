@@ -159,6 +159,21 @@ namespace gpu
                 static_cast<ConstVisits<r6xx::tex::Section> *>(&v)->visit(*this);
             }
 
+            Sequence<elf::Section>
+            Section::sections(const elf::SymbolTable &, const Sequence<elf::Symbol> &) const
+            {
+                elf::Section tex_section(elf::Section::Parameters()
+                        .alignment(0x10)
+                        .flags(SHF_ALLOC | SHF_EXECINSTR)
+                        .name(".tex")
+                        .type(SHT_PROGBITS));
+                Sequence<elf::Section> result;
+
+                result.append(tex_section);
+
+                return result;
+            }
+
             Sequence<elf::Symbol>
             Section::symbols() const
             {
