@@ -373,7 +373,6 @@ namespace gpu
                             needs_cf_const = true;
 
                         // Relocations
-                        // TODO loop counter relocation if needs_cf_const
                         unsigned offset(instructions.size() * sizeof(InstructionData));
                         if (local_branch)
                         {
@@ -386,8 +385,10 @@ namespace gpu
                         {
                             reltab.append(elf::Relocation(offset, i.target, cfrel_branch, 0));
                         }
+
                         if (needs_cf_const)
                         {
+                            reltab.append(elf::Relocation(offset, i.counter, cfrel_loop_counter, 0));
                         }
 
                         // Microcode
@@ -411,7 +412,8 @@ namespace gpu
                     {
                         // ALU clause instructions cannot be the last instruction in a program
                         // Push a nop instruction in that case
-                        if (it_default != last_type)                        {
+                        if (it_default != last_type)
+                        {
                             instructions.push_back(InstructionData(0));
                             last_type = it_default;
                         }
