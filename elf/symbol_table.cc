@@ -72,7 +72,18 @@ namespace gpu
         {
             std::map<std::string, unsigned>::const_iterator e(_imp->map.find(symbol.name)), e_end(_imp->map.end());
             if (e != e_end)
-                throw InternalError("elf", "duplicate symbol");
+            {
+                Symbol & existing(_imp->entries[e->second - 1]);
+
+                if ((! existing.section.empty()) && (! symbol.section.empty()))
+                    throw InternalError("elf", "duplicate symbol");
+
+                // merge symbols
+                if (existing.section.empty())
+                    existing = symbol;
+
+                return;
+            }
 
             _imp->entries.push_back(symbol);
             _imp->map.insert(std::pair<const std::string, unsigned>(symbol.name, _imp->entries.size()));
