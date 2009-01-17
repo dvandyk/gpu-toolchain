@@ -14,7 +14,7 @@ AC_PROG_LN_S
 AC_DISABLE_STATIC
 AC_PROG_LIBTOOL
 AC_PROG_MAKE_SET
-dnl }}}
+dnl }}} 
 
 dnl {{{ check for a sensible C++ compiler
 dnl {{{ check for partial specialisation of class templates
@@ -83,6 +83,24 @@ int main(int, char **)
 	 AC_MSG_RESULT([no])
 	 AC_MSG_ERROR([Your C++ Standard Library doesn't support std::numeric_limits<>.])
 	])
+dnl }}}
+dnl }}}
+dnl }}}
+
+dnl {{{ set up definitions
+dnl {{{ version string
+if test -d "${GIT_DIR:-${ac_top_srcdir:-./}/.git}" ; then
+	GPU_VERSION=`git describe 2>/dev/null`
+	if test -z ${GPU_VERSION} ; then
+			GPU_VERSION=`git rev-parse HEAD`
+	fi
+	if test -n "`git diff-index -m --name-only HEAD`" ; then
+			GPU_VERSION=${GPU_VERSION}-dirty
+	fi
+else
+	GPU_VERSION="unknown"
+fi
+AC_SUBST([GPU_VERSION])
 dnl }}}
 dnl }}}
 

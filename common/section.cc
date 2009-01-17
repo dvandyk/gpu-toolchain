@@ -17,7 +17,9 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <common/gpgpu_notes_section.hh>
 #include <common/section.hh>
+#include <utils/exception.hh>
 
 #include <algorithm>
 
@@ -32,6 +34,7 @@ namespace gpu
     {
         const static std::string section_names[] =
         {
+            ".gpgpu.notes"
         };
         const static std::string * const section_names_begin(&section_names[0]);
         const static std::string * const section_names_end(section_names_begin + sizeof(section_names) / sizeof(section_names[0]));
@@ -42,6 +45,13 @@ namespace gpu
     SectionPtr
     SectionFactory::make(const std::string & name)
     {
-        return SectionPtr();
+        if (".gpgpu.notes" == name)
+        {
+            return SectionPtr(new GPGPUNotesSection);
+        }
+        else
+        {
+            throw InternalError("common", "Not a common section: '" + name + "'");
+        }
     }
 }

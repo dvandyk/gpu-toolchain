@@ -31,3 +31,4 @@ main:
 .programend
 .type main, "func"
 .size main, .-main
+.section .gpgpu.notes

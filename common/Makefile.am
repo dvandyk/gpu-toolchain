@@ -4,7 +4,8 @@ MAINTAINERCLEANFILES = Makefile.in
 AM_CXXFLAGS = -I$(top_srcdir)
 DEFS = \
 	-DGPU_BUILDDIR=\"$(top_builddir)\" \
-	-DGPU_SRCDIR=\"$(top_srcdir)\"
+	-DGPU_SRCDIR=\"$(top_srcdir)\" \
+	-DGPU_VERSION=\"$(GPU_VERSION)\"
 EXTRA_DIST =
 
 noinst_LTLIBRARIES = libgpucommon.la
@@ -14,6 +15,7 @@ libgpucommon_la_SOURCES = \
 	assembly_parser.cc assembly_parser.hh \
 	directives.cc directives.hh \
 	expression.cc expression-fwd.hh expression.hh \
+	gpgpu_notes_section.cc gpgpu_notes_section.hh \
 	section.cc section.hh \
 	syntax.cc syntax.hh
 libgpuutils_la_CXXFLAGS = -I$(top_srcdir)
