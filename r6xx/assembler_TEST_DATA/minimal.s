@@ -32,3 +32,6 @@ main:
 .type main, "func"
 .size main, .-main
 .section .gpgpu.notes
+.section .gpgpu.data
+.counter loopcounter
+.buffer input

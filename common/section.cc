@@ -17,6 +17,7 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <common/gpgpu_data_section.hh>
 #include <common/gpgpu_notes_section.hh>
 #include <common/section.hh>
 #include <utils/exception.hh>
@@ -34,6 +35,7 @@ namespace gpu
     {
         const static std::string section_names[] =
         {
+            ".gpgpu.data",
             ".gpgpu.notes"
         };
         const static std::string * const section_names_begin(&section_names[0]);
@@ -45,7 +47,11 @@ namespace gpu
     SectionPtr
     SectionFactory::make(const std::string & name)
     {
-        if (".gpgpu.notes" == name)
+        if (".gpgpu.data" == name)
+        {
+            return SectionPtr(new common::GPGPUDataSection);
+        }
+        else if (".gpgpu.notes" == name)
         {
             return SectionPtr(new GPGPUNotesSection);
         }

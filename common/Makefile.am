@@ -15,6 +15,8 @@ libgpucommon_la_SOURCES = \
 	assembly_parser.cc assembly_parser.hh \
 	directives.cc directives.hh \
 	expression.cc expression-fwd.hh expression.hh \
+	gpgpu_data_entities.cc gpgpu_data_entities-fwd.hh gpgpu_data_entities.hh \
+	gpgpu_data_section.cc gpgpu_data_section.hh \
 	gpgpu_notes_section.cc gpgpu_notes_section.hh \
 	section.cc section.hh \
 	syntax.cc syntax.hh
