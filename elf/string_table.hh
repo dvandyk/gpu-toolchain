@@ -39,6 +39,10 @@ namespace gpu
 
                 unsigned operator[] (const std::string & item);
 
+                std::string operator[] (unsigned offset);
+
+                void read(const Data &);
+
                 void write(Data data);
         };
     }

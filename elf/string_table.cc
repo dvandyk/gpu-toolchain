@@ -18,7 +18,9 @@
  */
 
 #include <elf/string_table.hh>
+#include <utils/exception.hh>
 #include <utils/private_implementation_pattern-impl.hh>
+#include <utils/stringify.hh>
 
 #include <algorithm>
 #include <vector>
@@ -42,11 +44,11 @@ namespace gpu
     {
         namespace internal
         {
-            struct EntryComparator
+            struct StringComparator
             {
                 const std::string reference;
 
-                EntryComparator(const std::string & s) :
+                StringComparator(const std::string & s) :
                     reference(s)
                 {
                 }
@@ -54,6 +56,21 @@ namespace gpu
                 bool operator() (const std::pair<const std::string, unsigned> & entry)
                 {
                     return entry.first == reference;
+                }
+            };
+
+            struct OffsetComparator
+            {
+                const unsigned reference;
+
+                OffsetComparator(unsigned o) :
+                    reference(o)
+                {
+                }
+
+                bool operator() (const std::pair<const std::string, unsigned> & entry)
+                {
+                    return entry.second == reference;
                 }
             };
         }
@@ -71,7 +88,7 @@ namespace gpu
         StringTable::operator[] (const std::string & s)
         {
             std::vector<std::pair<std::string, unsigned> >::const_iterator e(std::find_if(
-                        _imp->entries.begin(), _imp->entries.end(), internal::EntryComparator(s)));
+                        _imp->entries.begin(), _imp->entries.end(), internal::StringComparator(s)));
             if (_imp->entries.end() != e)
                 return e->second;
 
@@ -81,6 +98,34 @@ namespace gpu
             _imp->offset += s.size() + 1;
 
             return result;
+        }
+
+        std::string
+        StringTable::operator[] (unsigned o)
+        {
+            std::vector<std::pair<std::string, unsigned> >::const_iterator e(std::find_if(
+                        _imp->entries.begin(), _imp->entries.end(), internal::OffsetComparator(o)));
+            if (_imp->entries.end() != e)
+                return e->first;
+
+            throw InternalError("elf", "There is no string at offset '" + stringify(o) + "'");
+        }
+
+        void
+        StringTable::read(const Data & data)
+        {
+            std::vector<char> raw_data(data.size());
+            data.read(0, &raw_data[0], data.size());
+
+            unsigned current_offset(1);
+            while (current_offset < raw_data.size())
+            {
+                std::string s(&raw_data[current_offset]);
+                _imp->entries.push_back(std::pair<std::string, unsigned>(s, current_offset));
+                current_offset += s.size() + 1;
+            }
+
+            _imp->offset = current_offset;
         }
 
         void
