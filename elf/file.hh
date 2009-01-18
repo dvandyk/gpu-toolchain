@@ -53,7 +53,13 @@ namespace gpu
                         Parameters & type(unsigned type);
                 };
 
+            private:
                 File(const Parameters & parameters);
+
+            public:
+                static File open(const std::string & filename);
+
+                static File create(const Parameters & parameters);
 
                 ~File();
 

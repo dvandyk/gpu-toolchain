@@ -145,6 +145,12 @@ namespace gpu
             }
         }
 
+        File
+        File::create(const Parameters & parameters)
+        {
+            return File(parameters);
+        }
+
         unsigned
         File::index(const Section & section)
         {
@@ -154,6 +160,71 @@ namespace gpu
                 throw InternalError("elf", "Trying to get the index of a section that has not been added yet");
 
             return std::distance(_imp->sections.begin(), s) + 1;
+        }
+
+        File
+        File::open(const std::string & filename)
+        {
+            if (elf_version(EV_CURRENT) == EV_NONE)
+                throw InternalError("elf", "libelf version mismatch");
+
+            int fd(::open(filename.c_str(), O_RDONLY, 0777));
+            if (fd < 0)
+                throw InternalError("elf", "Could not open file '" + filename + "'");
+
+            Elf * e(elf_begin(fd, ELF_C_READ, NULL));
+            if (0 == e)
+                throw Error("elf_begin");
+
+            if (ELF_K_ELF != elf_kind(e))
+                throw InternalError("elf", "Not an ELF file");
+
+            Elf32_Ehdr * ehdr(elf32_getehdr(e));
+            if (0 == ehdr)
+                throw Error("elf32_getehdr");
+
+            File result(File::Parameters()
+                    .data(ehdr->e_ident[EI_DATA])
+                    .machine(ehdr->e_machine)
+                    .type(ehdr->e_type));
+
+            // load .shstrtab
+            {
+                size_t shstrndx(SHN_UNDEF);
+                if (0 != elf_getshstrndx(e, &shstrndx))
+                    throw Error("elf_getshstrndx");
+
+                Elf_Scn * shstrscn(elf_getscn(e, shstrndx));
+                Elf_Data * shstrdata(elf_getdata(shstrscn, 0));
+
+                Data data;
+                data.resize(shstrdata->d_size);
+                data.write(0, reinterpret_cast<const char *>(shstrdata->d_buf), shstrdata->d_size);
+
+                result._imp->sh_strtab.read(data);
+            }
+
+            // load sections
+            unsigned index(1);
+            for (Elf_Scn * scn(elf_nextscn(e, 0)) ; 0 != scn ; scn = elf_nextscn(e, scn), ++index)
+            {
+                Elf32_Shdr * shdr(elf32_getshdr(scn));
+                Elf_Data * data(elf_getdata(scn, 0));
+
+                Section section(Section::Parameters()
+                        .alignment(data->d_align)
+                        .flags(shdr->sh_flags)
+                        .link(shdr->sh_link)
+                        .name(result._imp->sh_strtab[shdr->sh_name])
+                        .type(shdr->sh_type));
+
+                section.data().resize(data->d_size);
+
+                result._imp->sections.push_back(section);
+                result._imp->section_table.append(section.name());
+            }
+
+            return result;
         }
 
         const SectionTable &

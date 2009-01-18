@@ -71,10 +71,10 @@ namespace gpu
         void
         Assembler::write(const std::string & filename) const
         {
-            elf::File file(elf::File::Parameters()
-                    .data(ELFDATA2LSB)
-                    .machine(0xA600)
-                    .type(ET_REL));
+            elf::File file(elf::File::create(elf::File::Parameters()
+                        .data(ELFDATA2LSB)
+                        .machine(0xA600)
+                        .type(ET_REL)));
 
             // write symbols to symbol table
             for (Sequence<elf::Symbol>::Iterator s(_imp->symbols.begin()), s_end(_imp->symbols.end()) ;

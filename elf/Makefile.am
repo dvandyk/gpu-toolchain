@@ -33,6 +33,7 @@ data_TEST_LDADD = libgpuelf.la ../tests/libgputests.a ../utils/libgpuutils.la
 
 file_TEST_SOURCES = file_TEST.cc
 file_TEST_LDADD = libgpuelf.la ../tests/libgputests.a ../utils/libgpuutils.la
+EXTRA_DIST += file_TEST_DATA/minimal
 
 string_table_TEST_SOURCES = string_table_TEST.cc
 string_table_TEST_LDADD = libgpuelf.la ../tests/libgputests.a ../utils/libgpuutils.la

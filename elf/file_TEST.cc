@@ -21,28 +21,54 @@
 #include <elf/file.hh>
 #include <utils/stringify.hh>
 
+#include <algorithm>
+#include <vector>
+
 #include <elf.h>
 
 using namespace gpu;
 using namespace tests;
 
-struct ElfFileTest :
+struct ElfFileWriteTest :
     public Test
 {
-    ElfFileTest() :
-        Test("elf_file_test")
+    ElfFileWriteTest() :
+        Test("elf_file_write_test")
     {
     }
 
     void run()
     {
         std::string filename(stringify(GPU_BUILDDIR) + "/elf/file_TEST.output");
-        elf::File file(elf::File::Parameters()
-                .data(ELFDATA2LSB)
-                .machine(EM_PPC)
-                .type(ET_REL));
+        elf::File file(elf::File::create(elf::File::Parameters()
+                    .data(ELFDATA2LSB)
+                    .machine(EM_PPC)
+                    .type(ET_REL)));
 
 
         file.write(filename);
     }
-} elf_file_test;
+} elf_file_write_test;
+
+struct ElfFileReadTest :
+    public Test
+{
+    ElfFileReadTest() :
+        Test("elf_file_read_test")
+    {
+    }
+
+    void run()
+    {
+        std::string filename(stringify(GPU_SRCDIR) + "/elf/file_TEST_DATA/minimal");
+        elf::File file(elf::File::open(filename));
+
+        std::vector<std::string> section_names;
+        for (elf::File::Iterator i(file.begin()), i_end(file.end()) ; i != i_end ; ++i)
+        {
+            section_names.push_back(i->name());
+        }
+
+        TEST_CHECK(section_names.end() != find(section_names.begin(), section_names.end(), ".alu"));
+    }
+} elf_file_read_test;
