@@ -32,6 +32,9 @@
 
 namespace gpu
 {
+    template
+    struct WrappedForwardIterator<elf::File::SectionIteratorTag, elf::Section>;
+
     template <>
     struct Implementation<elf::File> :
         public elf::File::Parameters
