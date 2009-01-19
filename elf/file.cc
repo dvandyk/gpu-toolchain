@@ -219,6 +219,7 @@ namespace gpu
                         .type(shdr->sh_type));
 
                 section.data().resize(data->d_size);
+                section.data().write(0, reinterpret_cast<const char *>(data->d_buf), data->d_size);
 
                 result._imp->sections.push_back(section);
                 result._imp->section_table.append(section.name());
