@@ -39,11 +39,15 @@ namespace gpu
     struct Implementation<elf::File> :
         public elf::File::Parameters
     {
+        // Sections
         std::vector<elf::Section> sections;
 
         elf::SectionTable section_table;
 
         elf::StringTable sh_strtab;
+
+        // Segments
+        std::vector<elf::Segment> segments;
 
         Implementation(const elf::File::Parameters & parameters) :
             elf::File::Parameters(parameters)
@@ -143,6 +147,12 @@ namespace gpu
             {
                 append(*s);
             }
+        }
+
+        void
+        File::append(const Segment & segment)
+        {
+            _imp->segments.push_back(segment);
         }
 
         File
@@ -257,6 +267,7 @@ namespace gpu
             ehdr->e_type = _imp->_type;
             ehdr->e_version = EV_CURRENT;
 
+            // Sections
             _imp->sh_strtab.write(_imp->sections.front().data());
             bool shstrab(true);
             for (std::vector<Section>::iterator s(_imp->sections.begin()), s_end(_imp->sections.end()) ;
@@ -292,6 +303,19 @@ namespace gpu
                     ehdr->e_shstrndx = elf_ndxscn(scn);
                     shstrab = false;
                 }
+            }
+
+            // Segments
+            Elf32_Phdr * phdr(elf32_newphdr(e, _imp->segments.size()));
+            for (std::vector<Segment>::const_iterator s(_imp->segments.begin()), s_end(_imp->segments.end()) ;
+                    s != s_end ; ++s)
+            {
+                phdr->p_vaddr = s->parameters()._address;
+                phdr->p_align = s->parameters()._alignment;
+                phdr->p_flags = s->parameters()._flags;
+                phdr->p_offset = s->parameters()._offset;
+                phdr->p_filesz = phdr->p_memsz = s->parameters()._size;
+                phdr->p_type = s->parameters()._type;
             }
 
             if (elf_update(e, ELF_C_WRITE) < 0)
