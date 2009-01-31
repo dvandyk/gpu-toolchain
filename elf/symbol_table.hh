@@ -44,6 +44,8 @@ namespace gpu
 
                 void append(const Symbol & symbol);
 
+                bool empty() const;
+
                 void write(const SectionTable & section_table, Data data);
         };
     }

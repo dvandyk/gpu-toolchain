@@ -89,6 +89,12 @@ namespace gpu
             _imp->map.insert(std::pair<const std::string, unsigned>(symbol.name, _imp->entries.size()));
         }
 
+        bool
+        SymbolTable::empty() const
+        {
+            return _imp->entries.empty();
+        }
+
         void
         SymbolTable::write(const SectionTable & section_table, Data data)
         {
