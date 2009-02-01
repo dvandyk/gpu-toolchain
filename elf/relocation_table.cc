@@ -21,6 +21,7 @@
 #include <utils/exception.hh>
 #include <utils/private_implementation_pattern-impl.hh>
 #include <utils/tuple.hh>
+#include <utils/wrapped_forward_iterator-impl.hh>
 
 #include <algorithm>
 #include <cstring>
@@ -31,10 +32,12 @@
 
 namespace gpu
 {
+    template class WrappedForwardIterator<elf::RelocationTable::IteratorTag, elf::Relocation>;
+
     template <>
     struct Implementation<elf::RelocationTable>
     {
-        std::vector<Elf32_Rela> entries;
+        std::vector<elf::Relocation> entries;
 
         elf::SymbolTable symtab;
 
@@ -64,27 +67,46 @@ namespace gpu
         }
 
         void
-        RelocationTable::append(const Relocation & r)
+        RelocationTable::append(const Relocation & entry)
         {
-            unsigned symbol_index(_imp->symtab[r.symbol]);
-            if (0 == symbol_index)
-                throw InternalError("elf", "Unresolved symbol '" + r.symbol + "'");
+            _imp->entries.push_back(entry);
+        }
 
-            Elf32_Rela relocation;
-            relocation.r_addend = r.addend;
-            relocation.r_info = ELF32_R_INFO(symbol_index, r.type);
-            relocation.r_offset = r.offset;
+        RelocationTable::Iterator
+        RelocationTable::begin() const
+        {
+            return Iterator(_imp->entries.begin());
+        }
 
-            _imp->entries.push_back(relocation);
+        RelocationTable::Iterator
+        RelocationTable::end() const
+        {
+            return Iterator(_imp->entries.end());
         }
 
         void
         RelocationTable::write(Data data)
         {
             unsigned size(_imp->entries.size() * sizeof(Elf32_Rela));
+            std::vector<Elf32_Rela> relocations;
+
+            for (std::vector<Relocation>::const_iterator i(_imp->entries.begin()), i_end(_imp->entries.end()) ;
+                    i != i_end ; ++i)
+            {
+                unsigned symbol_index(_imp->symtab[i->symbol]);
+                if (0 == symbol_index)
+                    throw InternalError("elf", "Relocation against unknown symbol '" + i->symbol + "'");
+
+                Elf32_Rela r;
+                r.r_addend = i->addend;
+                r.r_info = ELF32_R_INFO(symbol_index, i->type);
+                r.r_offset = i->offset;
+
+                relocations.push_back(r);
+            }
 
             data.resize(size);
-            data.write(0, reinterpret_cast<char *>(&_imp->entries[0]), size);
+            data.write(0, reinterpret_cast<char *>(&relocations[0]), size);
         }
     }
 }

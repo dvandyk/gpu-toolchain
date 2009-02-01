@@ -23,6 +23,7 @@
 #include <elf/data.hh>
 #include <elf/symbol_table.hh>
 #include <utils/private_implementation_pattern.hh>
+#include <utils/wrapped_forward_iterator.hh>
 
 #include <string>
 
@@ -51,7 +52,14 @@ namespace gpu
 
                 ~RelocationTable();
 
+                struct IteratorTag;
+                typedef WrappedForwardIterator<IteratorTag, elf::Relocation> Iterator;
+
                 void append(const Relocation & relocation);
+
+                Iterator begin() const;
+
+                Iterator end() const;
 
                 void write(Data data);
         };
