@@ -12,6 +12,7 @@ noinst_LTLIBRARIES = libgpuelf.la
 libgpuelf_la_SOURCES = \
 	data.cc data.hh \
 	file.cc file.hh \
+	function.cc function.hh \
 	error.cc error.hh \
 	note_table.cc note_table.hh \
 	relocation_table.cc relocation_table.hh \
