@@ -23,6 +23,7 @@
 #include <elf/section.hh>
 #include <elf/segment.hh>
 #include <elf/string_table.hh>
+#include <elf/symbol_table.hh>
 #include <utils/private_implementation_pattern.hh>
 #include <utils/sequence.hh>
 #include <utils/wrapped_forward_iterator.hh>
@@ -67,9 +68,11 @@ namespace gpu
                 struct SectionIteratorTag;
                 typedef WrappedForwardIterator<SectionIteratorTag, elf::Section> Iterator;
 
-                Iterator begin();
+                Iterator begin() const;
 
-                Iterator end();
+                Iterator end() const;
+
+                Iterator find(const std::string & name) const;
 
                 void append(const Section & section);
 
@@ -80,6 +83,8 @@ namespace gpu
                 unsigned index(const Section & section);
 
                 const SectionTable & section_table() const;
+
+                SymbolTable symbol_table() const;
 
                 void write(const std::string & filename);
         };

@@ -20,6 +20,7 @@
 #include <elf/error.hh>
 #include <elf/file.hh>
 #include <elf/string_table.hh>
+#include <elf/symbol_table.hh>
 #include <utils/private_implementation_pattern-impl.hh>
 #include <utils/sequence-impl.hh>
 #include <utils/wrapped_forward_iterator-impl.hh>
@@ -46,18 +47,20 @@ namespace gpu
 
         elf::StringTable sh_strtab;
 
+        elf::StringTable strtab;
+
+        elf::SymbolTable symtab;
+
         // Segments
         std::vector<elf::Segment> segments;
 
         Implementation(const elf::File::Parameters & parameters) :
-            elf::File::Parameters(parameters)
+            elf::File::Parameters(parameters),
+            symtab(strtab)
         {
             sections.push_back(elf::Section(elf::Section::Parameters()
-                        .name(".shstrtab")
-                        .type(SHT_STRTAB)
-                        .flags(SHF_STRINGS)));
-            sh_strtab[".shstrtab"];
-            section_table.append(".shstrtab");
+                        .name("")));
+            section_table[""];
         }
     };
 
@@ -115,15 +118,21 @@ namespace gpu
         }
 
         File::Iterator
-        File::begin()
+        File::begin() const
         {
             return Iterator(_imp->sections.begin());
         }
 
         File::Iterator
-        File::end()
+        File::end() const
         {
             return Iterator(_imp->sections.end());
+        }
+
+        File::Iterator
+        File::find(const std::string & name) const
+        {
+            return std::find_if(begin(), end(), internal::SectionComparator(name));
         }
 
         void
@@ -164,7 +173,16 @@ namespace gpu
         File
         File::create(const Parameters & parameters)
         {
-            return File(parameters);
+            File result(parameters);
+
+            result._imp->sections.push_back(elf::Section(elf::Section::Parameters()
+                        .name(".shstrtab")
+                        .type(SHT_STRTAB)
+                        .flags(SHF_STRINGS)));
+            result._imp->sh_strtab[".shstrtab"];
+            result._imp->section_table.append(".shstrtab");
+
+            return result;
         }
 
         unsigned
@@ -175,7 +193,7 @@ namespace gpu
             if (_imp->sections.end() == s)
                 throw InternalError("elf", "Trying to get the index of a section that has not been added yet");
 
-            return std::distance(_imp->sections.begin(), s) + 1;
+            return std::distance(_imp->sections.begin(), s);
         }
 
         File
@@ -241,6 +259,22 @@ namespace gpu
                 result._imp->section_table.append(section.name());
             }
 
+            // load symbols
+            do {
+                std::vector<Section>::const_iterator i(std::find_if(
+                            result._imp->sections.begin(), result._imp->sections.end(), internal::SectionComparator(".strtab")));
+                if (i == result._imp->sections.end())
+                    break;
+
+                std::vector<Section>::const_iterator j(std::find_if(
+                            result._imp->sections.begin(), result._imp->sections.end(), internal::SectionComparator(".symtab")));
+                if (i == result._imp->sections.end())
+                    break;
+
+                result._imp->strtab.read(i->data());
+                result._imp->symtab.read(result._imp->section_table, j->data());
+            } while (false);
+
             return result;
         }
 
@@ -248,6 +282,12 @@ namespace gpu
         File::section_table() const
         {
             return _imp->section_table;
+        }
+
+        SymbolTable
+        File::symbol_table() const
+        {
+            return _imp->symtab;
         }
 
         void
@@ -274,11 +314,14 @@ namespace gpu
             ehdr->e_version = EV_CURRENT;
 
             // Sections
-            _imp->sh_strtab.write(_imp->sections.front().data());
+            _imp->sh_strtab.write(_imp->sections[1].data());
             bool shstrab(true);
             for (std::vector<Section>::iterator s(_imp->sections.begin()), s_end(_imp->sections.end()) ;
                     s != s_end ; ++s)
             {
+                if (s->name().empty())
+                    continue;
+
                 Elf_Scn * scn(elf_newscn(e));
                 if (0 == scn)
                     throw Error("elf_newscn");

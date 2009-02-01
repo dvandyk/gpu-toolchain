@@ -96,6 +96,28 @@ namespace gpu
         }
 
         void
+        SymbolTable::read(const SectionTable & section_table, const Data & data)
+        {
+            const Elf32_Sym * s(reinterpret_cast<const Elf32_Sym *>(data.buffer()));
+            const Elf32_Sym * s_end(s + data.size() / sizeof(Elf32_Sym));
+
+            ++s; // discard dummy
+
+            for (unsigned i(1) ; s != s_end ; ++s, ++i)
+            {
+                Symbol symbol(_imp->strtab[s->st_name]);
+                symbol.bind = ELF32_ST_BIND(s->st_info);
+                symbol.section = section_table[s->st_shndx];
+                symbol.size = s->st_size;
+                symbol.type = ELF32_ST_TYPE(s->st_info);
+                symbol.value = s->st_value;
+
+                _imp->map.insert(std::pair<const std::string, unsigned>(symbol.name, i));
+                _imp->entries.push_back(symbol);
+            }
+        }
+
+        void
         SymbolTable::write(const SectionTable & section_table, Data data)
         {
             std::vector<Elf32_Sym> symbols;

@@ -70,5 +70,11 @@ struct ElfFileReadTest :
         }
 
         TEST_CHECK(section_names.end() != find(section_names.begin(), section_names.end(), ".alu"));
+
+        elf::SymbolTable symtab(file.symbol_table());
+
+        TEST_CHECK_EQUAL(1, symtab[".cf"]);
+        TEST_CHECK_EQUAL(2, symtab["main"]);
+        TEST_CHECK_EQUAL(6, symtab[".tex"]);
     }
 } elf_file_read_test;

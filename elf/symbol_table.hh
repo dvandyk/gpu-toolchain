@@ -46,6 +46,8 @@ namespace gpu
 
                 bool empty() const;
 
+                void read(const SectionTable & section_table, const Data & data);
+
                 void write(const SectionTable & section_table, Data data);
         };
     }
