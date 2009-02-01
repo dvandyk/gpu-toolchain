@@ -21,6 +21,7 @@
 #include <utils/exception.hh>
 #include <utils/private_implementation_pattern-impl.hh>
 #include <utils/tuple.hh>
+#include <utils/wrapped_forward_iterator-impl.hh>
 
 #include <algorithm>
 #include <cstring>
@@ -31,6 +32,8 @@
 
 namespace gpu
 {
+    template class WrappedForwardIterator<elf::SymbolTable::IteratorTag, elf::Symbol>;
+
     template <>
     struct Implementation<elf::SymbolTable>
     {
@@ -65,6 +68,18 @@ namespace gpu
                 return 0;
 
             return e->second;
+        }
+
+        SymbolTable::Iterator
+        SymbolTable::begin() const
+        {
+            return Iterator(_imp->entries.begin());
+        }
+
+        SymbolTable::Iterator
+        SymbolTable::end() const
+        {
+            return Iterator(_imp->entries.end());
         }
 
         void

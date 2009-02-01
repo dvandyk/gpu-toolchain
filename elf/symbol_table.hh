@@ -25,6 +25,7 @@
 #include <elf/string_table.hh>
 #include <elf/symbol.hh>
 #include <utils/private_implementation_pattern.hh>
+#include <utils/wrapped_forward_iterator.hh>
 
 #include <string>
 
@@ -41,6 +42,13 @@ namespace gpu
                 ~SymbolTable();
 
                 unsigned operator[] (const std::string & name);
+
+                struct IteratorTag;
+                typedef WrappedForwardIterator<IteratorTag, Symbol> Iterator;
+
+                Iterator begin() const;
+
+                Iterator end() const;
 
                 void append(const Symbol & symbol);
 
