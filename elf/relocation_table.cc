@@ -85,6 +85,21 @@ namespace gpu
         }
 
         void
+        RelocationTable::read(const Data & data)
+        {
+            const Elf32_Rela * r(reinterpret_cast<const Elf32_Rela *>(data.buffer()));
+            const Elf32_Rela * r_end(r + data.size() / sizeof(Elf32_Rela));
+
+            for ( ; r != r_end ; ++r)
+            {
+                unsigned symbol_index(ELF32_R_SYM(r->r_info));
+                Relocation entry(r->r_offset, _imp->symtab[symbol_index].name, ELF32_R_TYPE(r->r_info), r->r_addend);
+
+                _imp->entries.push_back(entry);
+            }
+        }
+
+        void
         RelocationTable::write(Data data)
         {
             unsigned size(_imp->entries.size() * sizeof(Elf32_Rela));

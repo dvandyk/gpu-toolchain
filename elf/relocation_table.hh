@@ -61,6 +61,8 @@ namespace gpu
 
                 Iterator end() const;
 
+                void read(const Data & data);
+
                 void write(Data data);
         };
     }
