@@ -42,7 +42,9 @@ namespace gpu
     template <>
     struct Implementation<elf::SectionTable>
     {
-        std::map<std::string, unsigned> sections;
+        // FIXME: Use a bimap
+        std::map<std::string, const unsigned> names_to_indices;
+        std::map<unsigned, const std::string> indices_to_names;
 
         Implementation()
         {
@@ -136,14 +138,26 @@ namespace gpu
         void
         SectionTable::append(const std::string & section)
         {
-            _imp->sections.insert(std::pair<const std::string, unsigned>(section, _imp->sections.size() + 1));
+            unsigned index(_imp->names_to_indices.size() + 1);
+            _imp->names_to_indices.insert(std::pair<const std::string, const unsigned>(section, index));
+            _imp->indices_to_names.insert(std::pair<const unsigned, const std::string>(index, section));
         }
 
         unsigned
         SectionTable::operator[] (const std::string & section) const
         {
-            std::map<std::string, unsigned>::const_iterator s(_imp->sections.find(section));
-            if (_imp->sections.end() == s)
+            std::map<std::string, const unsigned>::const_iterator s(_imp->names_to_indices.find(section));
+            if (_imp->names_to_indices.end() == s)
+                return 0;
+
+            return s->second;
+        }
+
+        std::string
+        SectionTable::operator[] (unsigned index) const
+        {
+            std::map<unsigned, const std::string>::const_iterator s(_imp->indices_to_names.find(index));
+            if (_imp->indices_to_names.end() == s)
                 return 0;
 
             return s->second;

@@ -91,6 +91,8 @@ namespace gpu
                 ~SectionTable();
 
                 unsigned operator[] (const std::string &) const;
+
+                std::string operator[] (unsigned) const;
         };
     }
 }
