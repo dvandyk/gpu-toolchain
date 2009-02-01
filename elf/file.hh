@@ -21,6 +21,7 @@
 #define GPU_GUARD_ELF_FILE_HH 1
 
 #include <elf/section.hh>
+#include <elf/segment.hh>
 #include <elf/string_table.hh>
 #include <utils/private_implementation_pattern.hh>
 #include <utils/sequence.hh>
@@ -73,6 +74,8 @@ namespace gpu
                 void append(const Section & section);
 
                 void append(const Sequence<Section> & sections);
+
+                void append(const Segment & segment);
 
                 unsigned index(const Section & section);
 

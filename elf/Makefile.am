@@ -16,6 +16,7 @@ libgpuelf_la_SOURCES = \
 	note_table.cc note_table.hh \
 	relocation_table.cc relocation_table.hh \
 	section.cc section.hh \
+	segment.cc segment.hh \
 	string_table.cc string_table.hh \
 	symbol.cc symbol.hh \
 	symbol_table.cc symbol_table.hh
