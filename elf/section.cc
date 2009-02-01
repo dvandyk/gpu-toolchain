@@ -101,7 +101,7 @@ namespace gpu
         }
 
         Data
-        Section::data()
+        Section::data() const
         {
             return _imp->data;
         }

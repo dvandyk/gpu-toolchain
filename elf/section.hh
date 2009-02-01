@@ -67,7 +67,7 @@ namespace gpu
 
                 ~Section();
 
-                Data data();
+                Data data() const;
 
                 void link(unsigned);
 
