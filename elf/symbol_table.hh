@@ -43,6 +43,8 @@ namespace gpu
 
                 unsigned operator[] (const std::string & name);
 
+                Symbol operator[] (unsigned index);
+
                 struct IteratorTag;
                 typedef WrappedForwardIterator<IteratorTag, Symbol> Iterator;
 

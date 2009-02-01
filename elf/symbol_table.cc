@@ -20,6 +20,7 @@
 #include <elf/symbol_table.hh>
 #include <utils/exception.hh>
 #include <utils/private_implementation_pattern-impl.hh>
+#include <utils/stringify.hh>
 #include <utils/tuple.hh>
 #include <utils/wrapped_forward_iterator-impl.hh>
 
@@ -68,6 +69,18 @@ namespace gpu
                 return 0;
 
             return e->second;
+        }
+
+        Symbol
+        SymbolTable::operator[] (unsigned index)
+        {
+            if (index > _imp->entries.size())
+                throw InternalError("elf", "Invalid symbol index: " + stringify(index));
+
+            if (0 == index)
+                throw InternalError("elf", "Symbol at index 0 cannot be returned");
+
+            return _imp->entries[index - 1];
         }
 
         SymbolTable::Iterator
