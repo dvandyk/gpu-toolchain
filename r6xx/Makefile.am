@@ -18,6 +18,7 @@ libgpur6xx_la_SOURCES = \
 	cf_entities.cc cf_entities-fwd.hh cf_entities.hh \
 	cf_section.cc cf_section.hh \
 	error.cc error.hh \
+	linker.cc linker.hh \
 	relocation.hh \
 	section.cc section-fwd.hh section.hh \
 	tex_destination_gpr.cc tex_destination_gpr.hh \
