@@ -108,6 +108,7 @@ dnl output
 AM_CONFIG_HEADER(config.h)
 AC_OUTPUT(
 	Makefile
+	bin/Makefile
 	common/Makefile
 	elf/Makefile
 	r6xx/Makefile
