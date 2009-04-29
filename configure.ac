@@ -110,6 +110,7 @@ AC_OUTPUT(
 	Makefile
 	common/Makefile
 	elf/Makefile
+	mpcl/Makefile
 	r6xx/Makefile
 	tests/Makefile
 	utils/Makefile
