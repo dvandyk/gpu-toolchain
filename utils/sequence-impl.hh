@@ -74,6 +74,13 @@ namespace gpu
     }
 
     template <typename T_>
+    void
+    Sequence<T_>::drop_first() const
+    {
+        this->_imp->list.pop_front();
+    }
+
+    template <typename T_>
     bool
     Sequence<T_>::empty() const
     {
