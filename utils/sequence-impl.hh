@@ -109,6 +109,13 @@ namespace gpu
     }
 
     template <typename T_>
+    void
+    Sequence<T_>::insert_first(const T_ & t)
+    {
+        this->_imp->list.push_front(t);
+    }
+
+    template <typename T_>
     const T_ &
     Sequence<T_>::last() const
     {

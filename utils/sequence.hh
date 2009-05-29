@@ -65,6 +65,8 @@ namespace gpu
 
             T_ & first();
 
+            void insert_first(const T_ &);
+
             const T_ & last() const;
 
             T_ & last();
