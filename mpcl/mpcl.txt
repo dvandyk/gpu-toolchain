@@ -1,0 +1,99 @@
+# MPCL Specification #
+
+## Tokens ##
+
+Valid MPCL tokens are defined by the following expressions
+
+ * Identifier
+
+        id ::= [:alpha:] ([:alpha:] | [:digit:] | '_')*
+
+ * Operator
+
+        op ::= '+' | '-' | '*' | '/'
+             | '+=' | '-=' | '*=' | '/='
+             | '++' | '--'
+            | '=' | '==' | '!='
+            | '<' | '<=' | '>' | '>='
+
+ * Integer literal
+
+        int ::= ( '+' | '-' )? [:digit:]+
+
+ * Floating point literal
+
+        float ::= ( '+' | '-' )? [:digit:]+ '.' [:digit:]+ ( ( 'e' | 'E' ) ( '+' | '-' )? [:digit:]+ )?
+
+ * Comment
+
+        comment ::= '/' '*' ( '*' '/' )!?* '*' '/'
+
+ * Delimiter
+
+        delim ::= '{' | '}' | '[' | ']' | '(' | ')' | ',' | ';'
+
+Inputs that do not match any of the above tokens must throw a scanning error.
+
+## Grammar ##
+
+    translation-unit ::= <translation-element> { <translation-element> }
+
+    translation-element ::= <function>
+
+
+    function ::= <identifier> <identifier> <parameter-list> ( ';' | <statement-block> )
+
+
+    parameter-list ::= '(' <parameter> { ',' <parameter> } ')'
+
+    parameter ::= "void" | <parameter-modifier> <parameter-type> <identifier> | <parameter-type> <identifier>
+
+    parameter-modifier ::= "in" | "out" | "global" | "const"
+
+    parameter-type ::= <vector-type> | <scalar-type>
+
+
+    vector-type ::= "vector" '<' <scalar-type> '>'
+
+    scalar-type ::= <identifier>
+
+
+    expression ::= <sum>
+
+    sum ::= <product> { ( '+' | '-' ) <product> }
+
+    <product> ::= <scalar> { ( '*' | '/' ) <scalar> }
+
+    <scalar> ::= <literal> | <identifier> | '(' <expression> ')'
+
+    <literal> ::= <int> | <float>
+
+
+    statement-block ::= '{' <statment> { <statement> } '}'
+
+    statement   ::= <declaration-statement> |<assignment-statement>
+
+
+    declaration-statement ::= <declaration-type> <declaration-list> ';'
+
+    declaration-type ::= <declaration-modifier> <scalar-type> | <scalar-type>
+
+    declaration-list ::= <declaration-element> { ',' <declaration-element> }
+
+    declaration-element ::= <identifier> '=' <expression> | <identifier>
+
+
+    assignment-statement ::= <identifier> '=' <expression> ';'
+
+
+    foreach-statement ::= "foreach" <foreach-list> <statement-block>
+
+    foreach-list ::= '(' <foreach-element> { ',' <foreach-element> } ')'
+
+    foreach-element ::= <identifier> "in" <identifier>
+
+
+    return-statement ::= "return" <expression> ';'
+
+<!-- vim: set tw=100 ft=text spell spelllang=en sw=4 sts=4 et : -->
+
