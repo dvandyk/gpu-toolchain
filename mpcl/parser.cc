@@ -394,13 +394,9 @@ namespace gpu
         switch (tokens.first()->type)
         {
             case tt_integer:
-                result = ExpressionPtr(new Value(destringify<int>(text)));
-
-                break;
-
             case tt_float:
-                std::cout << "Is a float" << std::endl;
-                throw std::string("not implemented");
+                result = ExpressionPtr(new Value(Number(text)));
+                break;
 
             case tt_identifier:
                 result = ExpressionPtr(new Variable(text));
