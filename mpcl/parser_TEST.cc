@@ -21,6 +21,8 @@
 #include <mpcl/scanner.hh>
 #include <tests/tests.hh>
 
+#include <iostream>
+
 using namespace gpu;
 using namespace tests;
 
@@ -37,7 +39,8 @@ struct SimpleParserTest :
         static const std::string input =
             "float f(float x)\n"
             "{\n"
-            "\tfloat denom = x * x + 1;\n"
+            "\tfloat denom;\n"
+            "\tdenom = x * x + 1;\n"
             "\treturn 1 / denom;\n"
             "}\n";
 
@@ -49,3 +52,79 @@ struct SimpleParserTest :
         p.parse();
     }
 } simple_parser_test;
+
+struct BogusParserTest :
+    public Test
+{
+    BogusParserTest() :
+        Test("bogus_parser_test")
+    {
+    }
+
+    virtual void run()
+    {
+        static const std::string input =
+            "void invert(vector<float input\n"
+            "{\n"
+            "\tforeach (x in input\n"
+            "\t{\n"
+            "\t\tx = 1 / x\n"
+            "\t}\n"
+            "}\n";
+
+        static const ParserErrorMessage reference[] =
+        {
+            ParserErrorMessage(pet_expected_closing_chevron, 1, "input"),
+            ParserErrorMessage(pet_expected_closing_parenthesis, 2, "{"),
+            ParserErrorMessage(pet_expected_closing_parenthesis, 4, "{"),
+            ParserErrorMessage(pet_expected_semicolon, 6, "}")
+        };
+
+        std::stringstream ss(input);
+        Scanner s(ss);
+        s.scan();
+
+        Parser p(s.tokens());
+        TEST_CHECK_EQUAL(1, p.parse().size());
+
+        Sequence<ParserErrorMessage> errors(p.errors());
+        TEST_CHECK_EQUAL(sizeof(reference) / sizeof(*reference), errors.size());
+
+        const ParserErrorMessage * j(reference);
+        for (Sequence<ParserErrorMessage>::Iterator i(errors.begin()), i_end(errors.end()) ;
+                i != i_end ; ++i, ++j)
+        {
+            TEST_CHECK_EQUAL(*i, *j);
+        }
+    }
+} bogus_parser_test;
+
+struct MultipleFunctionsParserTest :
+    public Test
+{
+    MultipleFunctionsParserTest() :
+        Test("multiple_functions_parser_test")
+    {
+    }
+
+    virtual void run()
+    {
+        static const std::string input =
+            "float a(float x)\n"
+            "{\n"
+            "\treturn 1 / x;\n"
+            "}\n"
+            "\n"
+            "int32u b(int32u x)\n"
+            "{\n"
+            "\treturn x*x;\n"
+            "}\n";
+
+        std::stringstream ss(input);
+        Scanner s(ss);
+        s.scan();
+
+        Parser p(s.tokens());
+        p.parse();
+    }
+} multiple_functions_parser_test;

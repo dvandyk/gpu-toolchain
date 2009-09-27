@@ -17,31 +17,31 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MPCL_GUARD_SCANNER_HH
-#define MPCL_GUARD_SCANNER_HH 1
+#ifndef GPU_TOOLCHAIN_GUARD_MPCL_PARAMETER_HH
+#define GPU_TOOLCHAIN_GUARD_MPCL_PARAMETER_HH 1
 
-#include <mpcl/token.hh>
+#include <mpcl/type.hh>
 #include <utils/memory.hh>
-#include <utils/private_implementation_pattern.hh>
 #include <utils/sequence.hh>
-
-#include <istream>
-#include <tr1/functional>
 
 namespace gpu
 {
-    class Scanner :
-        public PrivateImplementationPattern<Scanner>
+    struct Parameter
     {
-        public:
-            Scanner(std::istream & stream);
+        std::string name;
 
-            ~Scanner();
+        std::string type;
 
-            void scan();
-
-            Sequence<std::tr1::shared_ptr<Token> > tokens() const;
+        Parameter(const std::string & type, const std::string & name) :
+            type(type),
+            name(name)
+        {
+        }
     };
+
+    typedef std::tr1::shared_ptr<Parameter> ParameterPtr;
+
+    extern template class Sequence<ParameterPtr>;
 }
 
 #endif

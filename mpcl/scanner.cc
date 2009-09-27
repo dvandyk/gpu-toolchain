@@ -23,6 +23,8 @@
 #include <istream>
 #include <string>
 
+#include <iostream>
+
 namespace gpu
 {
     template <> struct Implementation<Scanner>
@@ -155,6 +157,11 @@ namespace gpu
         else if (std::string::npos != whitespaces.find_first_of(c))
         {
             text = "";
+            if ('\n' == c)
+            {
+                type = tt_linebreak;
+                accept();
+            }
         }
         else if (! stream.eof())
         {

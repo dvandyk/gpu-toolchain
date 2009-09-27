@@ -35,7 +35,7 @@ struct IdentifierTest :
     {
         {
             static std::string id_input =
-                "id1 id2\tid3\nfoo_bar_baz67";
+                "id1 id2\tid3\t \tfoo_bar_baz67";
 
             std::stringstream ss(id_input);
             Scanner s(ss);
@@ -65,7 +65,6 @@ struct IdentifierTest :
             }
 
             TEST_CHECK_EQUAL(s.tokens().size(), 7);
-
         }
     }
 } identifier_test;

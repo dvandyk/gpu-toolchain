@@ -2,6 +2,7 @@
 
 /*
  * Copyright (c) 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2009 Dirk Fischer <dirk.fischer@gmail.com>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -17,31 +18,22 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MPCL_GUARD_SCANNER_HH
-#define MPCL_GUARD_SCANNER_HH 1
+#ifndef GPU_GUARD_MPCL_STATEMENT_FWD_HH
+#define GPU_GUARD_MPCL_STATEMENT_FWD_HH 1
 
-#include <mpcl/token.hh>
 #include <utils/memory.hh>
-#include <utils/private_implementation_pattern.hh>
-#include <utils/sequence.hh>
-
-#include <istream>
-#include <tr1/functional>
 
 namespace gpu
 {
-    class Scanner :
-        public PrivateImplementationPattern<Scanner>
-    {
-        public:
-            Scanner(std::istream & stream);
+    struct Statement;
 
-            ~Scanner();
+    typedef std::tr1::shared_ptr<Statement> StatementPtr;
 
-            void scan();
+    struct Assignment;
 
-            Sequence<std::tr1::shared_ptr<Token> > tokens() const;
-    };
+    struct Declaration;
+
+    struct Return;
 }
 
 #endif

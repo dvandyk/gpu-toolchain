@@ -35,7 +35,8 @@ namespace gpu
         tt_float,
         tt_identifier,
         tt_integer,
-        tt_operator
+        tt_operator,
+        tt_linebreak
     };
 
     struct Token

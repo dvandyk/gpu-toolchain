@@ -20,6 +20,7 @@
 #ifndef MPCL_GUARD_PARSER_HH
 #define MPCL_GUARD_PARSER_HH 1
 
+#include <mpcl/function.hh>
 #include <mpcl/token.hh>
 #include <utils/private_implementation_pattern.hh>
 #include <utils/sequence.hh>
@@ -28,6 +29,33 @@
 
 namespace gpu
 {
+    enum ParserErrorType
+    {
+        pet_expected_semicolon,
+        pet_expected_closing_brace,
+        pet_expected_closing_chevron,
+        pet_expected_closing_parenthesis
+    };
+
+    struct ParserErrorMessage
+    {
+        ParserErrorType type;
+
+        unsigned line;
+
+        std::string message;
+
+        ParserErrorMessage(ParserErrorType type, unsigned line, const std::string & message);
+
+        bool operator!= (const ParserErrorMessage & other);
+    };
+
+    std::ostream & operator<< (std::ostream &, const ParserErrorMessage &);
+
+    extern template class Sequence<ParserErrorMessage>;
+
+    extern template class WrappedForwardIterator<Sequence<ParserErrorMessage>::IteratorTag, ParserErrorMessage>;
+
     class Parser :
         public PrivateImplementationPattern<Parser>
     {
@@ -36,7 +64,9 @@ namespace gpu
 
             ~Parser();
 
-            void parse();
+            Sequence<FunctionPtr> parse();
+
+            Sequence<ParserErrorMessage> errors();
     };
 }
 
