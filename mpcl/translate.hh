@@ -23,6 +23,7 @@
 #include <common/expression.hh>
 #include <mpcl/function.hh>
 #include <mpcl/statement.hh>
+#include <utils/number.hh>
 #include <utils/sequence.hh>
 #include <utils/wrapped_forward_iterator.hh>
 
@@ -40,15 +41,15 @@ namespace gpu
         public:
             PILOperandType type;
 
-            unsigned value;
+            Number value;
 
         private:
-            PILOperand(PILOperandType type, unsigned value);
+            PILOperand(PILOperandType type, const Number & value);
 
         public:
             bool operator!= (const PILOperand &);
 
-            static PILOperand Constant(unsigned value);
+            static PILOperand Constant(const Number & value);
 
             static PILOperand Temporary(unsigned value);
 

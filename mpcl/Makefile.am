@@ -16,7 +16,8 @@ libgpumpcl_la_SOURCES = \
 	scanner.cc scanner.hh \
 	statement.cc statement-fwd.hh statement.hh \
 	token.cc token.hh \
-	translate.cc translate.hh
+	translate.cc translate.hh \
+	type.hh
 
 libgpumpcl_la_CXXFLAGS = -I$(top_srcdir)
 

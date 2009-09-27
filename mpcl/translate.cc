@@ -26,7 +26,7 @@
 
 namespace gpu
 {
-    PILOperand::PILOperand(PILOperandType type, unsigned value) :
+    PILOperand::PILOperand(PILOperandType type, const Number & value) :
         type(type),
         value(value)
     {
@@ -45,7 +45,7 @@ namespace gpu
     }
 
     PILOperand
-    PILOperand::Constant(unsigned value)
+    PILOperand::Constant(const Number & value)
     {
         return PILOperand(pot_constant, value);
     }
@@ -53,13 +53,13 @@ namespace gpu
     PILOperand
     PILOperand::Temporary(unsigned value)
     {
-        return PILOperand(pot_temporary, value);
+        return PILOperand(pot_temporary, Number(value));
     }
 
     PILOperand
     PILOperand::Undefined()
     {
-        return PILOperand(pot_undefined, -1);
+        return PILOperand(pot_undefined, Number(-1));
     }
 
     std::ostream & operator<< (std::ostream & lhs, const PILOperand & rhs)
@@ -329,7 +329,7 @@ namespace gpu
             operations.append(PILOperation::Unary(
                         PILOperand::Temporary(counter),
                         pop_param,
-                        PILOperand::Constant(parameters)));
+                        PILOperand::Constant(Number(parameters))));
 
             mapping[p.name] = counter;
 

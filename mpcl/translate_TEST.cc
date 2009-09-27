@@ -41,8 +41,8 @@ struct SimpleTranslateTest :
             "float f(float x)\n"
             "{\n"
             "\tfloat denom;\n"
-            "\tdenom = x * x + 1;\n"
-            "\treturn 1 / denom;\n"
+            "\tdenom = x * x + 1.0;\n"
+            "\treturn 1.0 / denom;\n"
             "}\n";
 
         static const PILOperationPtr reference[] =
@@ -50,7 +50,7 @@ struct SimpleTranslateTest :
             PILOperation::Unary(
                     PILOperand::Temporary(1),
                     pop_param,
-                    PILOperand::Constant(1)),
+                    PILOperand::Constant(Number(1u))),
             PILOperation::Unary(
                     PILOperand::Temporary(2),
                     pop_assign,
@@ -71,7 +71,7 @@ struct SimpleTranslateTest :
             PILOperation::Unary(
                     PILOperand::Temporary(6),
                     pop_iload,
-                    PILOperand::Constant(1)),
+                    PILOperand::Constant(Number(1.0))),
             PILOperation::Binary(
                     PILOperand::Temporary(7),
                     pop_add,
@@ -84,7 +84,7 @@ struct SimpleTranslateTest :
             PILOperation::Unary(
                     PILOperand::Temporary(9),
                     pop_iload,
-                    PILOperand::Constant(1)),
+                    PILOperand::Constant(Number(1.0))),
             PILOperation::Unary(
                     PILOperand::Temporary(10),
                     pop_assign,
