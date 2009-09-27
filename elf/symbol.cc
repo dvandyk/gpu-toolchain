@@ -18,9 +18,14 @@
  */
 
 #include <elf/symbol.hh>
+#include <utils/sequence-impl.hh>
 
 namespace gpu
 {
+    template class Sequence<elf::Symbol>;
+
+    template class WrappedForwardIterator<Sequence<elf::Symbol>::IteratorTag, elf::Symbol>;
+
     namespace elf
     {
         Symbol::Symbol(const std::string & name) :

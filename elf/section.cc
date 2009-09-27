@@ -20,12 +20,17 @@
 #include <elf/section.hh>
 #include <utils/exception.hh>
 #include <utils/private_implementation_pattern-impl.hh>
+#include <utils/sequence-impl.hh>
 
 #include <map>
 #include <string>
 
 namespace gpu
 {
+    template class Sequence<elf::Section>;
+
+    template class WrappedForwardIterator<Sequence<elf::Section>::IteratorTag, elf::Section>;
+
     template <>
     struct Implementation<elf::Section> :
         public elf::Section::Parameters
