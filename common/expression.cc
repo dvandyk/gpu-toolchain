@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
-* Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+* Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
 *
 * This file is part of the GPU Toolchain. GPU Toolchain is free software;
 * you can redistribute it and/or modify it under the terms of the GNU General
@@ -74,6 +74,98 @@ namespace gpu
 
     ExpressionPtr
     Difference::right_hand_side() const
+    {
+        return _imp->rhs;
+    }
+
+    template <>
+    Visits<Product>::~Visits()
+    {
+    }
+
+    template <>
+    struct Implementation<Product>
+    {
+        ExpressionPtr lhs;
+
+        ExpressionPtr rhs;
+
+        Implementation(const ExpressionPtr & lhs, const ExpressionPtr & rhs) :
+            lhs(lhs),
+            rhs(rhs)
+        {
+        }
+    };
+
+    Product::Product(const ExpressionPtr & lhs, const ExpressionPtr & rhs) :
+        PrivateImplementationPattern<Product>(new Implementation<Product>(lhs, rhs))
+    {
+    }
+
+    Product::~Product()
+    {
+    }
+
+    void
+    Product::accept(ExpressionVisitor & visitor)
+    {
+        static_cast<Visits<Product> *>(&visitor)->visit(*this);
+    }
+
+    ExpressionPtr
+    Product::left_hand_side() const
+    {
+        return _imp->lhs;
+    }
+
+    ExpressionPtr
+    Product::right_hand_side() const
+    {
+        return _imp->rhs;
+    }
+
+    template <>
+    Visits<Quotient>::~Visits()
+    {
+    }
+
+    template <>
+    struct Implementation<Quotient>
+    {
+        ExpressionPtr lhs;
+
+        ExpressionPtr rhs;
+
+        Implementation(const ExpressionPtr & lhs, const ExpressionPtr & rhs) :
+            lhs(lhs),
+            rhs(rhs)
+        {
+        }
+    };
+
+    Quotient::Quotient(const ExpressionPtr & lhs, const ExpressionPtr & rhs) :
+        PrivateImplementationPattern<Quotient>(new Implementation<Quotient>(lhs, rhs))
+    {
+    }
+
+    Quotient::~Quotient()
+    {
+    }
+
+    void
+    Quotient::accept(ExpressionVisitor & visitor)
+    {
+        static_cast<Visits<Quotient> *>(&visitor)->visit(*this);
+    }
+
+    ExpressionPtr
+    Quotient::left_hand_side() const
+    {
+        return _imp->lhs;
+    }
+
+    ExpressionPtr
+    Quotient::right_hand_side() const
     {
         return _imp->rhs;
     }
@@ -373,6 +465,28 @@ namespace gpu
             stack.back() = minuend - subtrahend;
         }
 
+        virtual void visit(Product & p)
+        {
+            p.left_hand_side()->accept(*this);
+            p.right_hand_side()->accept(*this);
+
+            unsigned factor(stack.back());
+            stack.pop_back();
+
+            stack.back() *= factor;
+        }
+
+        virtual void visit(Quotient & q)
+        {
+            q.left_hand_side()->accept(*this);
+            q.right_hand_side()->accept(*this);
+
+            unsigned factor(stack.back());
+            stack.pop_back();
+
+            stack.back() /= factor;
+        }
+
         virtual void visit(Sum & s)
         {
             s.left_hand_side()->accept(*this);
@@ -451,6 +565,34 @@ namespace gpu
         _imp->output += ",";
 
         d.right_hand_side()->accept(*this);
+
+        _imp->output += ")";
+    }
+
+    void
+    ExpressionPrinter::visit(Product & p)
+    {
+        _imp->output += "*(";
+
+        p.left_hand_side()->accept(*this);
+
+        _imp->output += ",";
+
+        p.right_hand_side()->accept(*this);
+
+        _imp->output += ")";
+    }
+
+    void
+    ExpressionPrinter::visit(Quotient & q)
+    {
+        _imp->output += "/(";
+
+        q.left_hand_side()->accept(*this);
+
+        _imp->output += ",";
+
+        q.right_hand_side()->accept(*this);
 
         _imp->output += ")";
     }

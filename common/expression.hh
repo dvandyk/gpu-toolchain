@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -29,7 +29,7 @@
 
 namespace gpu
 {
-    typedef VisitorTag<Difference, Sum, Value, Variable> Expressions;
+    typedef VisitorTag<Difference, Product, Quotient, Sum, Value, Variable> Expressions;
 
     typedef Visitor<Expressions> ExpressionVisitor;
 
@@ -54,6 +54,38 @@ namespace gpu
             Difference(const ExpressionPtr & lhs, const ExpressionPtr & rhs);
 
             virtual ~Difference();
+
+            virtual void accept(ExpressionVisitor & visitor);
+
+            virtual ExpressionPtr left_hand_side() const;
+
+            virtual ExpressionPtr right_hand_side() const;
+    };
+
+    class Product :
+        public Expression,
+        public PrivateImplementationPattern<Product>
+    {
+        public:
+            Product(const ExpressionPtr & lhs, const ExpressionPtr & rhs);
+
+            virtual ~Product();
+
+            virtual void accept(ExpressionVisitor & visitor);
+
+            virtual ExpressionPtr left_hand_side() const;
+
+            virtual ExpressionPtr right_hand_side() const;
+    };
+
+    class Quotient :
+        public Expression,
+        public PrivateImplementationPattern<Quotient>
+    {
+        public:
+            Quotient(const ExpressionPtr & lhs, const ExpressionPtr & rhs);
+
+            virtual ~Quotient();
 
             virtual void accept(ExpressionVisitor & visitor);
 
@@ -144,6 +176,10 @@ namespace gpu
             std::string print(const ExpressionPtr & expression);
 
             virtual void visit(Difference & d);
+
+            virtual void visit(Product & p);
+
+            virtual void visit(Quotient & q);
 
             virtual void visit(Sum & s);
 
