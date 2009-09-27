@@ -4,7 +4,7 @@ AC_INIT([gpu-toolchain], [0.0])
 AC_PREREQ(2.5)
 AC_CONFIG_SRCDIR([])
 AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(1.9)
+AM_INIT_AUTOMAKE(1.10)
 AC_LANG([C++])
 
 dnl {{{ basic toolchain checks
