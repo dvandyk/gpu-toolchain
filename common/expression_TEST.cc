@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -83,9 +83,9 @@ class ExpressionEvaluatorTest :
             symbols.insert(SymbolPair("main", 23));
         }
 
-        unsigned operator() (const std::string & name)
+        Number operator() (const std::string & name)
         {
-            return symbols[name];
+            return Number(symbols[name]);
         }
 
         void run_one(const DataPair & x)
@@ -94,7 +94,7 @@ class ExpressionEvaluatorTest :
             TEST_CHECK(0 != expression.get());
 
             ExpressionEvaluator evaluator(*this);
-            TEST_CHECK_EQUAL(evaluator.evaluate(expression), x.second);
+            TEST_CHECK_EQUAL(interpret_number_as<unsigned>(evaluator.evaluate(expression)), x.second);
         }
 
         virtual void run()

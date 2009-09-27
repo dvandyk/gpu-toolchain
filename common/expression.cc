@@ -224,15 +224,15 @@ namespace gpu
     template <>
     struct Implementation<Value>
     {
-        unsigned value;
+        Number value;
 
-        Implementation(unsigned value) :
+        Implementation(const Number & value) :
             value(value)
         {
         }
     };
 
-    Value::Value(unsigned value) :
+    Value::Value(const Number & value) :
         PrivateImplementationPattern<Value>(new Implementation<Value>(value))
     {
     }
@@ -259,7 +259,7 @@ namespace gpu
         return ExpressionPtr();
     }
 
-    unsigned
+    Number
     Value::value() const
     {
         return _imp->value;
@@ -344,9 +344,9 @@ namespace
         return true;
     }
 
-    long dehexify(const std::string & s)
+    unsigned long dehexify(const std::string & s)
     {
-        long result;
+        unsigned long result;
         std::stringstream ss(s);
         ss.setf(std::ios::hex, std::ios::basefield);
 
@@ -375,11 +375,11 @@ namespace gpu
 
         if (is_dec_value(first))
         {
-            result = new Value(destringify<long>(first));
+            result = new Value(Number(first));
         }
         else if (is_hex_value(first))
         {
-            result = new Value(dehexify(first));
+            result = new Value(Number(dehexify(first)));
         }
         else
         {
@@ -401,11 +401,11 @@ namespace gpu
             Expression * rhs(0);
             if (is_dec_value(operand))
             {
-                rhs = new Value(destringify<long>(operand));
+                rhs = new Value(Number(operand));
             }
-            else if (is_hex_value(operand))
+            else if (is_hex_value(first))
             {
-                rhs = new Value(dehexify(operand));
+                result = new Value(Number(dehexify(first)));
             }
             else
             {
@@ -435,11 +435,10 @@ namespace gpu
     {
         ExpressionEvaluator::LookupFunction lookup;
 
-        std::vector<unsigned> stack;
+        std::vector<Number> stack;
 
         Implementation(const ExpressionEvaluator::LookupFunction & lookup) :
-            lookup(lookup),
-            stack(0)
+            lookup(lookup)
         {
         }
 
@@ -457,10 +456,10 @@ namespace gpu
             d.left_hand_side()->accept(*this);
             d.right_hand_side()->accept(*this);
 
-            unsigned subtrahend(stack.back());
+            Number subtrahend(stack.back());
             stack.pop_back();
 
-            unsigned minuend(stack.back());
+            Number minuend(stack.back());
 
             stack.back() = minuend - subtrahend;
         }
@@ -470,10 +469,10 @@ namespace gpu
             p.left_hand_side()->accept(*this);
             p.right_hand_side()->accept(*this);
 
-            unsigned factor(stack.back());
+            Number factor(stack.back());
             stack.pop_back();
 
-            stack.back() *= factor;
+            stack.back() = stack.back() * factor;
         }
 
         virtual void visit(Quotient & q)
@@ -481,10 +480,10 @@ namespace gpu
             q.left_hand_side()->accept(*this);
             q.right_hand_side()->accept(*this);
 
-            unsigned factor(stack.back());
+            Number factor(stack.back());
             stack.pop_back();
 
-            stack.back() /= factor;
+            stack.back() = stack.back() / factor;
         }
 
         virtual void visit(Sum & s)
@@ -492,10 +491,10 @@ namespace gpu
             s.left_hand_side()->accept(*this);
             s.right_hand_side()->accept(*this);
 
-            unsigned addend(stack.back());
+            Number addend(stack.back());
             stack.pop_back();
 
-            unsigned augent(stack.back());
+            Number augent(stack.back());
 
             stack.back() = augent + addend;
         }
@@ -520,7 +519,7 @@ namespace gpu
     {
     }
 
-    unsigned
+    Number
     ExpressionEvaluator::evaluate(const ExpressionPtr & expression)
     {
         _imp->clear();

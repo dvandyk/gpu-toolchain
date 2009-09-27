@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2008 Danny van Dyk <danny.dyk@tu-dortmund.de>
+ * Copyright (c) 2008, 2009 Danny van Dyk <danny.dyk@tu-dortmund.de>
  *
  * This file is part of the GPU Toolchain. GPU Toolchain is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -25,6 +25,8 @@
 #include <utils/hexify.hh>
 #include <utils/stringify.hh>
 #include <utils/visitor-impl.hh>
+
+#include <iostream>
 
 namespace
 {
@@ -250,9 +252,9 @@ namespace gpu
 
                     if (std::string::npos != input.find('.')) // Float literal
                     {
-                        float value(destringify<float>(input));
-                        data = Enumeration<32>(*reinterpret_cast<unsigned *>(&value));
-
+                        union { float f; unsigned u; } value;
+                        value.f = destringify<float>(input);
+                        data = Enumeration<32>(value.u);
                     }
                     else if ('u' == input[input.size() - 1]) // Unsigned integer
                     {
@@ -263,8 +265,9 @@ namespace gpu
                     }
                     else // Signed integer
                     {
-                        signed value(destringify<signed>(input));
-                        data = Enumeration<32>(*reinterpret_cast<unsigned *>(&value));
+                        union { signed s; unsigned u; } value;
+                        value.s = (destringify<signed>(input));
+                        data = Enumeration<32>(value.u);
                     }
 
                     return SourceOperandPtr(new SourceLiteral(data));

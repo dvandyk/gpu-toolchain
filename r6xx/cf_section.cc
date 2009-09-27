@@ -107,16 +107,16 @@ namespace gpu
                         s->type = type;
                     }
 
-                    unsigned symbol_lookup(const std::string & name)
+                    Number symbol_lookup(const std::string & name)
                     {
                         if ("." == name)
-                            return current_offset;
+                            return Number(current_offset);
 
                         Sequence<elf::Symbol>::Iterator s(std::find_if(symbols.begin(), symbols.end(), elf::SymbolByName(name)));
                         if (symbols.end() == s)
                             throw UnresolvedSymbolError(name);
 
-                        return s->value;
+                        return Number(s->value);
                     }
 
                     // cf::EntityVisitor
@@ -155,7 +155,7 @@ namespace gpu
                     void visit(const cf::Size & s)
                     {
                         ExpressionEvaluator e(std::tr1::bind(std::tr1::mem_fn(&SymbolScanner::symbol_lookup), *this, std::tr1::placeholders::_1));
-                        set_symbol_size(s.symbol, e.evaluate(s.expression));
+                        set_symbol_size(s.symbol, interpret_number_as<unsigned>(e.evaluate(s.expression)));
                     }
 
                     void visit(const cf::Type & t)

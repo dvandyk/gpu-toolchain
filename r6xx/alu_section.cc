@@ -21,6 +21,8 @@
 #include <common/expression.hh>
 #include <r6xx/alu_section.hh>
 #include <r6xx/error.hh>
+#include <utils/number.hh>
+#include <utils/sequence-impl.hh>
 
 #include <algorithm>
 #include <vector>
@@ -98,10 +100,10 @@ namespace gpu
                         s->type = type;
                     }
 
-                    unsigned symbol_lookup(const std::string & name)
+                    Number symbol_lookup(const std::string & name)
                     {
                         if ("." == name)
-                            return current_offset;
+                            return Number(current_offset);
 
                         elf::Symbol symbol(name);
                         symbol.section = ".alu";
@@ -110,7 +112,7 @@ namespace gpu
                         if (symbols.end() == s)
                             throw UnresolvedSymbolError(name);
 
-                        return s->value;
+                        return Number(s->value);
                     }
 
 
@@ -138,7 +140,7 @@ namespace gpu
                     void visit(const alu::Size & s)
                     {
                         ExpressionEvaluator e(std::tr1::bind(std::tr1::mem_fn(&SymbolScanner::symbol_lookup), *this, std::tr1::placeholders::_1));
-                        set_symbol_size(s.symbol, e.evaluate(s.expression));
+                        set_symbol_size(s.symbol, interpret_number_as<unsigned>(e.evaluate(s.expression)));
                     }
 
                     void visit(const alu::Type & t)

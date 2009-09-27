@@ -22,6 +22,7 @@
 
 #include <common/expression-fwd.hh>
 #include <utils/memory.hh>
+#include <utils/number.hh>
 #include <utils/private_implementation_pattern.hh>
 #include <utils/visitor.hh>
 
@@ -115,7 +116,7 @@ namespace gpu
         public PrivateImplementationPattern<Value>
     {
         public:
-            Value(unsigned value);
+            Value(const Number & value);
 
             virtual ~Value();
 
@@ -125,7 +126,7 @@ namespace gpu
 
             virtual ExpressionPtr right_hand_side() const;
 
-            unsigned value() const;
+            Number value() const;
     };
 
     class Variable :
@@ -155,13 +156,13 @@ namespace gpu
         public PrivateImplementationPattern<ExpressionEvaluator>
     {
         public:
-            typedef std::tr1::function<unsigned (const std::string &)> LookupFunction;
+            typedef std::tr1::function<Number (const std::string &)> LookupFunction;
 
             ExpressionEvaluator(const LookupFunction & lookup);
 
             ~ExpressionEvaluator();
 
-            unsigned evaluate(const ExpressionPtr & expression);
+            Number evaluate(const ExpressionPtr & expression);
     };
 
     class ExpressionPrinter :
