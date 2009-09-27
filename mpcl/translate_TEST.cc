@@ -139,6 +139,11 @@ struct MultipleFunctionsTranslateTest :
             "int32u b(int32u x)\n"
             "{\n"
             "\treturn x*x;\n"
+            "}\n"
+            "\n"
+            "int32u c(int32u x)\n"
+            "{\n"
+            "\treturn a(x) * b(x);\n"
             "}\n";
 
         std::stringstream ss(input);

@@ -112,13 +112,13 @@ namespace gpu
     {
         ExpressionPrinter p;
 
-        this->_imp->stream << "<Assignment('" << a.lhs << "' = '" << p.print(a.rhs) << "')>" << std::endl;
+        this->_imp->stream << "Assignment('" << a.lhs << "' = Expression(" << p.print(a.rhs) << "))" << std::endl;
     }
 
     void
     StatementPrinter::visit(const Declaration & d)
     {
-        this->_imp->stream << "<Declaration('" << d.name << "' of type '" << d.type << "')>" << std::endl;
+        this->_imp->stream << "Declaration('" << d.name << "' of type '" << d.type << "')" << std::endl;
     }
 
     void
@@ -126,7 +126,7 @@ namespace gpu
     {
         ExpressionPrinter p;
 
-        this->_imp->stream << "<Return('" << p.print(r.exp) << "'>" << std::endl;
+        this->_imp->stream << "Return(Expression(" << p.print(r.exp) << "))" << std::endl;
     }
 
     std::string

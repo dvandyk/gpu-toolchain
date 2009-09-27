@@ -654,19 +654,22 @@ namespace gpu
             if (! f)
             {
                 std::cout << "file.mpc" << ":" << _imp->line_number << ": " << "The previous translation element was not a proper function!" << std::endl;
+                break;
             }
-
-            _imp->functions.append(f);
-
-            std::cout << "FUNCTION '" << f->name << "'" << std::endl;
-            StatementPrinter p;
-            for (Sequence<StatementPtr>::Iterator i(f->statements.begin()), i_end(f->statements.end()) ;
-                    i != i_end ; ++i)
+            else
             {
-                (*i)->accept(p);
-            }
+                _imp->functions.append(f);
 
-            std::cout << p.output() << std::flush;
+                std::cout << "FUNCTION '" << f->name << "'" << std::endl;
+                StatementPrinter p;
+                for (Sequence<StatementPtr>::Iterator i(f->statements.begin()), i_end(f->statements.end()) ;
+                        i != i_end ; ++i)
+                {
+                    (*i)->accept(p);
+                }
+
+                std::cout << p.output() << std::flush;
+            }
         }
 
         return _imp->functions;
