@@ -33,7 +33,8 @@ namespace gpu
     {
         pot_undefined = 0,
         pot_temporary,
-        pot_constant
+        pot_constant,
+        pot_symbol
     };
 
     class PILOperand
@@ -50,6 +51,8 @@ namespace gpu
             bool operator!= (const PILOperand &);
 
             static PILOperand Constant(const Number & value);
+
+            static PILOperand Symbol(unsigned value);
 
             static PILOperand Temporary(unsigned value);
 
@@ -73,7 +76,9 @@ namespace gpu
 
         /* abstract */
         pop_assign,
-        pop_param,
+        pop_call,
+        pop_get_param,
+        pop_set_param,
         pop_return
     };
 

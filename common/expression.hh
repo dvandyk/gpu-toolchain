@@ -24,13 +24,14 @@
 #include <utils/memory.hh>
 #include <utils/number.hh>
 #include <utils/private_implementation_pattern.hh>
+#include <utils/sequence.hh>
 #include <utils/visitor.hh>
 
 #include <tr1/functional>
 
 namespace gpu
 {
-    typedef VisitorTag<Difference, Product, Quotient, Sum, Value, Variable> Expressions;
+    typedef VisitorTag<Call, Difference, Product, Quotient, Sum, Value, Variable> Expressions;
 
     typedef Visitor<Expressions> ExpressionVisitor;
 
@@ -45,6 +46,26 @@ namespace gpu
             virtual ExpressionPtr left_hand_side() const = 0;
 
             virtual ExpressionPtr right_hand_side() const = 0;
+    };
+
+    class Call :
+        public Expression,
+        public PrivateImplementationPattern<Call>
+    {
+        public:
+            Call(const std::string & function, Sequence<ExpressionPtr> parameters);
+
+            virtual ~Call();
+
+            virtual void accept(ExpressionVisitor & visitor);
+
+            virtual ExpressionPtr left_hand_side() const;
+
+            virtual ExpressionPtr right_hand_side() const;
+
+            const std::string & function() const;
+
+            Sequence<ExpressionPtr> parameters() const;
     };
 
     class Difference :
@@ -175,6 +196,8 @@ namespace gpu
             ~ExpressionPrinter();
 
             std::string print(const ExpressionPtr & expression);
+
+            virtual void visit(Call & c);
 
             virtual void visit(Difference & d);
 

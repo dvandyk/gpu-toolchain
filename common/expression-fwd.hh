@@ -28,6 +28,8 @@ namespace gpu
 
     typedef std::tr1::shared_ptr<Expression> ExpressionPtr;
 
+    struct Call;
+
     struct Difference;
 
     struct Product;

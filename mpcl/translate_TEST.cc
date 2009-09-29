@@ -49,7 +49,7 @@ struct SimpleTranslateTest :
         {
             PILOperation::Unary(
                     PILOperand::Temporary(1),
-                    pop_param,
+                    pop_get_param,
                     PILOperand::Constant(Number(1u))),
             PILOperation::Unary(
                     PILOperand::Temporary(2),

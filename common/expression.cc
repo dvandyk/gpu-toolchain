@@ -20,6 +20,7 @@
 #include <common/expression.hh>
 #include <utils/destringify.hh>
 #include <utils/private_implementation_pattern-impl.hh>
+#include <utils/sequence-impl.hh>
 #include <utils/stringify.hh>
 #include <utils/text_manipulation.hh>
 
@@ -30,6 +31,64 @@ namespace gpu
 {
     Expression::~Expression()
     {
+    }
+
+    template <>
+    Visits<Call>::~Visits()
+    {
+    }
+
+    template <>
+    struct Implementation<Call>
+    {
+        std::string function;
+
+        Sequence<ExpressionPtr> parameters;
+
+        Implementation(const std::string & function, Sequence<ExpressionPtr> parameters) :
+            function(function),
+            parameters(parameters)
+        {
+        }
+    };
+
+    Call::Call(const std::string & function, Sequence<ExpressionPtr> parameters) :
+        PrivateImplementationPattern<Call>(new Implementation<Call>(function, parameters))
+    {
+    }
+
+    Call::~Call()
+    {
+    }
+
+    void
+    Call::accept(ExpressionVisitor & visitor)
+    {
+        static_cast<Visits<Call> *>(&visitor)->visit(*this);
+    }
+
+    ExpressionPtr
+    Call::left_hand_side() const
+    {
+        return ExpressionPtr();
+    }
+
+    ExpressionPtr
+    Call::right_hand_side() const
+    {
+        return ExpressionPtr();
+    }
+
+    const std::string &
+    Call::function() const
+    {
+        return _imp->function;
+    }
+
+    Sequence<ExpressionPtr>
+    Call::parameters() const
+    {
+        return _imp->parameters;
     }
 
     template <>
@@ -451,6 +510,11 @@ namespace gpu
             stack.clear();
         }
 
+        virtual void visit(Call & c)
+        {
+            throw InternalError("common", "Call expression encountered in ExpressionEvaluator");
+        }
+
         virtual void visit(Difference & d)
         {
             d.left_hand_side()->accept(*this);
@@ -552,6 +616,28 @@ namespace gpu
             e->accept(*this);
 
         return _imp->output;
+    }
+
+    void
+    ExpressionPrinter::visit(Call & c)
+    {
+        _imp->output += "@" + c.function() + "(";
+
+        ExpressionPrinter e;
+        Sequence<ExpressionPtr>::Iterator i(c.parameters().begin()), i_end(c.parameters().end());
+
+        if (i != i_end)
+        {
+            _imp->output += e.print(*i);
+            ++i;
+        }
+
+        for ( ; i != i_end ; ++i)
+        {
+            _imp->output += "," + e.print(*i);
+        }
+
+        _imp->output += ")";
     }
 
     void

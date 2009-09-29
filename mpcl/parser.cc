@@ -90,8 +90,6 @@ namespace gpu
 
         bool error(ParserErrorType e)
         {
-            static std::string expected(";}>)");
-
             bool result(false);
 
             switch (e)
@@ -191,6 +189,8 @@ namespace gpu
         ExpressionPtr product();
 
         ExpressionPtr scalar();
+
+        bool call_list(Sequence<ExpressionPtr>);
 
 
         bool statement_block();
@@ -396,10 +396,25 @@ namespace gpu
             case tt_integer:
             case tt_float:
                 result = ExpressionPtr(new Value(Number(text)));
+                pop();
                 break;
 
             case tt_identifier:
-                result = ExpressionPtr(new Variable(text));
+                pop();
+
+                if (match("("))
+                {
+                    Sequence<ExpressionPtr> params;
+
+                    if (! call_list(params))
+                        return ExpressionPtr();
+
+                    result = ExpressionPtr(new Call(text, params));
+                }
+                else
+                {
+                    result = ExpressionPtr(new Variable(text));
+                }
 
                 break;
 
@@ -410,18 +425,49 @@ namespace gpu
                 if (! (result = expression()))
                     return ExpressionPtr();
 
-                if (! match(")"))
+                if (! match_and_pop(")"))
                 {
                     if (! error(pet_expected_closing_parenthesis))
                         result = ExpressionPtr();
                 }
-
-                return result;
         }
 
-        pop();
-
         return result;
+    }
+
+    bool
+    Implementation<Parser>::call_list(Sequence<ExpressionPtr> params)
+    {
+        if (! match_and_pop("("))
+            return false;
+
+        if (match_and_pop(")"))
+            return true;
+
+        std::string next(tokens.first()->text);
+        ExpressionPtr e(expression());
+
+        if (! e)
+        {
+            return false;
+        }
+
+        params.append(e);
+
+        while (match_and_pop(","))
+        {
+            e = expression();
+
+            if (! e)
+                return false;
+
+            params.append(e);
+        }
+
+        if (! match_and_pop(")"))
+            error(pet_expected_closing_parenthesis);
+
+        return true;
     }
 
     bool

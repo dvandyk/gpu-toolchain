@@ -31,6 +31,7 @@ namespace gpu
 {
     enum ParserErrorType
     {
+        pet_expected_comma,
         pet_expected_semicolon,
         pet_expected_closing_brace,
         pet_expected_closing_chevron,

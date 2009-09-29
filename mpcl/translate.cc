@@ -51,6 +51,12 @@ namespace gpu
     }
 
     PILOperand
+    PILOperand::Symbol(unsigned value)
+    {
+        return PILOperand(pot_symbol, Number(value));
+    }
+
+    PILOperand
     PILOperand::Temporary(unsigned value)
     {
         return PILOperand(pot_temporary, Number(value));
@@ -68,6 +74,10 @@ namespace gpu
         {
             case pot_constant:
                 lhs << "c[" << rhs.value << "]";
+                break;
+
+            case pot_symbol:
+                lhs << "@[" << rhs.value << "]";
                 break;
 
             case pot_temporary:
@@ -149,9 +159,12 @@ namespace gpu
                 lhs << rhs.a << ' ' << arithmetic_operators[rhs.opcode - pop_add] << ' ' << rhs.b;
                 break;
 
-            case pop_param:
-                lhs << "param(" << rhs.a << ")";
+            case pop_get_param:
+                lhs << "get_param(" << rhs.a << ")";
                 break;
+
+            case pop_set_param:
+                lhs << "set_param(" << rhs.a << ", " << rhs.b << ")";
 
             case pop_return:
                 lhs << "return_value(" << rhs.a << ")";
@@ -184,6 +197,31 @@ namespace gpu
             parameters(0),
             counter(1)
         {
+        }
+
+        void visit(Call & c)
+        {
+            Sequence<ExpressionPtr> params(c.parameters());
+
+            // TODO: Insert symbol into symbol-name to symbol-idx map or find symbol-idx if already used.
+            unsigned symbol_idx(-1), param_idx(0);
+            for (Sequence<ExpressionPtr>::Iterator i(params.begin()), i_end(params.end()) ;
+                    i != i_end ; ++i, ++param_idx)
+            {
+                (*i)->accept(*this);
+                operations.append(PILOperation::Binary(
+                            PILOperand::Undefined(),
+                            pop_set_param,
+                            PILOperand::Constant(Number(param_idx)),
+                            PILOperand::Temporary(counter - 1)));
+            }
+
+            operations.append(PILOperation::Unary(
+                        PILOperand::Temporary(counter),
+                        pop_call,
+                        PILOperand::Symbol(symbol_idx)));
+
+            ++counter;
         }
 
         void visit(Difference & d)
@@ -328,7 +366,7 @@ namespace gpu
 
             operations.append(PILOperation::Unary(
                         PILOperand::Temporary(counter),
-                        pop_param,
+                        pop_get_param,
                         PILOperand::Constant(Number(parameters))));
 
             mapping[p.name] = counter;

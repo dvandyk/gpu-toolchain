@@ -64,7 +64,9 @@ Inputs that do not match any of the above tokens must throw a scanning error.
 
     <product> ::= <scalar> { ( '*' | '/' ) <scalar> }
 
-    <scalar> ::= <literal> | <identifier> | '(' <expression> ')'
+    <scalar> ::= <literal> | '(' <expression> ')' | <identifier> <call-list> | <identifier>
+
+    <call-list> ::= '(' { <expression> { ',' <expression> } } ')'
 
     <literal> ::= <int> | <float>
 
