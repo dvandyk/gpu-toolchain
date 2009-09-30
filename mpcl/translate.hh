@@ -70,6 +70,7 @@ namespace gpu
         pop_sub,
         pop_mul,
         pop_div,
+        pop_pow,
 
         /* immediate */
         pop_iload,

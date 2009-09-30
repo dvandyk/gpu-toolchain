@@ -101,11 +101,8 @@ struct SimpleTranslateTest :
         };
 
         std::stringstream ss(input);
-        Scanner s(ss);
-        s.scan();
-
-        Parser p(s.tokens());
-        Sequence<FunctionPtr> functions(p.parse());
+        Parser p(ss);
+        Sequence<FunctionPtr> functions(p.result());
 
         Translator t;
         Sequence<PILOperationPtr> operations(t.translate(functions.first()));
@@ -147,10 +144,6 @@ struct MultipleFunctionsTranslateTest :
             "}\n";
 
         std::stringstream ss(input);
-        Scanner s(ss);
-        s.scan();
-
-        Parser p(s.tokens());
-        p.parse();
+        Parser p(ss);
     }
 } multiple_functions_translate_test;

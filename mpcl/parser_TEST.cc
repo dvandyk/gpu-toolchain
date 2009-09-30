@@ -45,11 +45,7 @@ struct SimpleParserTest :
             "}\n";
 
         std::stringstream ss(input);
-        Scanner s(ss);
-        s.scan();
-
-        Parser p(s.tokens());
-        p.parse();
+        Parser p(ss);
     }
 } simple_parser_test;
 
@@ -72,26 +68,24 @@ struct BogusParserTest :
             "\t}\n"
             "}\n";
 
-        static const ParserErrorMessage reference[] =
+        static const ParserError reference[] =
         {
-            ParserErrorMessage(pet_expected_closing_chevron, 1, "input"),
-            ParserErrorMessage(pet_expected_closing_parenthesis, 2, "{"),
-            ParserErrorMessage(pet_expected_closing_parenthesis, 4, "{"),
-            ParserErrorMessage(pet_expected_semicolon, 6, "}")
+            ParserError(1, pet_expected_closing_chevron, "input"),
+            ParserError(2, pet_expected_closing_parenthesis, "{"),
+            ParserError(4, pet_expected_closing_parenthesis, "{"),
+            ParserError(6, pet_expected_semicolon, "}")
         };
 
         std::stringstream ss(input);
-        Scanner s(ss);
-        s.scan();
 
-        Parser p(s.tokens());
-        TEST_CHECK_EQUAL(1, p.parse().size());
+        Parser p(ss);
+        TEST_CHECK_EQUAL(1, p.result().size());
 
-        Sequence<ParserErrorMessage> errors(p.errors());
+        Sequence<ParserError> errors(p.errors());
         TEST_CHECK_EQUAL(sizeof(reference) / sizeof(*reference), errors.size());
 
-        const ParserErrorMessage * j(reference);
-        for (Sequence<ParserErrorMessage>::Iterator i(errors.begin()), i_end(errors.end()) ;
+        const ParserError * j(reference);
+        for (Sequence<ParserError>::Iterator i(errors.begin()), i_end(errors.end()) ;
                 i != i_end ; ++i, ++j)
         {
             TEST_CHECK_EQUAL(*i, *j);
@@ -121,10 +115,6 @@ struct MultipleFunctionsParserTest :
             "}\n";
 
         std::stringstream ss(input);
-        Scanner s(ss);
-        s.scan();
-
-        Parser p(s.tokens());
-        p.parse();
+        Parser p(ss);
     }
 } multiple_functions_parser_test;

@@ -22,7 +22,7 @@
 
 #include <mpcl/parameter.hh>
 #include <mpcl/statement-fwd.hh>
-#include <utils/private_implementation_pattern.hh>
+#include <mpcl/type.hh>
 
 namespace gpu
 {
@@ -30,12 +30,18 @@ namespace gpu
     {
         std::string name;
 
+        std::tr1::shared_ptr<Type> type;
+
         Sequence<ParameterPtr> parameters;
 
         Sequence<StatementPtr> statements;
 
-        Function(const std::string & name) :
-            name(name)
+        Function(const std::string & name, std::tr1::shared_ptr<Type> type,
+                Sequence<ParameterPtr> parameters, Sequence<StatementPtr> statements) :
+            name(name),
+            type(type),
+            parameters(parameters),
+            statements(statements)
         {
         }
     };

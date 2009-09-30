@@ -30,7 +30,7 @@
 
 namespace gpu
 {
-    typedef ConstVisitorTag<Assignment, Declaration, Return> Statements;
+    typedef ConstVisitorTag<Assignment, Block, Declaration, ForEach, Return> Statements;
 
     typedef ConstVisitor<Statements> StatementVisitor;
 
@@ -54,6 +54,18 @@ namespace gpu
         void accept(StatementVisitor &) const;
     };
 
+    struct Block :
+        public Statement
+    {
+        Sequence<StatementPtr> statements;
+
+        Block(Sequence<StatementPtr> statements);
+
+        ~Block();
+
+        void accept(StatementVisitor &) const;
+    };
+
     struct Declaration :
         public Statement
     {
@@ -66,6 +78,22 @@ namespace gpu
         Declaration(const std::string & type, const std::string & name);
 
         ~Declaration();
+
+        void accept(StatementVisitor &) const;
+    };
+
+    struct ForEach :
+        public Statement
+    {
+        std::string iterator;
+
+        std::string range;
+
+        Sequence<StatementPtr> statements;
+
+        ForEach(const std::string & iterator, const std::string & range, Sequence<StatementPtr> statements);
+
+        ~ForEach();
 
         void accept(StatementVisitor &) const;
     };

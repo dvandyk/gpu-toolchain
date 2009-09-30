@@ -51,6 +51,26 @@ namespace gpu
     {
     }
 
+    Block::Block(Sequence<StatementPtr> statements) :
+        statements(statements)
+    {
+    }
+
+    Block::~Block()
+    {
+    }
+
+    void
+    Block::accept(StatementVisitor & v) const
+    {
+        static_cast<ConstVisits<Block> *>(&v)->visit(*this);
+    }
+
+    template <>
+    ConstVisits<Block>::~ConstVisits()
+    {
+    }
+
     Declaration::Declaration(const std::string & type, const std::string & name) :
         name(name),
         type(type)
@@ -69,6 +89,26 @@ namespace gpu
 
     template <>
     ConstVisits<Declaration>::~ConstVisits()
+    {
+    }
+
+    ForEach::ForEach(const std::string &, const std::string &, Sequence<StatementPtr> statements) :
+        statements(statements)
+    {
+    }
+
+    ForEach::~ForEach()
+    {
+    }
+
+    void
+    ForEach::accept(StatementVisitor & v) const
+    {
+        static_cast<ConstVisits<ForEach> *>(&v)->visit(*this);
+    }
+
+    template <>
+    ConstVisits<ForEach>::~ConstVisits()
     {
     }
 

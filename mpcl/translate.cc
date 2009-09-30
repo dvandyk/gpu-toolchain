@@ -17,7 +17,9 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <mpcl/parameter.hh>
 #include <mpcl/translate.hh>
+#include <utils/exception.hh>
 #include <utils/sequence-impl.hh>
 #include <utils/wrapped_forward_iterator-impl.hh>
 
@@ -241,6 +243,26 @@ namespace gpu
             ++counter;
         }
 
+        void visit(List & l)
+        {
+            throw InternalError("mpcl", "List expression not yet implemented");
+        }
+
+        void visit(Power & p)
+        {
+            unsigned lhs;
+
+            p.left_hand_side()->accept(*this);
+            lhs = counter - 1;
+            p.right_hand_side()->accept(*this);
+            operations.append(PILOperation::Binary(
+                        PILOperand::Temporary(counter),
+                        pop_pow,
+                        PILOperand::Temporary(lhs),
+                        PILOperand::Temporary(counter - 1)));
+            ++counter;
+        }
+
         void visit(Product & p)
         {
             unsigned lhs;
@@ -326,6 +348,15 @@ namespace gpu
             ++counter;
         }
 
+        void visit(const Block & b)
+        {
+            for (Sequence<StatementPtr>::Iterator i(b.statements.begin()), i_end(b.statements.end()) ;
+                    i != i_end ; ++i)
+            {
+                (*i)->accept(*this);
+            }
+        }
+
         void visit(const Declaration & d)
         {
             if (d.exp)
@@ -349,6 +380,15 @@ namespace gpu
             ++counter;
         }
 
+        void visit(const ForEach & f)
+        {
+            for (Sequence<StatementPtr>::Iterator i(f.statements.begin()), i_end(f.statements.end()) ;
+                    i != i_end ; ++i)
+            {
+                (*i)->accept(*this);
+            }
+        }
+
         void visit(const Return & r)
         {
             r.exp->accept(*this);
@@ -360,7 +400,7 @@ namespace gpu
             ++counter;
         }
 
-        void visit(const Parameter & p)
+        void visit(const ParameterPtr & p)
         {
             ++parameters;
 
@@ -369,7 +409,7 @@ namespace gpu
                         pop_get_param,
                         PILOperand::Constant(Number(parameters))));
 
-            mapping[p.name] = counter;
+            mapping[p->name] = counter;
 
             ++counter;
         }
@@ -387,10 +427,11 @@ namespace gpu
     Sequence<PILOperationPtr>
     Translator::translate(const FunctionPtr & f)
     {
-        for (Sequence<ParameterPtr>::Iterator p(f->parameters.begin()),
-                p_end(f->parameters.end()) ; p != p_end ; ++p)
+        for (Sequence<ParameterPtr>::Iterator i(f->parameters.begin()),
+                i_end(f->parameters.end()) ; i != i_end ; ++i)
         {
-            _imp->visit(*(*p));
+            ParameterPtr p = *i;
+        //    _imp->visit((*p));
         }
 
         for (Sequence<StatementPtr>::Iterator s(f->statements.begin()),

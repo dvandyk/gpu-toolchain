@@ -138,6 +138,107 @@ namespace gpu
     }
 
     template <>
+    Visits<List>::~Visits()
+    {
+    }
+
+    template <>
+    struct Implementation<List>
+    {
+        Sequence<ExpressionPtr> elements;
+
+        Implementation(Sequence<ExpressionPtr> elements) :
+            elements(elements)
+        {
+        }
+    };
+
+    List::List(Sequence<ExpressionPtr> elements) :
+        PrivateImplementationPattern<List>(new Implementation<List>(elements))
+    {
+    }
+
+    List::~List()
+    {
+    }
+
+    void
+    List::accept(ExpressionVisitor & visitor)
+    {
+        static_cast<Visits<List> *>(&visitor)->visit(*this);
+    }
+
+    ExpressionPtr
+    List::left_hand_side() const
+    {
+        return ExpressionPtr();
+    }
+
+    ExpressionPtr
+    List::right_hand_side() const
+    {
+        return ExpressionPtr();
+    }
+
+    Sequence<ExpressionPtr>::Iterator
+    List::begin() const
+    {
+        return _imp->elements.begin();
+    }
+
+    Sequence<ExpressionPtr>::Iterator
+    List::end() const
+    {
+        return _imp->elements.end();
+    }
+
+    template <>
+    Visits<Power>::~Visits()
+    {
+    }
+
+    template <>
+    struct Implementation<Power>
+    {
+        ExpressionPtr lhs;
+
+        ExpressionPtr rhs;
+
+        Implementation(const ExpressionPtr & lhs, const ExpressionPtr & rhs) :
+            lhs(lhs),
+            rhs(rhs)
+        {
+        }
+    };
+
+    Power::Power(const ExpressionPtr & lhs, const ExpressionPtr & rhs) :
+        PrivateImplementationPattern<Power>(new Implementation<Power>(lhs, rhs))
+    {
+    }
+
+    Power::~Power()
+    {
+    }
+
+    void
+    Power::accept(ExpressionVisitor & visitor)
+    {
+        static_cast<Visits<Power> *>(&visitor)->visit(*this);
+    }
+
+    ExpressionPtr
+    Power::left_hand_side() const
+    {
+        return _imp->lhs;
+    }
+
+    ExpressionPtr
+    Power::right_hand_side() const
+    {
+        return _imp->rhs;
+    }
+
+    template <>
     Visits<Product>::~Visits()
     {
     }
@@ -510,7 +611,7 @@ namespace gpu
             stack.clear();
         }
 
-        virtual void visit(Call & c)
+        virtual void visit(Call &)
         {
             throw InternalError("common", "Call expression encountered in ExpressionEvaluator");
         }
@@ -526,6 +627,16 @@ namespace gpu
             Number minuend(stack.back());
 
             stack.back() = minuend - subtrahend;
+        }
+
+        virtual void visit(List &)
+        {
+            throw InternalError("common", "Power expression encountered in ExpressionEvaluator");
+        }
+
+        virtual void visit(Power &)
+        {
+            throw InternalError("common", "Power expression encountered in ExpressionEvaluator");
         }
 
         virtual void visit(Product & p)
@@ -650,6 +761,40 @@ namespace gpu
         _imp->output += ",";
 
         d.right_hand_side()->accept(*this);
+
+        _imp->output += ")";
+    }
+
+    void
+    ExpressionPrinter::visit(List & l)
+    {
+        _imp->output += "L(";
+
+        Sequence<ExpressionPtr>::Iterator i(l.begin()), i_end(l.end());
+
+        if (i != i_end)
+        {
+            (*i)->accept(*this);
+            ++i;
+        }
+
+        for ( ; i != i_end ; ++i)
+        {
+            _imp->output += ",";
+            (*i)->accept(*this);
+        }
+    }
+
+    void
+    ExpressionPrinter::visit(Power & p)
+    {
+        _imp->output += "^(";
+
+        p.left_hand_side()->accept(*this);
+
+        _imp->output += ",";
+
+        p.right_hand_side()->accept(*this);
 
         _imp->output += ")";
     }

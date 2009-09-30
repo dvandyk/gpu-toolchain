@@ -31,43 +31,44 @@ namespace gpu
 {
     enum ParserErrorType
     {
-        pet_expected_comma,
+        pet_expected_comma = 0,
         pet_expected_semicolon,
         pet_expected_closing_brace,
         pet_expected_closing_chevron,
-        pet_expected_closing_parenthesis
+        pet_expected_closing_parenthesis,
+        pet_last
     };
 
-    struct ParserErrorMessage
+    class ParserError :
+        public PrivateImplementationPattern<ParserError>
     {
-        ParserErrorType type;
+        public:
+            ParserError(unsigned line, const std::string & msg);
 
-        unsigned line;
+            ParserError(unsigned line, ParserErrorType type, const std::string & text);
 
-        std::string message;
+            ~ParserError();
 
-        ParserErrorMessage(ParserErrorType type, unsigned line, const std::string & message);
+            unsigned line() const;
 
-        bool operator!= (const ParserErrorMessage & other);
+            const std::string & message() const;
     };
 
-    std::ostream & operator<< (std::ostream &, const ParserErrorMessage &);
+    bool operator!= (const ParserError & lhs, const ParserError & rhs);
 
-    extern template class Sequence<ParserErrorMessage>;
-
-    extern template class WrappedForwardIterator<Sequence<ParserErrorMessage>::IteratorTag, ParserErrorMessage>;
+    std::ostream & operator<< (std::ostream &, const ParserError &);
 
     class Parser :
         public PrivateImplementationPattern<Parser>
     {
         public:
-            Parser(const Sequence<std::tr1::shared_ptr<Token> > & tokens);
+            Parser(std::istream &);
 
             ~Parser();
 
-            Sequence<FunctionPtr> parse();
+            Sequence<FunctionPtr> result();
 
-            Sequence<ParserErrorMessage> errors();
+            Sequence<ParserError> errors();
     };
 }
 

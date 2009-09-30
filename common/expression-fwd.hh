@@ -32,6 +32,10 @@ namespace gpu
 
     struct Difference;
 
+    struct List;
+
+    struct Power;
+
     struct Product;
 
     struct Quotient;

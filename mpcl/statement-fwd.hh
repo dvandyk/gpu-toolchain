@@ -31,7 +31,11 @@ namespace gpu
 
     struct Assignment;
 
+    struct Block;
+
     struct Declaration;
+
+    struct ForEach;
 
     struct Return;
 }

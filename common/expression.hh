@@ -31,7 +31,7 @@
 
 namespace gpu
 {
-    typedef VisitorTag<Call, Difference, Product, Quotient, Sum, Value, Variable> Expressions;
+    typedef VisitorTag<Call, Difference, List, Power, Product, Quotient, Sum, Value, Variable> Expressions;
 
     typedef Visitor<Expressions> ExpressionVisitor;
 
@@ -76,6 +76,42 @@ namespace gpu
             Difference(const ExpressionPtr & lhs, const ExpressionPtr & rhs);
 
             virtual ~Difference();
+
+            virtual void accept(ExpressionVisitor & visitor);
+
+            virtual ExpressionPtr left_hand_side() const;
+
+            virtual ExpressionPtr right_hand_side() const;
+    };
+
+    class List :
+        public Expression,
+        public PrivateImplementationPattern<List>
+    {
+        public:
+            List(Sequence<ExpressionPtr>);
+
+            virtual ~List();
+
+            virtual void accept(ExpressionVisitor & visitor);
+
+            virtual ExpressionPtr left_hand_side() const;
+
+            virtual ExpressionPtr right_hand_side() const;
+
+            Sequence<ExpressionPtr>::Iterator begin() const;
+
+            Sequence<ExpressionPtr>::Iterator end() const;
+    };
+
+    class Power :
+        public Expression,
+        public PrivateImplementationPattern<Power>
+    {
+        public:
+            Power(const ExpressionPtr & lhs, const ExpressionPtr & rhs);
+
+            virtual ~Power();
 
             virtual void accept(ExpressionVisitor & visitor);
 
@@ -200,6 +236,10 @@ namespace gpu
             virtual void visit(Call & c);
 
             virtual void visit(Difference & d);
+
+            virtual void visit(List & l);
+
+            virtual void visit(Power & p);
 
             virtual void visit(Product & p);
 

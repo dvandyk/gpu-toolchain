@@ -34,6 +34,10 @@ namespace gpu
 
     template <> unsigned interpret_number_as<unsigned>(const Number &);
 
+    template <typename T_> bool interpretable_as(const Number &);
+
+    template <> bool interpretable_as<unsigned>(const Number &);
+
     class Number :
         public PrivateImplementationPattern<Number>
     {
@@ -44,6 +48,7 @@ namespace gpu
             friend float interpret_number_as<float>(const Number &);
             friend signed interpret_number_as<signed>(const Number &);
             friend unsigned interpret_number_as<unsigned>(const Number &);
+            friend bool interpretable_as<unsigned>(const Number &);
             friend bool operator== (const Number & lhs, const Number & rhs);
             friend bool operator!= (const Number & lhs, const Number & rhs);
             friend bool operator< (const Number & lhs, const Number & rhs);
@@ -78,6 +83,8 @@ namespace gpu
 
             Number & operator/= (const Number &);
     };
+
+    typedef std::tr1::shared_ptr<Number> NumberPtr;
 
     Number operator+ (const Number & lhs, const Number & rhs);
 

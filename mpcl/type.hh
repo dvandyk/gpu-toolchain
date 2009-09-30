@@ -21,6 +21,7 @@
 #define GPU_TOOLCHAIN_GUARD_MPCL_TYPE_HH 1
 
 #include <string>
+#include <tr1/memory>
 
 namespace gpu
 {
@@ -33,6 +34,8 @@ namespace gpu
         {
         }
     };
+
+    typedef std::tr1::shared_ptr<Type> TypePtr;
 }
 
 #endif

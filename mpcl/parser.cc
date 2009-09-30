@@ -28,330 +28,528 @@
 #include <utils/wrapped_forward_iterator-impl.hh>
 
 #include <iostream>
+#include <istream>
+#include <sstream>
+#include <vector>
 
 namespace gpu
 {
-    ParserErrorMessage::ParserErrorMessage(ParserErrorType type, unsigned line, const std::string & message) :
-        type(type),
-        line(line),
-        message(message)
+    template <>
+    struct Implementation<ParserError>
+    {
+        unsigned line;
+
+        std::string message;
+
+        Implementation(unsigned line, const std::string & message) :
+            line(line),
+            message(message)
+        {
+        }
+    };
+
+    ParserError::ParserError(unsigned line, ParserErrorType type, const std::string & text) :
+        PrivateImplementationPattern<ParserError>(new Implementation<ParserError>(line, ""))
+    {
+        static const std::string messages[] = 
+        {
+            "Expected ',' before '@'",
+            "Expected ';' before '@'",
+            "Expected '}' before '@'",
+            "Expected '>' before '@'",
+            "Expected ')' before '@'"
+        };
+
+        if (type >= pet_last)
+            throw InternalError("mpcl", "ParserErrorType 'type' exceeds bounds");
+
+        _imp->message = messages[type]; // TODO: Replace @ by text.
+    }
+
+    ParserError::ParserError(unsigned line, const std::string & msg) :
+        PrivateImplementationPattern<ParserError>(new Implementation<ParserError>(line, msg))
     {
     }
 
-    bool
-    ParserErrorMessage::operator!= (const ParserErrorMessage & other)
+    ParserError::~ParserError()
     {
-        if (this->type != other.type)
+    }
+
+    unsigned
+    ParserError::line() const
+    {
+        return _imp->line;
+    }
+
+    const std::string &
+    ParserError::message() const
+    {
+        return _imp->message;
+    }
+
+    bool operator!= (const ParserError & lhs, const ParserError & rhs)
+    {
+        if (lhs.line() != rhs.line())
             return true;
 
-        if (this->line != other.line)
-            return true;
-
-        if (this->message != other.message)
+        if (lhs.message() != rhs.message())
             return true;
 
         return false;
     }
 
-    std::ostream & operator<< (std::ostream & lhs, const ParserErrorMessage & rhs)
+    std::ostream & operator<< (std::ostream & lhs, const ParserError & rhs)
     {
-        lhs << "<" << rhs.type << "," << rhs.line << ",'" << rhs.message << "'>";
+        lhs << rhs.line() << ":" << rhs.message();
 
         return lhs;
     }
 
-    template class Sequence<ParserErrorMessage>;
+    template class Sequence<ParserError>;
 
-    template class WrappedForwardIterator<Sequence<ParserErrorMessage>::IteratorTag, ParserErrorMessage>;
+    template class WrappedForwardIterator<Sequence<ParserError>::IteratorTag, ParserError>;
+
+    namespace internal
+    {
+        struct Scope
+        {
+            Sequence<StatementPtr> statements;
+        };
+    }
 
     template <> struct Implementation<Parser>
     {
-        Sequence<std::tr1::shared_ptr<Token> > tokens;
+        std::stringbuf buffer;
 
-        std::tr1::shared_ptr<Token> last_token;
+        unsigned line;
 
-        unsigned line_number;
-
-        Sequence<ParserErrorMessage> errors;
+        Sequence<ParserError> errors;
 
         Sequence<FunctionPtr> functions;
 
-        Sequence<StatementPtr> statements;
+        std::vector<internal::Scope> scopes;
 
-        Implementation(const Sequence<std::tr1::shared_ptr<Token> > & tokens) :
-            tokens(tokens),
-            line_number(1)
+        Implementation(std::istream & stream) :
+            line(1)
         {
+            stream.get(buffer, '\0');
+
+            while (0 < buffer.in_avail())
+            {
+                if (! func())
+                {
+                    std::cout << "Translation element is not a function" << std::endl;
+                    error("Translation element is not a function");
+                    break;
+                }
+            }
         }
 
         ~Implementation()
         {
         }
 
-        bool error(ParserErrorType e)
+        void error(ParserErrorType type, const std::string & text)
         {
-            bool result(false);
+            errors.append(ParserError(line, type, text));
+            //std::cout << "ERROR: " << errors.last() << std::endl;
+        }
 
-            switch (e)
+        void error(const std::string & message)
+        {
+            errors.append(ParserError(line, message));
+            //std::cout << "ERROR: " << errors.last() << std::endl;
+        }
+
+        bool matches_any_of(const std::string & ensemble)
+        {
+            char c(buffer.sgetc());
+
+            return std::string::npos != ensemble.find(c);
+        }
+
+        bool matches(char c)
+        {
+            return c == buffer.sgetc();
+        }
+
+        bool matches(const std::string & s)
+        {
+            std::string data(s.size(), '\0');
+
+            if (s.size() != buffer.sgetn(&data[0], s.size()))
+                return false;
+
+            return s == data;
+        }
+
+        bool match_and_discard(char c)
+        {
+            if (c == char(buffer.sgetc()))
             {
-                case pet_expected_semicolon:
-                case pet_expected_closing_brace:
-                case pet_expected_closing_chevron:
-                case pet_expected_closing_parenthesis:
-                    errors.append(ParserErrorMessage(e, line_number, tokens.first()->text));
-                    result = true;
-                    break;
+                buffer.snextc();
+
+                return true;
+            }
+
+            return false;
+        }
+
+        bool match_and_discard(const std::string & s)
+        {
+            std::string data(s.size(), '\0');
+
+            if (s.size() != buffer.sgetn(&data[0], s.size()))
+                return false;
+
+            if (data != s)
+                return false;
+
+            buffer.pubseekoff(s.size(), std::ios_base::cur);
+
+            return true;
+        }
+
+        char get_one()
+        {
+            return buffer.sbumpc();
+        }
+
+        std::string get_any_of(const std::string & ensemble)
+        {
+            std::string result;
+
+            char next(buffer.sgetc());
+            while (std::string::npos != ensemble.find(next))
+            {
+                result += next;
+                next = buffer.snextc();
             }
 
             return result;
         }
 
-        std::tr1::shared_ptr<Token> pop()
+        void skip_irrelevant()
         {
-            if (tokens.empty())
+            static const std::string whitespaces(" \t\n");
+
+            while (matches_any_of(whitespaces))
             {
-                std::cout << "NO MORE TOKENS" << std::endl;
-                throw std::string("foo");
+                if ('\n' == buffer.snextc())
+                    ++line;
             }
-
-            last_token = tokens.first();
-            tokens.drop_first();
-
-            while ((! tokens.empty()) && (tt_linebreak == tokens.first()->type))
-            {
-                ++line_number;
-                tokens.drop_first();
-            }
-
-            return last_token;
         }
 
-        void push()
+        void push_statement(const StatementPtr & statement)
         {
-            tokens.insert_first(last_token);
+            if (scopes.empty())
+                throw InternalError("mpcl", "Empty stack of Scopes when pushing statement");
+
+            scopes.back().statements.append(statement);
         }
 
-        bool match(const std::string & text)
-        {
-            bool result(text == tokens.first()->text);
+        /* Directly from the grammar (mpcl/mpcl.txt) */
 
-            return result;
-        }
+        std::string id();
+        NumberPtr number();
+        std::string comment();
 
-        bool match(TokenType type)
-        {
-            bool result(type == tokens.first()->type);
+        FunctionPtr func();
+        bool func_param_list(Sequence<ParameterPtr>);
+        std::tr1::shared_ptr<Parameter> func_param();
 
-    //        std::cout << "[MATCH] TokenType(" << _tokens.front()->type << ") == TokenType(" << type << ") -> " << std::boolalpha << result << std::endl;
+        std::tr1::shared_ptr<Type> type();
 
-            return result;
-        }
+        ExpressionPtr exp();
+        ExpressionPtr exp_sum();
+        ExpressionPtr exp_prod();
+        ExpressionPtr exp_power();
+        ExpressionPtr exp_elem();
+        Sequence<ExpressionPtr> exp_list_elem();
 
-        std::tr1::shared_ptr<Token> match_and_pop(const std::string & text)
-        {
-            std::tr1::shared_ptr<Token> result;
+        bool stmt_block();
+        bool stmt();
 
-            if ((! tokens.empty()) && (match(text)))
-            {
-                result = pop();
-            }
+        bool stmt_decl();
+        bool stmt_decl_list();
+        bool stmt_decl_elem();
 
-            return result;
-        }
+        bool stmt_assign();
 
-        std::tr1::shared_ptr<Token> match_and_pop(TokenType type)
-        {
-            std::tr1::shared_ptr<Token> result;
+        bool stmt_foreach();
+        bool stmt_foreach_list();
+        bool stmt_foreach_elem();
 
-            if ((! tokens.empty()) && (match(type)))
-            {
-                result = pop();
-            }
-
-            return result;
-        }
-
-
-        FunctionPtr function();
-
-
-        bool parameter_list(Sequence<std::tr1::shared_ptr<Parameter> >);
-
-        std::tr1::shared_ptr<Parameter> parameter();
-
-        bool parameter_type(std::string & type);
-
-
-        ExpressionPtr expression();
-
-        ExpressionPtr sum();
-
-        ExpressionPtr product();
-
-        ExpressionPtr scalar();
-
-        bool call_list(Sequence<ExpressionPtr>);
-
-
-        bool statement_block();
-
-        bool statement();
-
-
-        bool declaration_statement();
-
-        bool declaration_type(std::string &);
-
-        bool declaration_list(const std::string &);
-
-        bool declaration_element(std::string &);
-
-
-        bool assignment_statement();
-
-
-        bool foreach_statement();
-
-        bool foreach_list();
-
-        bool foreach_iterator();
-
-
-        bool return_statement();
+        bool stmt_return();
     };
 
-    FunctionPtr
-    Implementation<Parser>::function()
+
+    std::string
+    Implementation<Parser>::id()
     {
-        if (! match(tt_identifier))
-            return FunctionPtr();
+        //std::cout << "id()" << std::endl;
+        static const std::string head("abcdefghijklmnopqrstuvwxyz"
+                                      "ABCDEFGHIKKLMNOPQRSTUVWXYZ");
+        static const std::string body(head + "0123456789_");
 
-        std::string return_type(pop()->text);
+        skip_irrelevant();
 
-        if (! match(tt_identifier))
-            return FunctionPtr();
-
-        FunctionPtr result(new Function(pop()->text));
-
-        if (! parameter_list(result->parameters))
-            return FunctionPtr();
-
-        if (match_and_pop(";"))
+        std::string result;
+        if (! matches_any_of(head))
         {
+            return result;
         }
-        else if (statement_block())
+
+        result = get_one();
+        result += get_any_of(body);
+
+        std::cout << "id(): id = " << result << std::endl;
+
+        return result;
+    }
+
+    NumberPtr
+    Implementation<Parser>::number()
+    {
+        std::cout << "number()" << std::endl;
+        static const std::string digits("0123456789");
+        std::string raw;
+        NumberPtr result;
+
+        skip_irrelevant();
+
+        if (matches_any_of("+-"))
+        {
+            raw = get_one();
+        }
+
+        std::string integer(get_any_of(digits));
+        if (integer.empty())
+        {
+            error(std::string("Expected at least one digit after '") + raw[0] + "'");
+            return result;
+        }
+        raw += integer;
+
+        if (! matches('.'))
+        {
+            return NumberPtr(new Number(raw));
+        }
+        else
+        {
+            get_one();
+        }
+
+        std::string fractional(get_any_of(digits));
+        if (fractional.empty())
+        {
+            error("Expected at least one digit after '.'");
+            return NumberPtr();
+        }
+        raw += fractional;
+
+        if (! matches_any_of("eE"))
+        {
+            return NumberPtr(new Number(raw));
+        }
+
+        raw += get_one();
+
+        if (! matches_any_of("+-"))
+        {
+            raw += get_one();
+        }
+
+        std::string exponent(get_any_of(digits));
+        if (exponent.empty())
+        {
+            error("Expected at least one digit after '" + raw + "'");
+            return NumberPtr();
+        }
+        raw += exponent;
+
+        return NumberPtr(new Number(raw));
+    }
+
+    FunctionPtr
+    Implementation<Parser>::func()
+    {
+        std::cout << "func()" << std::endl;
+        FunctionPtr result;
+
+        skip_irrelevant();
+
+        std::tr1::shared_ptr<Type> func_type;
+        if (! (func_type = type()))
+        {
+            error("Expected return type specifier");
+            return FunctionPtr();
+        }
+        std::cout << "func(): func_type = " << func_type->type << std::endl;
+
+        skip_irrelevant();
+
+        std::string func_name;
+        if ((func_name = id()).empty())
+        {
+            error("Expected identifier");
+            return FunctionPtr();
+        }
+
+        std::cout << "func(): func_name = " << func_name << std::endl;
+
+        skip_irrelevant();
+
+        Sequence<ParameterPtr> func_params;
+        if (! func_param_list(func_params))
+        {
+            return FunctionPtr();
+        }
+
+        skip_irrelevant();
+
+        Sequence<StatementPtr> func_statements;
+        if (matches('{'))
+        {
+            scopes.push_back(internal::Scope());
+            stmt_block();
+            func_statements = scopes.back().statements;
+            scopes.pop_back();
+        }
+        else if (match_and_discard(';'))
         {
         }
         else
-            return FunctionPtr();
+        {
+            error("Expected either ';' or block of statements after ')'");
+        }
 
-        result->statements = statements;
-        statements = Sequence<StatementPtr>();
+        result = FunctionPtr(new Function(func_name, func_type, func_params, func_statements));
 
         return result;
     }
 
     bool
-    Implementation<Parser>::parameter_list(Sequence<std::tr1::shared_ptr<Parameter> > parameters)
+    Implementation<Parser>::func_param_list(Sequence<ParameterPtr> parameters)
     {
-        if (! match_and_pop("("))
+        skip_irrelevant();
+
+        if (! match_and_discard("("))
             return false;
 
-        std::tr1::shared_ptr<Parameter> p;
-        if (! (p = parameter()))
+        skip_irrelevant();
+
+        ParameterPtr param;
+        if (! (param = func_param()))
             return false;
 
-        parameters.append(p);
+        parameters.append(param);
 
-        while (match_and_pop(","))
+        skip_irrelevant();
+
+        while (match_and_discard(','))
         {
-            if (! (p = parameter()))
-                return false;
+            skip_irrelevant();
 
-            parameters.append(p);
+            if (! (param = func_param()))
+            {
+                return false;
+            }
+
+            parameters.append(param);
+
+            skip_irrelevant();
         }
 
-        if (! match_and_pop(")"))
-            return error(pet_expected_closing_parenthesis);
+        if (! match_and_discard(")"))
+        {
+            error(pet_expected_closing_parenthesis, "NYI");
+        }
 
         return true;
     }
 
-    std::tr1::shared_ptr<Parameter>
-    Implementation<Parser>::parameter()
+    ParameterPtr
+    Implementation<Parser>::func_param()
     {
-        std::tr1::shared_ptr<Parameter> result;
+        ParameterPtr result;
 
-        if (match_and_pop("void"))
+        skip_irrelevant();
+
+        if (match_and_discard("void"))
         {
-            return std::tr1::shared_ptr<Parameter>(new Parameter("void", ""));
+            return ParameterPtr(new Parameter("void", ""));
         }
 
-        std::string text(tokens.first()->text);
-        if (("in" == text) || ("out" == text) || ("global" == text) || ("const" == text))
-            pop();
+        // TODO: func-param-mod
 
-        std::string type;
-        if (! parameter_type(type))
+        TypePtr func_param_type(type());
+        if (! func_param_type)
             return result;
 
-        if (! match(tt_identifier))
+        skip_irrelevant();
+
+        std::string func_param_name;
+        if ((func_param_name = id()).empty())
             return result;
 
-        std::string name(pop()->text);
+        result = ParameterPtr(new Parameter(func_param_type->type, func_param_name));
 
-        return std::tr1::shared_ptr<Parameter>(new Parameter(type, name));
+        return result;
     }
 
-    bool
-    Implementation<Parser>::parameter_type(std::string & type)
+    TypePtr
+    Implementation<Parser>::type()
     {
-        if (match_and_pop("vector"))
+        //std::cout << "type()" << std::endl;
+        std::string type_name;
+        if ((type_name = id()).empty())
         {
-            if (! match_and_pop("<"))
-                return false;
-
-            if (! match(tt_identifier))
-                return false;
-
-            type = "vector of " + pop()->text;
-
-            if (! match_and_pop(">"))
-                return error(pet_expected_closing_chevron);
+            return TypePtr();
         }
-        else if (match(tt_identifier))
+
+        if (! match_and_discard('<'))
         {
-            type = pop()->text;
+            return TypePtr(new Type(type_name));
         }
-        else
-            return false;
 
-        return true;
+        std::string type_spec;
+        if ((type_spec = id()).empty())
+        {
+            error("Expected identifier after '<'");
+            return TypePtr();
+        }
+
+        if (! match_and_discard('>'))
+        {
+            error(pet_expected_closing_chevron, "?");
+        }
+
+        return TypePtr(new Type(type_name + " of " + type_spec));
     }
 
     ExpressionPtr
-    Implementation<Parser>::expression()
+    Implementation<Parser>::exp()
     {
-        return sum();
+        return exp_sum();
     }
 
     ExpressionPtr
-    Implementation<Parser>::sum()
+    Implementation<Parser>::exp_sum()
     {
         ExpressionPtr lhs, rhs;
-        std::string op;
 
-        if (! (lhs = product()))
+        if (! (lhs = exp_prod()))
             return ExpressionPtr();
 
-        while ((! tokens.empty()) && (("+" == tokens.first()->text) || ("-" == tokens.first()->text)))
+        while (matches_any_of("+-"))
         {
-            op = pop()->text;
+            char op(get_one());
 
-            if (! (rhs = product()))
+            if (! (rhs = exp_prod()))
                 return ExpressionPtr();
 
-            if ("+" == op)
+            if ('+' == op)
                 lhs = ExpressionPtr(new Sum(lhs, rhs));
             else
                 lhs = ExpressionPtr(new Difference(lhs, rhs));
@@ -361,22 +559,21 @@ namespace gpu
     }
 
     ExpressionPtr
-    Implementation<Parser>::product()
+    Implementation<Parser>::exp_prod()
     {
         ExpressionPtr lhs, rhs;
-        std::string op;
 
-        if (! (lhs = scalar()))
+        if (! (lhs = exp_power()))
             return ExpressionPtr();
 
-        while ((! tokens.empty()) && (("*" == tokens.first()->text) || ("/" == tokens.first()->text)))
+        while (matches_any_of("*/"))
         {
-            op = pop()->text;
+            char op(get_one());
 
-            if (! (rhs = scalar()))
+            if (! (rhs = exp_power()))
                 return ExpressionPtr();
 
-            if ("*" == op)
+            if ('*' == op)
                 lhs = ExpressionPtr(new Product(lhs, rhs));
             else
                 lhs = ExpressionPtr(new Quotient(lhs, rhs));
@@ -386,165 +583,267 @@ namespace gpu
     }
 
     ExpressionPtr
-    Implementation<Parser>::scalar()
+    Implementation<Parser>::exp_power()
+    {
+        ExpressionPtr lhs, rhs;
+
+        if (! (lhs = exp_elem()))
+            return ExpressionPtr();
+
+        while (matches('^'))
+        {
+            char op(get_one());
+
+            if (! (rhs = exp_elem()))
+                return ExpressionPtr();
+
+            lhs = ExpressionPtr(new Power(lhs, rhs));
+        }
+
+        return lhs;
+    }
+
+    ExpressionPtr
+    Implementation<Parser>::exp_elem()
     {
         ExpressionPtr result;
-        std::string text(tokens.first()->text);
+        std::string exp_id;
+        NumberPtr exp_number;
 
-        switch (tokens.first()->type)
+        if ((exp_id = id()).empty()) // exp-var or exp-call
         {
-            case tt_integer:
-            case tt_float:
-                result = ExpressionPtr(new Value(Number(text)));
-                pop();
-                break;
+            if (! match_and_discard('('))
+            {
+                result = ExpressionPtr(new Variable(exp_id));
+            }
+            else
+            {
+                Sequence<ExpressionPtr> call_params;
+                ExpressionPtr param;
 
-            case tt_identifier:
-                pop();
-
-                if (match("("))
+                if (! (param = exp()))
                 {
-                    Sequence<ExpressionPtr> params;
-
-                    if (! call_list(params))
-                        return ExpressionPtr();
-
-                    result = ExpressionPtr(new Call(text, params));
+                    error("Expected expression after '('");
+                    result = ExpressionPtr(new Call(exp_id, call_params));
                 }
                 else
                 {
-                    result = ExpressionPtr(new Variable(text));
+                    call_params.append(param);
+
+                    while (match_and_discard(','))
+                    {
+                        if (! (param = exp()))
+                        {
+                            error("Expected expression after ','");
+                            return ExpressionPtr(new Call(exp_id, call_params));
+                        }
+
+                        call_params.append(param);
+                    }
+
+                    result = ExpressionPtr(new Call(exp_id, call_params));
+
+                    if (! matches(')'))
+                    {
+                        error(pet_expected_closing_parenthesis, "?");
+                    }
                 }
+            }
+        }
+        else if (match_and_discard('(')) // exp-paren
+        {
+            result = exp();
 
-                break;
+            if (! match_and_discard(')'))
+            {
+                error(pet_expected_closing_parenthesis, "?");
+            }
+        }
+        else if (match_and_discard('{')) // exp-list
+        {
+            Sequence<ExpressionPtr> list_elements, next_elements;
 
-            default:
-                if (! match_and_pop("("))
-                    return ExpressionPtr();
+            if ((next_elements = exp_list_elem()).empty())
+            {
+                error("Expected expression after '{'");
+            }
+            else
+            {
+                list_elements.append(next_elements);
 
-                if (! (result = expression()))
-                    return ExpressionPtr();
-
-                if (! match_and_pop(")"))
+                while (match_and_discard(','))
                 {
-                    if (! error(pet_expected_closing_parenthesis))
-                        result = ExpressionPtr();
+                    if ((next_elements = exp_list_elem()).empty())
+                    {
+                        error("Expected expression after ','");
+                        break;
+                    }
+
+                    list_elements.append(next_elements);
                 }
+
+                if (! match_and_discard('}'))
+                {
+                    error(pet_expected_closing_brace, "?");
+                }
+
+                result = ExpressionPtr(new List(list_elements));
+            }
+        }
+        else if (! (exp_number = number())) // exp-value
+        {
+            result = ExpressionPtr(new Value(*exp_number));
+        }
+        else
+        {
+            error("Invalid input in place of expression element");
+        }
+
+        return result;
+    }
+
+    Sequence<ExpressionPtr>
+    Implementation<Parser>::exp_list_elem()
+    {
+        Sequence<ExpressionPtr> result;
+        ExpressionPtr element;
+
+        if (! (element = exp()))
+        {
+            error("Expected expression");
+            return result;
+        }
+
+        skip_irrelevant();
+
+        unsigned repetitions(1);
+
+        if (match_and_discard('x'))
+        {
+            NumberPtr n;
+
+            if ((! (n = number())) || (! interpretable_as<unsigned>(*n)))
+            {
+                error("Expected unsigned integer after repetition operator 'x'");
+                return result;
+            }
+
+            repetitions = interpret_number_as<unsigned>(*n);
+        }
+
+        for (unsigned i(0) ; i < repetitions ; ++i)
+        {
+            result.append(element);
+        }
+    }
+
+    bool
+    Implementation<Parser>::stmt_block()
+    {
+        if (! match_and_discard('{'))
+            return false;
+
+        if (! stmt())
+        {
+            error("Expected statement after '{'");
+            return false;
+        }
+
+        while (! matches('}'))
+        {
+            if (! stmt())
+            {
+                error("Expected statement or '}'");
+                return false; // TODO Continue on failure?
+            }
+        }
+
+        if (! matches('}'))
+        {
+            error(pet_expected_closing_brace, "? ? ?"); // TODO
+        }
+
+        return true;
+    }
+
+    bool
+    Implementation<Parser>::stmt()
+    {
+        bool result(true);
+
+        if (matches('{'))
+        {
+            scopes.push_back(internal::Scope());
+
+            if (! stmt_block());
+            {
+                error("Not a valid block of statements");
+                result = false;
+            }
+
+            push_statement(StatementPtr(new Block(scopes.back().statements)));
+            scopes.pop_back();
+        }
+        else if (matches("foreach"))
+        {
+            scopes.push_back(internal::Scope());
+
+            if (! stmt_foreach())
+            {
+                error("Not a valid foreach statement");
+                result = false;
+            }
+
+            scopes.pop_back();
+        }
+        else if (stmt_return())
+        {
+        }
+        else if (stmt_decl())
+        {
+        }
+        else if (stmt_assign())
+        {
+        }
+        else
+        {
+            error("Expected statement");
         }
 
         return result;
     }
 
     bool
-    Implementation<Parser>::call_list(Sequence<ExpressionPtr> params)
+    Implementation<Parser>::stmt_decl()
     {
-        if (! match_and_pop("("))
-            return false;
+        bool result(true);
 
-        if (match_and_pop(")"))
-            return true;
-
-        std::string next(tokens.first()->text);
-        ExpressionPtr e(expression());
-
-        if (! e)
+        TypePtr decl_type;
+        if (! (decl_type = type()))
         {
             return false;
         }
 
-        params.append(e);
-
-        while (match_and_pop(","))
+        std::string decl_id;
+        if ((decl_id = id()).empty())
         {
-            e = expression();
-
-            if (! e)
-                return false;
-
-            params.append(e);
+            error("Expected identifier after 'TODO: TYPE'");
+            result = false;
         }
 
-        if (! match_and_pop(")"))
-            error(pet_expected_closing_parenthesis);
-
-        return true;
-    }
-
-    bool
-    Implementation<Parser>::statement_block()
-    {
-        if (! match_and_pop("{"))
-            return false;
-
-        if (! statement())
-            return false;
-
-        while (! match("}"))
+        if (! match_and_discard(';'))
         {
-            if (! statement())
-                return false;
+            error("Expected ';'");
+            result = false;
         }
 
-        if (! match("}"))
-            return error(pet_expected_closing_brace);
+        push_statement(StatementPtr(new Declaration(decl_type->type, decl_id)));
 
-        pop();
-
-        return true;
+        result = true;
     }
-
+#if 0
     bool
-    Implementation<Parser>::statement()
-    {
-        if (return_statement())
-            return true;
-        else if (foreach_statement())
-            return true;
-        else if (assignment_statement())
-            return true;
-        else if (declaration_statement())
-            return true;
-        else
-            return false;
-    }
-
-    bool
-    Implementation<Parser>::declaration_statement()
-    {
-        std::string type;
-        if (! declaration_type(type))
-            return false;
-
-        if (! declaration_list(type))
-            return false;
-
-        if (! match_and_pop(";"))
-            return error(pet_expected_semicolon);
-
-        return true;
-    }
-
-    bool
-    Implementation<Parser>::declaration_type(std::string & type)
-    {
-        std::string modifier;
-
-        if ((! tokens.empty()) && ("const" == tokens.first()->text))
-        {
-            modifier = "const ";
-            pop();
-        }
-
-        if (! match(tt_identifier))
-            return false;
-
-        type = modifier + pop()->text;
-
-        return true;
-    }
-
-    bool
-    Implementation<Parser>::declaration_list(const std::string & type)
+    Implementation<Parser>::stmt_decl_list(const std::string & type)
     {
         std::string name;
 
@@ -583,106 +882,129 @@ namespace gpu
 
         return true;
     }
-
+#endif
     bool
-    Implementation<Parser>::assignment_statement()
+    Implementation<Parser>::stmt_assign()
     {
-        std::tr1::shared_ptr<Token> lhs;
-        if (! (lhs = match_and_pop(tt_identifier)))
-            return false;
+        bool result(true);
 
-        if (! match_and_pop("="))
+        std::string lhs;
+        if ((lhs = id()).empty())
         {
-            push();
-
-            return false;
+            error("Expected identifier");
+            result = false;
         }
 
-        ExpressionPtr exp;
-        if (! (exp = expression()))
-            return false;
+        skip_irrelevant();
 
-        if (! match_and_pop(";"))
-            return error(pet_expected_semicolon);
-
-        statements.append(StatementPtr(new Assignment(lhs->text, exp)));
-
-        return true;
-    }
-
-    bool
-    Implementation<Parser>::foreach_statement()
-    {
-        if (! match_and_pop("foreach"))
-            return false;
-
-        if (! foreach_list())
-            return false;
-
-        if (! statement_block())
-            return false;
-
-        // add to list of blocks
-
-        return true;
-    }
-
-    bool
-    Implementation<Parser>::foreach_list()
-    {
-        if (! match_and_pop("("))
-            return false;
-
-        if (! foreach_iterator())
-            return false;
-
-        while (match_and_pop(","))
+        if (! matches('='))
         {
-            if (! foreach_iterator())
+            error("Expected assignment-like operator after '" + lhs + "'");
+        }
+
+        skip_irrelevant();
+
+        ExpressionPtr rhs;
+        if (! (rhs = exp()))
+        {
+            error("Expected expression after '='");
+            result = false;
+        }
+
+        if (! match_and_discard(";"))
+        {
+            error(pet_expected_semicolon, "");
+            result = false;
+        }
+
+        push_statement(StatementPtr(new Assignment(lhs, rhs)));
+
+        return result;
+    }
+
+    bool
+    Implementation<Parser>::stmt_foreach()
+    {
+        if (! match_and_discard("foreach"))
+            return false;
+
+        if (! stmt_foreach_list())
+            return false;
+
+        if (! stmt_block())
+            return false;
+
+        return true;
+    }
+
+    bool
+    Implementation<Parser>::stmt_foreach_list()
+    {
+        if (! match_and_discard('('))
+            return false;
+
+        if (! stmt_foreach_elem())
+            return false;
+
+        while (match_and_discard(','))
+        {
+            if (! stmt_foreach_elem())
                 return false;
         }
 
-        if (! match_and_pop(")"))
-            return error(pet_expected_closing_parenthesis);
+        if (! match_and_discard(')'))
+        {
+            error(pet_expected_closing_parenthesis, "? ? ?");
+        }
 
         return true;
     }
 
     bool
-    Implementation<Parser>::foreach_iterator()
+    Implementation<Parser>::stmt_foreach_elem()
     {
-        if (! match_and_pop(tt_identifier))
+        std::string iterator;
+        if ((iterator = id()).empty())
             return false;
 
-        if (! match_and_pop("in"))
+        if (! match_and_discard("in"))
             return false;
 
-        if (! match_and_pop(tt_identifier))
+        ExpressionPtr range_exp1, range_exp2;
+        if (! (range_exp1 = exp()))
             return false;
+
+        if (match_and_discard(".."))
+        {
+            if (! (range_exp2 = exp()))
+                return false;
+        }
 
         return true;
     }
 
     bool
-    Implementation<Parser>::return_statement()
+    Implementation<Parser>::stmt_return()
     {
-        if (! match_and_pop("return"))
+        if (! match_and_discard("return"))
             return false;
 
-        ExpressionPtr exp;
-        if (! (exp = expression()))
+        ExpressionPtr expression;
+        if (! (expression = exp()))
             return false;
 
-        if (! match_and_pop(";"))
-            return error(pet_expected_semicolon);
+        if (! match_and_discard(';'))
+        {
+            error(pet_expected_semicolon, "? ?");
+        }
 
-        statements.append(StatementPtr(new Return(exp)));
+        push_statement(StatementPtr(new Return(expression)));
 
         return true;
     }
 
-    Parser::Parser(const Sequence<std::tr1::shared_ptr<Token> > & tokens) :
-        PrivateImplementationPattern<Parser>(new Implementation<Parser>(tokens))
+    Parser::Parser(std::istream & stream) :
+        PrivateImplementationPattern<Parser>(new Implementation<Parser>(stream))
     {
     }
 
@@ -691,37 +1013,12 @@ namespace gpu
     }
 
     Sequence<FunctionPtr>
-    Parser::parse()
+    Parser::result()
     {
-        while (! _imp->tokens.empty())
-        {
-            FunctionPtr f(_imp->function());
-
-            if (! f)
-            {
-                std::cout << "file.mpc" << ":" << _imp->line_number << ": " << "The previous translation element was not a proper function!" << std::endl;
-                break;
-            }
-            else
-            {
-                _imp->functions.append(f);
-
-                std::cout << "FUNCTION '" << f->name << "'" << std::endl;
-                StatementPrinter p;
-                for (Sequence<StatementPtr>::Iterator i(f->statements.begin()), i_end(f->statements.end()) ;
-                        i != i_end ; ++i)
-                {
-                    (*i)->accept(p);
-                }
-
-                std::cout << p.output() << std::flush;
-            }
-        }
-
         return _imp->functions;
     }
 
-    Sequence<ParserErrorMessage>
+    Sequence<ParserError>
     Parser::errors()
     {
         return _imp->errors;

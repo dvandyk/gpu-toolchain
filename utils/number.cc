@@ -300,9 +300,14 @@ namespace gpu
                 return n._implementation()->value.get_ui();
 
             default:
-                std::cout << "Gna: " << n._implementation()->type << std::endl;
                 throw InternalError("utils", "Trying to interpret incompatible Number as 'unsigned'");
         };
+    }
+
+    template <>
+    bool interpretable_as<unsigned>(const Number & n)
+    {
+        return nvt_unsigned == n._implementation()->type;
     }
 
     std::ostream & operator<< (std::ostream & lhs, const Number & rhs)

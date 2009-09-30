@@ -112,7 +112,9 @@ namespace gpu
              typename T4_ = internal::NoType<4>,
              typename T5_ = internal::NoType<5>,
              typename T6_ = internal::NoType<6>,
-             typename T7_ = internal::NoType<7> >
+             typename T7_ = internal::NoType<7>,
+             typename T8_ = internal::NoType<8>,
+             typename T9_ = internal::NoType<9> >
     struct VisitorTag
     {
         typedef T1_ VisitableType1;
@@ -128,6 +130,10 @@ namespace gpu
         typedef T6_ VisitableType6;
 
         typedef T7_ VisitableType7;
+
+        typedef T8_ VisitableType8;
+
+        typedef T9_ VisitableType9;
     };
 
     template <typename Tag_> class Visitor :
@@ -137,7 +143,9 @@ namespace gpu
         public Visits<typename Tag_::VisitableType4>,
         public Visits<typename Tag_::VisitableType5>,
         public Visits<typename Tag_::VisitableType6>,
-        public Visits<typename Tag_::VisitableType7>
+        public Visits<typename Tag_::VisitableType7>,
+        public Visits<typename Tag_::VisitableType8>,
+        public Visits<typename Tag_::VisitableType9>
     {
     };
 
